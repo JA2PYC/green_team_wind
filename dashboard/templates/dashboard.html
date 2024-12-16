@@ -2,6 +2,15 @@
 <html lang="ko">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>풍력 발전량 예측 모니터링</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<head>
   <title>풍력 발전량 예측 모니터링</title>
   {% include 'headScript.html' %}
 
@@ -69,6 +78,7 @@
     </div>
   </main>
   {% include 'footer.html' %}
+
 </body>
 
 </html>
