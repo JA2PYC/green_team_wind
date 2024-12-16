@@ -2,41 +2,41 @@
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>풍력 발전량 예측 모니터링</title>
+    {% include 'headScript.html' %}
+
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 
 </head>
 
 <body>
-    <header>
-        <div class="header_title">풍력 발전량 예측 모니터링</div>
-    </header>
+       <!-- 헤더 부분 -->
+       {% include 'header.html' %}
     <main>
         <h1>풍력 발전량 예측 모니터링</h1>
         <canvas id="chart"></canvas>
         <button id="testButton">Click me</button>
         <p id="output"></p>
+        <h1>Power Data Viewer</h1>
+        <form id="powerForm">
+            <label for="tradeYmd">Enter Date (YYYYMMDD):</label>
+            <input type="text" id="tradeYmd" name="tradeYmd" required>
+            <button type="submit">Fetch Data</button>
+        </form>
+    
+        <h2>Result</h2>
+        <div id="result"></div>
+        <div class="kma_sfctm2">
+            <h2>kma_sfctm2</h2>
+
+
+        </div>
     </main>
-    <footer>
-        <div class="footer_logo">
-            <a href="/">풍력 발전량 모니터링</a>
-        </div>
-        <div class="info">
-            <p class="infoName">© 2024 Old. All rights reserved.</p>
-            <p>
-                <a href="/terms">이용 약관</a> | <a href="/privacyPolicy">개인정보 처리방침</a>
-            </p>
-            <p>연락처: manager@teamold.co.kr | 전화: 123-456-7890</p>
-            <div class="social-links">
-                <span><a href="https://getbootstrap.com/" target="_blank">Bootstrap</a> |</span>
-            </div>
-        </div>
-    </footer>
+  
+    <!-- 푸터 부분 -->
+    {% include 'footer.html' %}
 </body>
 
 </html>

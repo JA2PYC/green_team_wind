@@ -1,4 +1,6 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, request, render_template, jsonify
+# from api.power import fetch_power_data
+from api.kma_sfctm2 import fetch_kma_sfctm2_data
 import random
 
 app = Flask(__name__)
@@ -17,5 +19,31 @@ def get_data():
     }
     return jsonify(data)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# @app.route("/api/power", methods=["POST"])
+# def power_data():
+#     # 클라이언트로부터 요청받은 파라미터
+#     params = request.json
+#     trade_ymd = params.get("tradeYmd")
+#     page_no = params.get("pageNo", 1)
+#     num_of_rows = params.get("numOfRows", 30)
+
+#     # power.py의 fetch_power_data 함수 호출
+#     result = fetch_power_data(trade_ymd, page_no, num_of_rows)
+
+#     # 결과 반환
+#     return jsonify(result)
+
+@app.route("/api/kma_sfctm2", methods=["POST"])
+def power_data():
+    # 클라이언트로부터 요청받은 파라미터
+    # params = request.json
+    # trade_ymd = params.get("tradeYmd")
+    # page_no = params.get("pageNo", 1)
+    # num_of_rows = params.get("numOfRows", 30)
+
+    # power.py의 fetch_power_data 함수 호출
+    result = fetch_kma_sfctm2_data()
+
+    # 결과 반환
+    return jsonify(result)
+
