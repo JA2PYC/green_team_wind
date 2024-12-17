@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, jsonify
 # from api.power import fetch_power_data
 from api.kma_sfctm2 import fetch_kma_sfctm2_data
+from models.random_forest_model import rf_model_predict
 import random
 import json
 
@@ -53,3 +54,15 @@ def kma_sfctm2_data():
     # 결과 반환
     return result
 
+@app.route("/model/rf_model", methods=["POST"])
+def rf_model_data():
+    params = request.json
+    temp = params.get("temp")
+    wind = params.get("wind")
+    atmos = params.get("atmos")
+    density = params.get("density")
+    # Temperature (°C), "wind velocity (m/s)," "local atmospheric pressure (hPa)," "air density (kg/m^3)"
+    
+    result = rf_model_predict(temp, wind, atmos, density)
+    
+    return result
