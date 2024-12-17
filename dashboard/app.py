@@ -28,6 +28,7 @@ def get_data():
     }
     return jsonify(data)
 
+
 # @app.route("/api/power", methods=["POST"])
 # def power_data():
 #     # 클라이언트로부터 요청받은 파라미터
@@ -68,14 +69,11 @@ def rf_model_data():
 
 def power_data():
     # 클라이언트로부터 요청받은 파라미터
-    # params = request.json
-    # trade_ymd = params.get("tradeYmd")
-    # page_no = params.get("pageNo", 1)
-    # num_of_rows = params.get("numOfRows", 30)
+    params = request.json
+    tm = params.get("tm")
+    stn = params.get("stn")
 
-    # power.py의 fetch_power_data 함수 호출
-    result = fetch_kma_sfctm2_data()
-
+    result = fetch_kma_sfctm2_data(tm, stn)
     # 결과 반환
-    return jsonify(result)
+    return result
 

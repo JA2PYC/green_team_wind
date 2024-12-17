@@ -103,7 +103,7 @@ $(document).ready(() => {
             },
             error: function (error) {
                 // 에러 시 메시지 표시
-                $("#result").html("<p>Error occurred: " + error.responseJSON.error + "</p>");
+                $("#result").text("Error occurred: " + error.responseJSON.error);
             }
         });
     }

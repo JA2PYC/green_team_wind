@@ -10,7 +10,6 @@ def fetch_kma_sfctm2_data(tm, stn):
         'authKey': 'gW1elmiyQWWtXpZoslFl8w',
     }
     try:
-
         response = requests.get(url, params=params)
 
         # 응답이 성공적인 경우
