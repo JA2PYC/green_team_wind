@@ -1,42 +1,55 @@
 <!DOCTYPE html>
 <html lang="ko">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
     <title>풍력 발전량 예측 모니터링</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+    {% include 'headScript.html' %}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  </head>
 
-</head>
-
-<body>
-    <header>
-        <div class="header_title">풍력 발전량 예측 모니터링</div>
-    </header>
+  <body>
+    {% include 'header.html' %}
     <main>
-        <h1>풍력 발전량 예측 모니터링</h1>
-        <canvas id="chart"></canvas>
-        <button id="testButton">Click me</button>
-        <p id="output"></p>
+      <div class="container">
+        <div class="widget weather">
+          <h2>Current Weather</h2>
+          <p>
+            Temperature: <span id="temperature">-</span> °C
+          </p>
+          <p>
+            Wind Speed: <span id="wind-speed">-</span> m/s
+          </p>
+          <p>
+            Humidity: <span id="humidity">-</span> %
+          </p>
+        </div>
+        <div class="widget current-energy">
+          <h2>Current Energy Output</h2>
+          <p>
+            Output: <span id="current-output">-</span> MW
+          </p>
+        </div>
+        <div class="widget forecast-energy">
+          <h2>Forecasted Energy</h2>
+          <p>
+            Next Hour: <span id="forecast-hour">-</span> MW
+          </p>
+          <p>
+            Next Day: <span id="forecast-day">-</span> MW
+          </p>
+        </div>
+        <div class="widget charts">
+          <h2>Performance Charts</h2>
+          <div class="chart" id="past-energy-chart">
+            <canvas></canvas>
+          </div>
+          <div class="chart" id="forecast-chart">
+            <canvas></canvas>
+          </div>
+        </div>
+      </div>
     </main>
-    <footer>
-        <div class="footer_logo">
-            <a href="/">풍력 발전량 모니터링</a>
-        </div>
-        <div class="info">
-            <p class="infoName">© 2024 Old. All rights reserved.</p>
-            <p>
-                <a href="/terms">이용 약관</a> | <a href="/privacyPolicy">개인정보 처리방침</a>
-            </p>
-            <p>연락처: manager@teamold.co.kr | 전화: 123-456-7890</p>
-            <div class="social-links">
-                <span><a href="https://getbootstrap.com/" target="_blank">Bootstrap</a> |</span>
-            </div>
-        </div>
-    </footer>
-</body>
-
+    {% include 'footer.html' %}
+  </body>
 </html>
