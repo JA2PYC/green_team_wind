@@ -73,7 +73,6 @@ def power_data():
     tm = params.get("tm")
     stn = params.get("stn")
 
-    result = fetch_kma_sfctm2_data(tm, stn)
-    # 결과 반환
+       # result = rf_model_predict(temp, wind, atmos, density)
+    result = 'test'
     return result
-
