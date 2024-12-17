@@ -63,6 +63,6 @@ def rf_model_data():
     density = params.get("density")
     # Temperature (°C), "wind velocity (m/s)," "local atmospheric pressure (hPa)," "air density (kg/m^3)"
     
-    result = rf_model_predict(temp, wind, atmos, density)
-    
+    # result = rf_model_predict(temp, wind, atmos, density)
+    result = 'test'
     return result
