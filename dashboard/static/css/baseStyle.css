@@ -1,0 +1,24 @@
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #f1f1f1;
+    --text-color: #333;
+    --header-height: 60px;
+    --widget-bg: #fff;
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans KR', 'Arial', sans-serif;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    height: 100vh;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
