@@ -1,42 +1,55 @@
 <!DOCTYPE html>
 <html lang="ko">
-
-<head>
+  <head>
     <title>풍력 발전량 예측 모니터링</title>
     {% include 'headScript.html' %}
 
-    
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  </head>
 
-</head>
-
-<body>
-       <!-- 헤더 부분 -->
-       {% include 'header.html' %}
+  <body>
+    {% include 'header.html' %}
     <main>
-        <h1>풍력 발전량 예측 모니터링</h1>
-        <canvas id="chart"></canvas>
-        <button id="testButton">Click me</button>
-        <p id="output"></p>
-        <h1>Power Data Viewer</h1>
-        <form id="powerForm">
-            <label for="tradeYmd">Enter Date (YYYYMMDD):</label>
-            <input type="text" id="tradeYmd" name="tradeYmd" required>
-            <button type="submit">Fetch Data</button>
-        </form>
-    
-        <h2>Result</h2>
-        <div id="result"></div>
-        <div class="kma_sfctm2">
-            <h2>kma_sfctm2</h2>
-
-
+      <div class="container">
+        <div class="widget weather">
+          <h2>Current Weather</h2>
+          <p>
+            Temperature: <span id="temperature">-</span> °C
+          </p>
+          <p>
+            Wind Speed: <span id="wind-speed">-</span> m/s
+          </p>
+          <p>
+            Humidity: <span id="humidity">-</span> %
+          </p>
         </div>
+        <div class="widget current-energy">
+          <h2>Current Energy Output</h2>
+          <p>
+            Output: <span id="current-output">-</span> MW
+          </p>
+        </div>
+        <div class="widget forecast-energy">
+          <h2>Forecasted Energy</h2>
+          <p>
+            Next Hour: <span id="forecast-hour">-</span> MW
+          </p>
+          <p>
+            Next Day: <span id="forecast-day">-</span> MW
+          </p>
+        </div>
+        <div class="widget charts">
+          <h2>Performance Charts</h2>
+          <div class="chart" id="past-energy-chart">
+            <canvas></canvas>
+          </div>
+          <div class="chart" id="forecast-chart">
+            <canvas></canvas>
+          </div>
+        </div>
+      </div>
     </main>
-  
-    <!-- 푸터 부분 -->
     {% include 'footer.html' %}
-</body>
-
+  </body>
 </html>

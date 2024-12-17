@@ -82,28 +82,28 @@ $(document).ready(() => {
     }
 
     function callkma_sfctm2Data() {
+        let now = new Date();
         $.ajax({
             url: "/api/kma_sfctm2",
             method: "POST",
             contentType: "application/json",
             data: JSON.stringify({
-                // tradeYmd: tradeYmd,
-                // pageNo: 1,
-                // numOfRows: 30
+                // tm: 202412160900,
+                stn: 184,
             }),
             success: function (data) {
                 console.log(data);
                 // 성공 시 응답 데이터를 화면에 표시
-                    let resultHtml = "<ul>";
-                    data.response.body.items.item.forEach(item => {
-                        resultHtml += `<li>Location: ${item.locationName}, Generation: ${item.amount}</li>`;
-                    });
-                    resultHtml += "</ul>";
-                    $("#result").html(resultHtml);
+                    // let resultHtml = "<ul>";
+                    // data.response.body.items.item.forEach(item => {
+                    //     resultHtml += `<li>Location: ${item.locationName}, Generation: ${item.amount}</li>`;
+                    // });
+                    // resultHtml += "</ul>";
+                    // $("#result").html(resultHtml);
             },
             error: function (error) {
                 // 에러 시 메시지 표시
-                $("#result").html("<p>Error occurred: " + error.responseJSON.error + "</p>");
+                $("#result").text("Error occurred: " + error.responseJSON.error);
             }
         });
     }
