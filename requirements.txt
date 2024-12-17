@@ -1,3 +1,9 @@
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+tensorflow
 flask
 urllib3
 requests
