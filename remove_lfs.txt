@@ -42,3 +42,117 @@ git filter-branch --force --index-filter \
 bash
 코드 복사
 git push origin --force --all
+
+-------------------------------------------------
+
+
+
+--force를 사용하지 않고도 로컬 저장소의 커밋 기록을 수정해서 리모트 저장소에 푸시할 수 있습니다. 이를 위해 **git rebase**와 git push --force-with-lease 같은 안전한 방식을 사용할 수 있습니다.
+
+1. 문제의 커밋 수정하기 (로컬에서)
+문제가 발생한 브랜치에서 이미 커밋된 .pkl 파일을 제거하려면 **git rebase -i**를 사용하여 로컬의 커밋 기록을 수정합니다.
+
+단계별 과정
+문제가 발생한 브랜치로 이동
+각 브랜치에서 작업을 반복합니다.
+
+bash
+코드 복사
+git checkout ja2pyc_dashboard
+문제가 있는 커밋을 수정하기 위해 인터랙티브 리베이스 실행
+리베이스를 실행할 기준 커밋을 지정합니다. 최근 몇 개의 커밋을 수정할지 결정하세요 (예: 10개 커밋).
+
+bash
+코드 복사
+git rebase -i HEAD~10
+HEAD~10은 최근 10개의 커밋을 대상으로 합니다. 필요에 따라 숫자를 조정하세요.
+
+리베이스 편집 모드에서 수정할 커밋 선택
+실행하면 다음과 같은 화면이 나타납니다:
+
+sql
+코드 복사
+pick 123abc First commit
+pick 456def Add pkl file
+pick 789ghi Some other change
+여기서 문제가 되는 .pkl 파일이 포함된 커밋의 **pick**을 **edit**로 변경합니다.
+
+sql
+코드 복사
+pick 123abc First commit
+edit 456def Add pkl file
+pick 789ghi Some other change
+저장하고 편집기 종료 (:wq 또는 Ctrl + X → Y → Enter).
+
+문제가 되는 커밋 수정
+리베이스가 중단되면서 해당 커밋을 수정할 수 있게 됩니다. .pkl 파일을 Git 추적에서 제거합니다.
+
+bash
+코드 복사
+git rm --cached models/pkl/*.pkl
+git commit --amend --no-edit
+git rm --cached: 파일을 Git 추적에서만 제거하고 로컬 파일은 그대로 둡니다.
+--amend --no-edit: 기존 커밋 메시지를 그대로 유지하면서 수정합니다.
+리베이스 계속하기
+수정이 완료되면 리베이스를 계속 진행합니다.
+
+bash
+코드 복사
+git rebase --continue
+리베이스를 계속하면 다음 커밋으로 넘어가며 변경사항이 적용됩니다.
+
+다른 브랜치에도 반복
+ja2pyc_dashboard 브랜치 작업이 끝나면 나머지 브랜치도 동일하게 진행합니다.
+
+bash
+코드 복사
+git checkout ja2pyc_model
+git rebase -i HEAD~10
+# 동일한 절차 반복
+
+git checkout ja2pyc_api
+git rebase -i HEAD~10
+# 동일한 절차 반복
+2. 수정된 커밋 푸시하기
+수정된 커밋을 리모트 저장소에 푸시할 때 --force-with-lease 옵션을 사용하면 안전하게 변경사항을 푸시할 수 있습니다.
+
+bash
+코드 복사
+git push origin ja2pyc_dashboard --force-with-lease
+git push origin ja2pyc_model --force-with-lease
+git push origin ja2pyc_api --force-with-lease
+--force-with-lease란?
+**--force-with-lease**는 리모트 브랜치가 변경되지 않았을 경우에만 푸시를 허용합니다.
+--force와 달리 팀원의 변경사항을 덮어쓰지 않기 때문에 더 안전한 옵션입니다.
+3. 최종 확인
+브랜치 확인
+각 브랜치에서 .pkl 파일이 추적되지 않는지 확인합니다.
+
+bash
+코드 복사
+git ls-files models/pkl/
+결과에 아무것도 출력되지 않아야 합니다.
+
+리모트 브랜치 최신 상태 확인
+
+bash
+코드 복사
+git fetch --all
+git log origin/ja2pyc_dashboard
+4. 팀원들에게 알림
+리베이스 작업은 커밋 히스토리를 변경하므로, 팀원들에게 다음과 같이 안내하세요:
+
+로컬 브랜치를 리셋하도록 요청:
+
+bash
+코드 복사
+git fetch --all
+git checkout ja2pyc_dashboard
+git reset --hard origin/ja2pyc_dashboard
+나머지 브랜치도 동일하게 업데이트하면 됩니다.
+
+정리
+**git rebase -i**를 사용하면 커밋 히스토리를 수정해 .pkl 파일을 제거할 수 있습니다.
+**--force-with-lease**를 사용하면 안전하게 변경사항을 푸시할 수 있습니다.
+팀원들에게 변경사항을 알리고 리모트 브랜치를 최신 상태로 동기화하도록 안내하면 문제가 해결될 것입니다.
+이제 안전하게 작업을 진행할 수 있을 거예요! 문제가 있거나 더 궁금한 점이 있다면 알려주세요
