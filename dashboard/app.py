@@ -43,12 +43,12 @@ def kma_sfctm2_data():
         params = request.json
         tm = params.get("tm")
         stn = params.get("stn")
-        print(tm)
-        print(stn)
+        # print(tm)
+        # print(stn)
         result = fetch_kma_sfctm2_data(tm, stn)
-        print(result)
+        # print(result)
         # 결과 반환
-        return result
+        return jsonify({'kma_sfctm2_result': result})
     except Exception as e:
         return jsonify({'error' : str(e)}), 500
 

@@ -49,6 +49,7 @@ $(document).ready(() => {
             // [10, 3, 1020, 1020 * 100 / (287.05 * (10 + 273.15))],
             // [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
         ];
+
         callRFModel(inputs).then(function (response) {
             // console.log("Returned data:", response);
 
@@ -113,7 +114,7 @@ $(document).ready(() => {
             contentType: "application/json",
             data: JSON.stringify({
                 // tm: 202412160900,
-                // stn: 184,
+                stn: 184,
             }),
             success: function (data) {
                 console.log(data);
@@ -194,7 +195,7 @@ $(document).ready(() => {
         chart.update(); // 차트 다시 렌더링
     }
 
-    // initWidget 함수
+    // Call Chart
     function callChart() {
         let inputs = [
             [12, 1, 1023, 1023 * 100 / (287.05 * (12 + 273.15))],
@@ -205,7 +206,7 @@ $(document).ready(() => {
 
         // callRFModel 실행 후 서버로 데이터 전송 및 차트 업데이트
         callRFModel(inputs).then(function (response) {
-            console.log(response)
+            // console.log(response)
             if (response && response.rf_result && response.rf_result.length > 0) {
                 // Flask로 데이터 전송
                 fetch('/api/chart_data', {
@@ -215,7 +216,7 @@ $(document).ready(() => {
                 })
                     .then(res => res.json())
                     .then(data => {
-                        console.log("Received data from Flask:", data);
+                        // console.log("Received data from Flask:", data);
                         updateChart(data.labels, data.values); // 차트 업데이트
                     })
                     .catch(error => {
