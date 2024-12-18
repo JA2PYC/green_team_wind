@@ -63,16 +63,6 @@ def rf_model_data():
     density = params.get("density")
     # Temperature (°C), "wind velocity (m/s)," "local atmospheric pressure (hPa)," "air density (kg/m^3)"
     
-    result = rf_model_predict(temp, wind, atmos, density)
-    
-    return result
-
-def power_data():
-    # 클라이언트로부터 요청받은 파라미터
-    params = request.json
-    tm = params.get("tm")
-    stn = params.get("stn")
-
-       # result = rf_model_predict(temp, wind, atmos, density)
+    # result = rf_model_predict(temp, wind, atmos, density)
     result = 'test'
     return result
