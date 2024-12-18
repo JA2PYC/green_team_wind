@@ -28,20 +28,16 @@ except Exception as e:
 
 def rf_model_predict(inputs):
     try:
-        print ("def rf_predict")
-        
         # Set DF
         feature_names = ["기온(°C)", "풍속(m/s)", "현지기압(hPa)", "공기밀도(kg/m^3)"]        
         input_data = pd.DataFrame(inputs, columns=feature_names)
-        print('rf model predict - array')
-        print(input_data)
+        # print('rf model predict - array')
+        # print(input_data)
         
         # Use the trained model to make a prediction
-        # pred = rf_model.predict(input_data  )  # No need for round() here, predict already returns a float
         preds = rf_model.predict(input_data)
-
-        print('rf model predict - preds')
-        print(preds)
+        # print('rf model predict - preds')
+        # print(preds)
         
         # Round prediction to 1 decimal place and return as integer
         rounded_preds = [round(pred, 1) for pred in preds]
