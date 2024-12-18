@@ -27,6 +27,7 @@ def create_model_pkl():
     rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
     rf_model.fit(X_train, y_train)
     print(rf_model)
+    
     # 모델 피클링
     # model_path = os.path.join(file_dir, '..', 'model', 'saved_models', 'jeju_random_forest.pkl')
     model_path = "./models/saved_models/jeju_random_forest.pkl"

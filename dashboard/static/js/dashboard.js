@@ -1,9 +1,10 @@
 $(document).ready(() => {
     function initialize() {
-        callData();
+        // callData();
         // callPowerAPI();
-        callkma_sfctm2Data();
+        // callkma_sfctm2Data();
         // callWindAPI();
+        callRFModel();
         eventHandler();
     }
 
@@ -136,6 +137,37 @@ $(document).ready(() => {
         // 함수 실행
         fetchData();
 
+    }
+
+    function callRFModel() {
+        console.log("js - rfmodel")
+        let now = new Date();
+        console.log(1023 * 100 / (287.05 * (12 + 273.15)));
+        $.ajax({
+            url: "/model/rf_model",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                temp: 12,
+                wind: 1,
+                atmos: 1023,
+                density: 1023 * 100 / (287.05 * (12 + 273.15)),
+            }),
+            success: function (data) {
+                console.log(data);
+                // 성공 시 응답 데이터를 화면에 표시
+                    // let resultHtml = "<ul>";
+                    // data.response.body.items.item.forEach(item => {
+                    //     resultHtml += `<li>Location: ${item.locationName}, Generation: ${item.amount}</li>`;
+                    // });
+                    // resultHtml += "</ul>";
+                    // $("#result").html(resultHtml);
+            },
+            error: function (error) {
+                // 에러 시 메시지 표시
+                $("#result").text("Error occurred: " + error.responseJSON.error);
+            }
+        });
     }
 
     initialize();

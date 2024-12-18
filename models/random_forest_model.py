@@ -2,7 +2,7 @@ import os
 import numpy as np
 import joblib
 import subprocess
-from data.random_forest_data import create_model_pkl
+# from data.random_forest_data import create_model_pkl
 
 # model.py 파일의 절대 경로를 직접 활용
 file_dir = os.path.dirname(__file__)
@@ -27,9 +27,35 @@ except Exception as e:
 
 def rf_model_predict(temp, wind, atmos, density):
     try:
-        array = np.array([[temp, wind, atmos, density]])
-        pred = int(rf_model.predict(array).round(1))
-        print (pred)
-        return pred
+        print (temp, type(temp))
+        print (wind, type(wind))
+        print (atmos, type(atmos))
+        print (density, type(density))
+        # Convert input values into a numpy array for prediction
+        array = np.array([[float(temp), float(wind), float(atmos), float(density)]])
+        print('rf model predict - array')
+        print(array)
+        
+        # Use the trained model to make a prediction
+        pred = rf_model.predict(array)  # No need for round() here, predict already returns a float
+        print('rf model predict - pred')
+        print(pred)
+        
+        # Round prediction to 1 decimal place and return as integer
+        return round(pred[0], 1)
     except Exception as e:
         return {"error": str(e)}
+
+
+# def rf_model_predict(temp, wind, atmos, density):
+#     try:
+#         array = np.array([[temp, wind, atmos, density]])
+#         print ('rf model predict - array')
+#         print(array)
+        
+#         pred = int(rf_model.predict(array).round(1))
+#         print ('rf model predict - pred')
+#         print (pred)
+#         return pred
+#     except Exception as e:
+#         return {"error": str(e)}
