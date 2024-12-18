@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 import joblib
 import subprocess
 # from data.random_forest_data import create_model_pkl
@@ -25,24 +26,27 @@ try:
 except Exception as e:
     raise RuntimeError(f"모델 로드 중 오류 발생: {e}")
 
-def rf_model_predict(temp, wind, atmos, density):
+def rf_model_predict(inputs):
     try:
-        print (temp, type(temp))
-        print (wind, type(wind))
-        print (atmos, type(atmos))
-        print (density, type(density))
-        # Convert input values into a numpy array for prediction
-        array = np.array([[float(temp), float(wind), float(atmos), float(density)]])
+        print ("def rf_predict")
+        
+        # Set DF
+        feature_names = ["기온(°C)", "풍속(m/s)", "현지기압(hPa)", "공기밀도(kg/m^3)"]        
+        input_data = pd.DataFrame(inputs, columns=feature_names)
         print('rf model predict - array')
-        print(array)
+        print(input_data)
         
         # Use the trained model to make a prediction
-        pred = rf_model.predict(array)  # No need for round() here, predict already returns a float
-        print('rf model predict - pred')
-        print(pred)
+        # pred = rf_model.predict(input_data  )  # No need for round() here, predict already returns a float
+        preds = rf_model.predict(input_data)
+
+        print('rf model predict - preds')
+        print(preds)
         
         # Round prediction to 1 decimal place and return as integer
-        return round(pred[0], 1)
+        rounded_preds = [round(pred, 1) for pred in preds]
+        return rounded_preds
+        # return round(pred[0], 1)
     except Exception as e:
         return {"error": str(e)}
 

@@ -4,14 +4,65 @@ $(document).ready(() => {
         // callPowerAPI();
         // callkma_sfctm2Data();
         // callWindAPI();
-        callRFModel();
+
+        // Dummy data
+        // feature_names = ["기온(°C)", "풍속(m/s)", "현지기압(hPa)", "공기밀도(kg/m^3)"]        
+        initWidget();
         eventHandler();
     }
 
     function eventHandler() {
-        $('#testButton').click(function () {
-            $('#output').text('jQuery file is working!');
+        // 문서 전체에 클릭 이벤트 감지
+        $(document).on("click", function (e) {
+            // 클릭된 요소가 .forecast-energy 아래의 .model_rf인지 확인
+            if ($(e.target).closest(".forecast-energy .model_rf").length) {
+                let inputs = [
+                    [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
+                ];
+
+                // callRFModel 함수 호출
+                callRFModel(inputs)
+                    .then(function (response) {
+                        console.log("Returned data:", response);
+
+                        // 예상 발전량을 forecast-now 요소에 업데이트
+                        if (response && response.predicted_power && response.predicted_power.length > 0) {
+                            $("#forecast-now").text(response.predicted_power.join(", ") + " MW");
+                        } else {
+                            console.error("Invalid data format:", response);
+                            $("#forecast-now").text("Error");
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error("Error calling RF model:", error);
+                        $("#forecast-now").text("Error");
+                    });
+            }
         });
+    }
+
+    function initWidget() {
+        let inputs = [
+            [12, 1, 1023, 1023 * 100 / (287.05 * (12 + 273.15))],
+            // [15, 2, 1015, 1015 * 100 / (287.05 * (15 + 273.15))],
+            // [10, 3, 1020, 1020 * 100 / (287.05 * (10 + 273.15))],
+            // [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
+        ];
+        callRFModel(inputs).then(function (response) {
+            console.log("Returned data:", response);
+
+            // 예상 발전량을 forecast-now 요소에 업데이트
+            if (response && response.predicted_power && response.predicted_power.length > 0) {
+                $("#forecast-now").text(response.predicted_power.join(", ") + " MW");
+            } else {
+                console.error("Invalid data format:", response);
+                $("#forecast-now").text("Error");
+            }
+        })
+            .catch(function (error) {
+                console.error("Error calling RF model:", error);
+                $("#forecast-now").text("Error");
+            });
     }
 
     function callData() {
@@ -95,12 +146,12 @@ $(document).ready(() => {
             success: function (data) {
                 console.log(data);
                 // 성공 시 응답 데이터를 화면에 표시
-                    // let resultHtml = "<ul>";
-                    // data.response.body.items.item.forEach(item => {
-                    //     resultHtml += `<li>Location: ${item.locationName}, Generation: ${item.amount}</li>`;
-                    // });
-                    // resultHtml += "</ul>";
-                    // $("#result").html(resultHtml);
+                // let resultHtml = "<ul>";
+                // data.response.body.items.item.forEach(item => {
+                //     resultHtml += `<li>Location: ${item.locationName}, Generation: ${item.amount}</li>`;
+                // });
+                // resultHtml += "</ul>";
+                // $("#result").html(resultHtml);
             },
             error: function (error) {
                 // 에러 시 메시지 표시
@@ -139,35 +190,47 @@ $(document).ready(() => {
 
     }
 
-    function callRFModel() {
-        console.log("js - rfmodel")
-        let now = new Date();
-        console.log(1023 * 100 / (287.05 * (12 + 273.15)));
-        $.ajax({
-            url: "/model/rf_model",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                temp: 12,
-                wind: 1,
-                atmos: 1023,
-                density: 1023 * 100 / (287.05 * (12 + 273.15)),
-            }),
-            success: function (data) {
-                console.log(data);
-                // 성공 시 응답 데이터를 화면에 표시
-                    // let resultHtml = "<ul>";
-                    // data.response.body.items.item.forEach(item => {
-                    //     resultHtml += `<li>Location: ${item.locationName}, Generation: ${item.amount}</li>`;
-                    // });
-                    // resultHtml += "</ul>";
-                    // $("#result").html(resultHtml);
-            },
-            error: function (error) {
-                // 에러 시 메시지 표시
-                $("#result").text("Error occurred: " + error.responseJSON.error);
-            }
+    function callRFModel(inputs) {
+        console.log("Input Data:", inputs);
+
+
+        // Promise 반환
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/model/rf_model",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    inputs: inputs // 여러 값의 배열을 JSON으로 보냄
+                }),
+                success: function (data) {
+                    console.log("Response Data:", data);
+                    resolve(data); // 성공 시 데이터 반환
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error); // 에러 발생 시 에러 반환
+                }
+            });
         });
+        // // Ajax POST 요청
+        // $.ajax({
+        //     url: "/model/rf_model",
+        //     method: "POST",
+        //     contentType: "application/json",
+        //     data: JSON.stringify({
+        //         inputs: inputs  // 여러 값의 배열을 JSON으로 보냄
+        //     }),
+        //     success: function (data) {
+        //         console.log("Response Data:", data);
+
+        //         return data;
+        //     },
+        //     error: function (error) {
+        //         console.error("Error:", error);
+        //     }
+        // });
+
     }
 
     initialize();
