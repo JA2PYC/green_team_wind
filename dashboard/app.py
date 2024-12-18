@@ -56,35 +56,42 @@ def kma_sfctm2_data():
 
 @app.route("/model/rf_model", methods=["POST"])
 def rf_model_data():
-    # print("route -rf model")
-    # params = request.json
-    # temp = params.get("temp")
-    # wind = params.get("wind")
-    # atmos = params.get("atmos")
-    # density = params.get("density")
-    # # Temperature (°C), "wind velocity (m/s)," "local atmospheric pressure (hPa)," "air density (kg/m^3)"
-    # print(density, type(temp))
-    # print(density, type(wind))
-    # print(density, type(atmos))
-    # print(density, type(density))
-    
-    # result = rf_model_predict(temp, wind, atmos, density)
-    # print(result)
-    # return result
     try:
         # Assuming you get the values from the request (e.g., JSON payload)
         data = request.get_json()
 
-        temp = data.get('temp')
-        wind = data.get('wind')
-        atmos = data.get('atmos')
-        density = data.get('density')
+        # # Temperature (°C), "wind velocity (m/s)," "local atmospheric pressure (hPa)," "air density (kg/m^3)"
+        # print ("route rf_model")
+        # temp = float(data.get('temp'))
+        # wind = float(data.get('wind'))
+        # atmos = float(data.get('atmos'))
+        # density = float(data.get('density'))
+        # print(temp, type(temp))
+        # print(wind, type(wind))
+        # print(atmos, type(atmos))
+        # print(density, type(density))
 
-        # Call the rf_model_predict function
-        predicted_value = rf_model_predict(temp, wind, atmos, density)
+        # # Call the rf_model_predict function
+        # predicted_value = rf_model_predict(temp, wind, atmos, density)
 
-        # Return the predicted value as a JSON response
-        return jsonify({'predicted_power': predicted_value})
+        # # Return the predicted value as a JSON response
+        # return jsonify({'predicted_power': predicted_value})
+
+        # JSON 데이터의 'inputs' 키에서 값 가져오기
+        # 예시: {"inputs": [[4, 14, 24, 184], [5, 12, 22, 190], [6, 15, 25, 200]]}
+        inputs = data.get("inputs")
+        print("route rf_model - inputs")
+        print(inputs, type(inputs))
+        
+        # 입력 검증: inputs가 리스트인지 확인
+        if not isinstance(inputs, list) or not all(isinstance(row, list) and len(row) == 4 for row in inputs):
+            return jsonify({"error": "Invalid input format. 'inputs' must be a list of 4-value lists."}), 400
+
+        # rf_model_predict 함수 호출
+        predictions = rf_model_predict(inputs)
+
+        # 결과를 JSON으로 반환
+        return jsonify({'predicted_power': predictions})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
