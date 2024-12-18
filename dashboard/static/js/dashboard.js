@@ -2,12 +2,13 @@ $(document).ready(() => {
     function initialize() {
         // callData();
         // callPowerAPI();
-        // callkma_sfctm2Data();
+        callkma_sfctm2Data();
         // callWindAPI();
 
         // Dummy data
         // feature_names = ["기온(°C)", "풍속(m/s)", "현지기압(hPa)", "공기밀도(kg/m^3)"]        
         initWidget();
+        callChart();
         eventHandler();
     }
 
@@ -23,11 +24,11 @@ $(document).ready(() => {
                 // callRFModel 함수 호출
                 callRFModel(inputs)
                     .then(function (response) {
-                        console.log("Returned data:", response);
+                        // console.log("Returned data:", response);
 
                         // 예상 발전량을 forecast-now 요소에 업데이트
-                        if (response && response.predicted_power && response.predicted_power.length > 0) {
-                            $("#forecast-now").text(response.predicted_power.join(", ") + " MW");
+                        if (response && response.rf_result && response.rf_result.length > 0) {
+                            $("#forecast-now").text(response.rf_result.join(", ") + " MW");
                         } else {
                             console.error("Invalid data format:", response);
                             $("#forecast-now").text("Error");
@@ -49,11 +50,11 @@ $(document).ready(() => {
             // [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
         ];
         callRFModel(inputs).then(function (response) {
-            console.log("Returned data:", response);
+            // console.log("Returned data:", response);
 
             // 예상 발전량을 forecast-now 요소에 업데이트
-            if (response && response.predicted_power && response.predicted_power.length > 0) {
-                $("#forecast-now").text(response.predicted_power.join(", ") + " MW");
+            if (response && response.rf_result && response.rf_result.length > 0) {
+                $("#forecast-now").text(response.rf_result.join(", ") + " MW");
             } else {
                 console.error("Invalid data format:", response);
                 $("#forecast-now").text("Error");
@@ -62,35 +63,6 @@ $(document).ready(() => {
             .catch(function (error) {
                 console.error("Error calling RF model:", error);
                 $("#forecast-now").text("Error");
-            });
-    }
-
-    function callData() {
-        fetch('/data')
-            .then(response => response.json())
-            .then(data => {
-                const ctx = document.getElementById('chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Sample Data',
-                            data: data.values,
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
             });
     }
 
@@ -141,7 +113,7 @@ $(document).ready(() => {
             contentType: "application/json",
             data: JSON.stringify({
                 // tm: 202412160900,
-                stn: 184,
+                // stn: 184,
             }),
             success: function (data) {
                 console.log(data);
@@ -160,39 +132,8 @@ $(document).ready(() => {
         });
     }
 
-    function callWindAPI() {
-        // API 요청 URL과 파라미터
-        const API_KEY = "eHgX5J93R2wPgAq/JUQzHP3xbkJ16lQIJXvQeY4fxh3EutJ9W/REVVrb84PbqmDitlWiLPtmcxDg8TqhaV0TlQ=="; // 발급받은 API 키를 여기에 입력하세요
-        const url = `https://apis.data.go.kr/B551893/wind-power-by-hour/list?serviceKey=${API_KEY}&startD=20241215&endD=20241216`;
-
-        // API 호출 함수
-        async function fetchData() {
-            try {
-                // fetch를 사용하여 데이터 가져오기
-                const response = await fetch(url, { method: "GET" });
-
-
-                // HTTP 상태 코드 확인
-                if (!response.ok) {
-                    throw new Error(`HTTP Error! status: ${response.status}`);
-                }
-
-                // JSON 응답 처리
-                const data = await response.json();
-                console.log("API 데이터:", data);
-            } catch (error) {
-                console.error("API 요청 중 오류 발생:", error);
-            }
-        }
-
-        // 함수 실행
-        fetchData();
-
-    }
-
     function callRFModel(inputs) {
-        console.log("Input Data:", inputs);
-
+        // console.log("Input Data:", inputs);
 
         // Promise 반환
         return new Promise(function (resolve, reject) {
@@ -204,7 +145,7 @@ $(document).ready(() => {
                     inputs: inputs // 여러 값의 배열을 JSON으로 보냄
                 }),
                 success: function (data) {
-                    console.log("Response Data:", data);
+                    // console.log("Response Data:", data);
                     resolve(data); // 성공 시 데이터 반환
                 },
                 error: function (error) {
@@ -213,25 +154,85 @@ $(document).ready(() => {
                 }
             });
         });
-        // // Ajax POST 요청
-        // $.ajax({
-        //     url: "/model/rf_model",
-        //     method: "POST",
-        //     contentType: "application/json",
-        //     data: JSON.stringify({
-        //         inputs: inputs  // 여러 값의 배열을 JSON으로 보냄
-        //     }),
-        //     success: function (data) {
-        //         console.log("Response Data:", data);
+    }
 
-        //         return data;
-        //     },
-        //     error: function (error) {
-        //         console.error("Error:", error);
-        //     }
-        // });
+
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [], // 초기 레이블
+            datasets: [{
+                label: '예상 발전량 (MW)',
+                data: [], // 초기 데이터
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true, // 차트 크기가 자동으로 조절되도록 설정
+            maintainAspectRatio: true, // 차트의 가로 세로 비율을 유지하지 않음
+            // 차트 애니메이션 효과를 설정
+            animation: {
+                duration: 500, // 애니메이션 지속 시간을 설정
+                easing: 'ease-in-out' // 애니메이션의 변화 속도 설정
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // 차트 업데이트 함수
+    function updateChart(labels, values) {
+        chart.data.labels = labels; // X축 레이블 업데이트
+        chart.data.datasets[0].data = values; // Y축 데이터 업데이트
+        chart.update(); // 차트 다시 렌더링
+    }
+
+    // initWidget 함수
+    function callChart() {
+        let inputs = [
+            [12, 1, 1023, 1023 * 100 / (287.05 * (12 + 273.15))],
+            [15, 2, 1015, 1015 * 100 / (287.05 * (15 + 273.15))],
+            [10, 3, 1020, 1020 * 100 / (287.05 * (10 + 273.15))],
+            [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
+        ];
+
+        // callRFModel 실행 후 서버로 데이터 전송 및 차트 업데이트
+        callRFModel(inputs).then(function (response) {
+            console.log(response)
+            if (response && response.rf_result && response.rf_result.length > 0) {
+                // Flask로 데이터 전송
+                fetch('/api/chart_data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rf_result: response.rf_result })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log("Received data from Flask:", data);
+                        updateChart(data.labels, data.values); // 차트 업데이트
+                    })
+                    .catch(error => {
+                        console.error("Error updating chart:", error);
+                    });
+
+            } else {
+                console.error("Invalid data format:", response);
+            }
+        })
+            .catch(function (error) {
+                console.error("Error calling RF model:", error);
+            });
+
 
     }
+
 
     initialize();
 
