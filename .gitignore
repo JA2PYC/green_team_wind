@@ -123,6 +123,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # 모델 파일
-models/saved_models/
+models/saved_models/*.pkl
 *.pkl
 

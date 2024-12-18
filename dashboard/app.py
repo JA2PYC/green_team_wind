@@ -56,13 +56,35 @@ def kma_sfctm2_data():
 
 @app.route("/model/rf_model", methods=["POST"])
 def rf_model_data():
-    params = request.json
-    temp = params.get("temp")
-    wind = params.get("wind")
-    atmos = params.get("atmos")
-    density = params.get("density")
-    # Temperature (°C), "wind velocity (m/s)," "local atmospheric pressure (hPa)," "air density (kg/m^3)"
+    # print("route -rf model")
+    # params = request.json
+    # temp = params.get("temp")
+    # wind = params.get("wind")
+    # atmos = params.get("atmos")
+    # density = params.get("density")
+    # # Temperature (°C), "wind velocity (m/s)," "local atmospheric pressure (hPa)," "air density (kg/m^3)"
+    # print(density, type(temp))
+    # print(density, type(wind))
+    # print(density, type(atmos))
+    # print(density, type(density))
     
     # result = rf_model_predict(temp, wind, atmos, density)
-    result = 'test'
-    return result
+    # print(result)
+    # return result
+    try:
+        # Assuming you get the values from the request (e.g., JSON payload)
+        data = request.get_json()
+
+        temp = data.get('temp')
+        wind = data.get('wind')
+        atmos = data.get('atmos')
+        density = data.get('density')
+
+        # Call the rf_model_predict function
+        predicted_value = rf_model_predict(temp, wind, atmos, density)
+
+        # Return the predicted value as a JSON response
+        return jsonify({'predicted_power': predicted_value})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
