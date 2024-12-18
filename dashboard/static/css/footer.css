@@ -13,7 +13,6 @@ footer {
     overflow: hidden;
     z-index: 1001;
 }
-
 footer a {
     color: #f68e3e; /* 버튼 색상과 동일한 주황색 */
 }
