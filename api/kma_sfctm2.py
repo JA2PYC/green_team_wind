@@ -4,7 +4,6 @@ import json
 import re
 
 API_KEY = os.getenv("KMA_SFCTM2_KEY")
-print(API_KEY)
 API_URL = "http://apihub.kma.go.kr/api/typ01/url/kma_sfctm2.php" 
 def fetch_kma_sfctm2_data(tm, stn):
     
