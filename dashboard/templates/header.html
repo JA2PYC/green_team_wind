@@ -1,5 +1,42 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+
 <header>
-    <div class="header_title">
-        <a href="/">풍력 발전량 모니터링</a>
-    </div>
+   <div class="header-container"> 
+        <!-- 좌측 섹션 -->
+        <div class="header-left">
+            <a href="/"></a>
+        </div>
+        
+        <!-- 가운데 섹션 -->
+        <div class="header_title">
+            <a href="/">풍력 발전량 모니터링</a>
+        </div>
+        
+        <!-- 우측 섹션 -->
+        <div class="header-right">
+            <div id="chatbot-icon" class="chatbot-icon">
+                <img src="{{ url_for('static', filename='images/chatbot-icon.png') }}" alt="챗봇 아이콘">
+            </div>
+        </div>
 </header>
+
+<!-- 챗봇 오버레이 -->
+<div id="chatbot-overlay" class="chatbot-overlay hidden">
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <span>챗봇</span>
+            <button id="close-chatbot">×</button>
+        </div>
+        <div class="chatbot-content">
+            <div id="chatbot-messages" class="chatbot-messages">
+                 <!-- 메시지가 동적으로 추가될 영역 -->
+            </div>
+
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbot-input" placeholder="질문을 입력하세요..." />
+            <button id="send-chatbot">보내기</button>
+        </div>
+    </div>
+</div>

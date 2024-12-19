@@ -99,3 +99,10 @@ def chart_data():
     return jsonify(data)
 
 
+@app.route('/api/chatbot', methods=['POST'])
+def chatbot():
+    data = request.json
+    user_message = data.get('message', '')
+    # 챗봇 로직 구현 (간단한 응답 예제)
+    response_message = f"당신이 입력한 메시지는: {user_message}"
+    return jsonify({'response': response_message})
