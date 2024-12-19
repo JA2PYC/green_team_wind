@@ -2,7 +2,6 @@ import os
 import subprocess
 import sys
 
-
 def create_virtualenv():
     """가상환경 생성"""
     if not os.path.exists("venv"):
