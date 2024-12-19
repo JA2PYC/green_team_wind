@@ -42,6 +42,12 @@ $(document).ready(() => {
     }
 
     function initWidget() {
+        widgetForecastEnergy(184);
+        widgetWindPowerChart();
+    }
+
+
+    function widgetForecastEnergy(station_id) {
         let inputs = [
             [12, 1, 1023, 1023 * 100 / (287.05 * (12 + 273.15))],
             // [15, 2, 1015, 1015 * 100 / (287.05 * (15 + 273.15))],
@@ -65,7 +71,9 @@ $(document).ready(() => {
                 $("#forecast-now").text("Error");
             });
 
+    }
 
+    function widgetWindPowerChart() {
         callkma_sfctm2Data().then(function (kma_sfctm2Data) {
 
             let rf_model_inputs = processWeathertoRFData(kma_sfctm2Data);
@@ -80,7 +88,6 @@ $(document).ready(() => {
 
 
         });
-
     }
 
     function processWeathertoRFData(weatherData) {
@@ -131,14 +138,14 @@ $(document).ready(() => {
                 y1: {
                     title: '풍속 (m/s)',
                     beginAtZero: true,
-                    type:'linear',
-                    position:'left'
+                    type: 'linear',
+                    position: 'left'
                 },
                 y2: {
                     title: '발전량 (MW)',
                     beginAtZero: true,
-                    type:'linear',
-                    position:'right',
+                    type: 'linear',
+                    position: 'right',
                     grid: {
                         drawOnChartArea: false // 오른쪽 y축의 격자선 제거
                     }
@@ -233,26 +240,24 @@ $(document).ready(() => {
         });
     }
 
+    // Make Chart Graph
     function callChartGraph($target, chartData, chartType = 'line') {
         // jQuery로 캔버스 요소를 가져옵니다.
         const ctx = $($target)[0].getContext('2d');
-        const scales ={};
+        const scales = {};
 
         // y축 설정이 chartData에 있을 경우 적용, 없으면 기본 설정을 사용
         if (chartData.yAxisConfig) {
             // chartData의 y축 설정을 사용
             Object.keys(chartData.yAxisConfig).forEach(axis => {
-                console.log(chartData.yAxisConfigx);
                 scales[axis] = {
-                    // type: chartData.yAxisConfig[axis][type],
-                    // position: chartData.yAxisConfig[axis][position]
-                //     // ...chartData.yAxisConfig[axis]
+                    type: chartData.yAxisConfig[axis].type,
+                    position: chartData.yAxisConfig[axis].position
                 };
-                console.log(scales);
             });
         }
-                console.log(scales);
-                // Chart.js로 그래프를 생성합니다.
+        console.log(scales);
+        // Chart.js로 그래프를 생성합니다.
         new Chart(ctx, {
             type: chartType,
             data: {
@@ -261,7 +266,7 @@ $(document).ready(() => {
             },
             options: {
                 responsive: true,
-                // scales: scales
+                scales: scales
             }
         });
     }
