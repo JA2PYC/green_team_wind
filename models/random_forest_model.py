@@ -1,8 +1,7 @@
 import os
-import numpy as np
-import pandas as pd
-import joblib
 import subprocess
+import joblib
+import pandas as pd
 # from data.random_forest_data import create_model_pkl
 
 # model.py 파일의 절대 경로를 직접 활용
@@ -22,7 +21,7 @@ if not os.path.exists(pkl_path):
 
 # pkl 파일 로드
 try:
-    rf_model = joblib.load(open(pkl_path, 'rb'))
+    model_file = joblib.load(open(pkl_path, 'rb'))
 except Exception as e:
     raise RuntimeError(f"모델 로드 중 오류 발생: {e}")
 
@@ -35,7 +34,7 @@ def rf_model_predict(inputs):
         # print(input_data)
         
         # Use the trained model to make a prediction
-        preds = rf_model.predict(input_data)
+        preds = model_file.predict(input_data)
         # print('rf model predict - preds')
         # print(preds)
         

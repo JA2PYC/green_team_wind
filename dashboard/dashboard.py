@@ -1,14 +1,11 @@
-from flask import Flask, Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify
 from api.kma_sfctm2 import fetch_kma_sfctm2_data
 # from api.open_api_PvAmountByPwrGen import fetch_power_data
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
-import random
-import json
 
 # 라우트 설정
-# app = Flask(__name__)
-dashboard_bp = Blueprint('dashboard', __name__)
+dashboard = Blueprint('dashboard', __name__)
 
 # from flask_mysqldb import MySQL
 # app.config['MYSQL_HOST'] = 'localhost' 
@@ -18,8 +15,8 @@ dashboard_bp = Blueprint('dashboard', __name__)
 # mysql = MySQL(app)
 
 # 라우트 설정
-@dashboard_bp.route('/')
-def dashboard():
+@dashboard.route('/')
+def dashboard_route():
     return render_template('dashboard.html')
 
 # # 공공 데이터 PvAmountByPowerGen API
@@ -38,7 +35,7 @@ def dashboard():
 #     return jsonify(result)
 
 # 기상 데이터 
-@dashboard_bp.route("/api/kma_sfctm2", methods=["POST"])
+@dashboard.route("/api/kma_sfctm2", methods=["POST"])
 def kma_sfctm2_data():
     try:
         # 클라이언트로부터 요청받은 파라미터
@@ -53,7 +50,7 @@ def kma_sfctm2_data():
         return jsonify({'error' : str(e)}), 500
 
 # RF 모델
-@dashboard_bp.route("/model/rf_model", methods=["POST"])
+@dashboard.route("/model/rf_model", methods=["POST"])
 def rf_model_data():
     try:
         # # Temperature (°C), "wind velocity (m/s)," "local atmospheric pressure (hPa)," "air density (kg/m^3)"
@@ -72,8 +69,18 @@ def rf_model_data():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@dashboard.route('/model/xgboost_ai_model', methods=["POST"])
+def xgboost_ai_data():
+    try:
+        print ('test')
+        predictions = ''
+        return jsonify({'xgboost_ai_result': predictions})
+    except Exception as e:
+        return jsonify({'error' : e}), 500
 
-@dashboard_bp.route('/api/chart_data', methods=['POST'])
+
+@dashboard.route('/api/chart_data', methods=['POST'])
 def chart_data():
     # 클라이언트에서 보낸 데이터를 가져옴
     received_data = request.json
