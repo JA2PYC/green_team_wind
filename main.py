@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 
+
 def create_virtualenv():
     """가상환경 생성"""
     if not os.path.exists("venv"):
@@ -38,8 +39,9 @@ def main():
 
     # Flask 앱 가져오기 및 실행
     try:
-        from dashboard.app import app
+        from dashboard import create_app
         print("Flask 앱을 실행합니다...")
+        app = create_app()
         app.run(debug=True)
     except ImportError as e:
         print(f"Flask 앱 가져오는 중 오류 발생: {e}")

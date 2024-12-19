@@ -68,27 +68,32 @@ $(document).ready(() => {
 
         callkma_sfctm2Data().then(function (kma_sfctm2Data) {
 
-            let rf_model_data = processWeathertoRFData(kma_sfctm2Data);
+            let rf_model_inputs = processWeathertoRFData(kma_sfctm2Data);
 
+            callRFModel(rf_model_inputs).then(function (rf_model_response) {
+                if (rf_model_response && rf_model_response.rf_result && rf_model_response.rf_result.length > 0) {
+                    let windPowerChartData = processWindPowerChart(kma_sfctm2Data, rf_model_response.rf_result);
+                    let $windPowerChart = $('#windPowerChart');
+                    callChartGraph($windPowerChart, windPowerChartData, 'line')
+                }
+            });
 
-            let weatherData = processWeatherChart(kma_sfctm2Data);
-            console.log(weatherData);
-            let $weatherChart = $('#windPowerChart');
-            callChartGraph($weatherChart, weatherData, 'line')
 
         });
 
     }
 
     function processWeathertoRFData(weatherData) {
-
-
+        const inputs = [];
+        weatherData.forEach(item => {
+            inputs.push([item.temperature, item.wind_speed, item.air_pressure, item.density]);
+        });
+        return inputs;
     }
 
-    function processWeatherChart(weatherData, predictData) {
+    function processWindPowerChart(weatherData, rf_model_data) {
         // 데이터를 처리하여 그래프에 필요한 데이터 배열을 만듭니다.
         const labels = []; // datetime 배열
-        const temperatures = []; // 온도 배열
         const rf_model = []; // 기압 배열
         const windSpeeds = []; // 풍속 배열
 
@@ -97,28 +102,49 @@ $(document).ready(() => {
             labels.push(item.station_id); // datetime을 x축 레이블로 사용
             windSpeeds.push(parseFloat(item.wind_speed)); // 풍속을 배열에 추가
         });
-
+        rf_model_data.forEach(item => {
+            rf_model.push(parseFloat(item));
+        })
 
 
         return {
             labels: labels,
             datasets: [
                 {
-                    label: '예측치 (MW)', // 기압 그래프
-                    data: rf_model,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                },
-                {
                     label: '풍속 (m/s)', // 풍속 그래프
                     data: windSpeeds,
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
+                    borderColor: 'rgb(78, 230, 184)',
+                    borderWidth: 1,
+                    yAxisID: 'y1' // 첫 번째 y축
+                },
+                {
+                    label: 'RF Model (MW)', // 기압 그래프
+                    data: rf_model,
+                    backgroundColor: 'rgba(243, 84, 97, 0.2)',
+                    borderColor: 'rgb(243, 84, 97)',
+                    borderWidth: 1,
+                    yAxisID: 'y2' // 첫 번째 y축
+                },
+            ],
+            yAxisConfig: { // y축 설정 추가
+                y1: {
+                    title: '풍속 (m/s)',
+                    beginAtZero: true,
+                    type:'linear',
+                    position:'left'
+                },
+                y2: {
+                    title: '발전량 (MW)',
+                    beginAtZero: true,
+                    type:'linear',
+                    position:'right',
+                    grid: {
+                        drawOnChartArea: false // 오른쪽 y축의 격자선 제거
+                    }
                 }
-            ]
-        };
+            }
+        }
     }
 
     function callPowerAPI() {
@@ -172,7 +198,7 @@ $(document).ready(() => {
                 }),
                 success: function (data) {
                     if (data.kma_sfctm2_result) {
-                        console.log(data.kma_sfctm2_result)
+                        // console.log(data.kma_sfctm2_result)
                         resolve(data.kma_sfctm2_result);
                     } else {
                         reject("error")
@@ -209,24 +235,33 @@ $(document).ready(() => {
 
     function callChartGraph($target, chartData, chartType = 'line') {
         // jQuery로 캔버스 요소를 가져옵니다.
-        console.log($target)
-        console.log(chartData)
         const ctx = $($target)[0].getContext('2d');
+        const scales ={};
 
-        // Chart.js로 그래프를 생성합니다.
+        // y축 설정이 chartData에 있을 경우 적용, 없으면 기본 설정을 사용
+        if (chartData.yAxisConfig) {
+            // chartData의 y축 설정을 사용
+            Object.keys(chartData.yAxisConfig).forEach(axis => {
+                console.log(chartData.yAxisConfigx);
+                scales[axis] = {
+                    // type: chartData.yAxisConfig[axis][type],
+                    // position: chartData.yAxisConfig[axis][position]
+                //     // ...chartData.yAxisConfig[axis]
+                };
+                console.log(scales);
+            });
+        }
+                console.log(scales);
+                // Chart.js로 그래프를 생성합니다.
         new Chart(ctx, {
-            type: chartType, 
+            type: chartType,
             data: {
                 labels: chartData.labels, // x축 레이블 (datetime)
                 datasets: chartData.datasets // 데이터셋
             },
             options: {
                 responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: false // y축은 0부터 시작하지 않음
-                    }
-                }
+                // scales: scales
             }
         });
     }
