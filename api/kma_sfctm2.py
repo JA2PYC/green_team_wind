@@ -14,7 +14,7 @@ def fetch_kma_sfctm2_data(tm, stn):
         # 'help': 1,
         'authKey': API_KEY,
     }
-    print(params)
+
     try:
         response = requests.get(API_URL, params=params)
 
@@ -76,7 +76,8 @@ def parse_weather_data(data):
             weather_data.append(weather_info)
     
     # 결과를 JSON 형식으로 변환하여 반환
-    return json.dumps(weather_data, indent=4, ensure_ascii=False)
+    return weather_data
+    # return json.dumps(weather_data, indent=4, ensure_ascii=False)
 
 #START7777
 #--------------------------------------------------------------------------------------------------
