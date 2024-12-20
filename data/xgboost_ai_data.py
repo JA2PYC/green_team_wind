@@ -1,16 +1,13 @@
 import os
 import pandas as pd
-import joblib
 from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
+import joblib
 
 def create_model_pkl(dataname, modelname):
     # 데이터 불러오기
-    print(dataname)
-    print(modelname)
     file_dir = os.path.dirname(__file__)
     file_path = os.path.join(file_dir, 'processed', f'{dataname}.csv')
-
     data = pd.read_csv(file_path, encoding='EUC-KR')
 
     # 공기밀도(kg/m^3) 계산
