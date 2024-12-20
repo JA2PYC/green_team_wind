@@ -59,27 +59,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ message: userMessage }),
             })
                 
-                .then(response => response.json())
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error("Server error");
+                }
+                return response.json();
+            })
                 .then(data => {
-                    // 챗봇 응답 추가
-                    const botBubble = document.createElement("div");
-                    botBubble.className = "message bot";
-                    botBubble.innerHTML = `
-                        <div class="message-icon">🤖</div>
-                        <div class="message-bubble">${data.response}</div>
-                    `;
-                    chatbotMessages.appendChild(botBubble);
-                    botBubble.scrollIntoView({ behavior: "smooth" });
+                    if (data.error) {
+                        // 서버 오류 처리
+                        console.error(data.error);
+                        chatbotMessages.innerHTML += `<div class="message bot">오류가 발생했습니다: ${data.error}</div>`;
+                    } else {
+                        // 정상 응답
+                        chatbotMessages.innerHTML += `<div class="message bot"><div class="message-icon">🤖</div>
+                        <div class="message-bubble">${data.response}</div></div>`;
+                    }
+                })
+                .catch(error => {
+                    chatbotMessages.innerHTML += `<div class="message bot">네트워크 오류: ${error.message}</div>`;
                 });
-
-            chatbotInput.value = ""; // 입력창 초기화
+                chatbotInput.value = ""; // 입력창 초기화
         }
     });
 
-    // Enter 키로 메시지 전송
-    chatbotInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            document.getElementById("send-chatbot").click();
+        // Enter 키로 메시지 전송
+        chatbotInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                document.getElementById("send-chatbot").click();
         }
     });
 });
