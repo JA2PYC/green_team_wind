@@ -44,17 +44,3 @@ def rf_model_predict(inputs):
         # return round(pred[0], 1)
     except Exception as e:
         return {"error": str(e)}
-
-
-# def rf_model_predict(temp, wind, atmos, density):
-#     try:
-#         array = np.array([[temp, wind, atmos, density]])
-#         print ('rf model predict - array')
-#         print(array)
-        
-#         pred = int(rf_model.predict(array).round(1))
-#         print ('rf model predict - pred')
-#         print (pred)
-#         return pred
-#     except Exception as e:
-#         return {"error": str(e)}

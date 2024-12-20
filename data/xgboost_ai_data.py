@@ -1,16 +1,15 @@
 import os
 import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
 import joblib
+from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
 
-def create_model_pkl():
+def create_model_pkl(dataname, modelname):
     # 데이터 불러오기
-    data_name = 'Jeju_MergedData_20241217'
+    print(dataname)
+    print(modelname)
     file_dir = os.path.dirname(__file__)
-    file_path = os.path.join(file_dir, 'processed', 'Jeju_MergedData_20241217.csv')
+    file_path = os.path.join(file_dir, 'processed', f'{dataname}.csv')
 
     data = pd.read_csv(file_path, encoding='EUC-KR')
 
@@ -22,38 +21,40 @@ def create_model_pkl():
     X = data[["기온(\u00b0C)", "풍속(m/s)", "현지기압(hPa)", "공기밀도(kg/m^3)"]]
     y = data["발전량(mW)"]  # 출력 변수
 
-    # 훈련 및 테스트 데이터 분리
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # 데이터 정규화 (0~1 범위로 스케일링)
+    scaler_X = MinMaxScaler()
+    scaler_y = MinMaxScaler()
 
-    # 랜덤 포레스트 모델 생성 및 학습
-    
-    rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
-    rf_model.fit(X_train, y_train)
-    print(rf_model)
-    
+    X_scaled = scaler_X.fit_transform(X)
+    y_scaled = scaler_y.fit_transform(y.values.reshape(-1, 1)).flatten()
+
+    # 모델 생성
     xgb_model = XGBRegressor(
-    n_estimators=1000,        # 트리 개수
-    learning_rate=0.01,       # 학습률
-    max_depth=6,              # 트리의 최대 깊이
-    subsample=0.8,            # 데이터 샘플링 비율
-    colsample_bytree=0.8,     # 각 트리에서 사용할 feature 비율
-    random_state=42
+        n_estimators=1000,        # 트리 개수
+        learning_rate=0.01,       # 학습률
+        max_depth=6,              # 트리의 최대 깊이
+        subsample=0.8,            # 데이터 샘플링 비율
+        colsample_bytree=0.8,     # 각 트리에서 사용할 feature 비율
+        random_state=42
     )
     
+    # 모델 학습 (전체 데이터로 학습)
+    xgb_model.fit(X_scaled, y_scaled)
     
-# 학습 (조기 종료 설정)
-    xgb_model.fit(
-        X_train, y_train,
-        eval_set=[(X_test, y_test)],  # 평가 데이터셋 지정
-        eval_metric="rmse",           # 평가 지표 (RMSE)
-        early_stopping_rounds=50,     # 조기 종료 조건
-        verbose=True                  # 학습 상태 출력
-    )
+    # 모델 피클링 디렉터리 존재 여부 확인 및 생성
+    model_dir = './models/saved_models'
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+    
     # 모델 피클링
-    # model_path = os.path.join(file_dir, '..', 'model', 'saved_models', 'jeju_random_forest.pkl')
-    model_path = "./models/saved_models/jeju_random_forest.pkl"
-    joblib.dump(rf_model, model_path)
+    model_path = os.path.join(model_dir, f'{modelname}.pkl')
+    joblib.dump(xgb_model, model_path)
+    
+    # 정규화 객체도 함께 저장 (예측 후 원래 스케일로 복원용)
+    scaler_path_X = os.path.join(model_dir, f'{modelname}_scaler_X.pkl')
+    scaler_path_y = os.path.join(model_dir, f'{modelname}_scaler_y.pkl')
+    joblib.dump(scaler_X, scaler_path_X)
+    joblib.dump(scaler_y, scaler_path_y)
 
     print(f"Model saved to {model_path}")
-
-create_model_pkl()
+    print(f"Scalers saved to {scaler_path_X} and {scaler_path_y}")

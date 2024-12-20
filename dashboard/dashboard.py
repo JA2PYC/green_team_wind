@@ -3,6 +3,7 @@ from api.kma_sfctm2 import fetch_kma_sfctm2_data
 # from api.open_api_PvAmountByPwrGen import fetch_power_data
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
+from models.jeju_xgboost_ai_model import xgboost_ai_model_predict
 
 # 라우트 설정
 dashboard = Blueprint('dashboard', __name__)
@@ -69,12 +70,20 @@ def rf_model_data():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
+# XGB 모델
 @dashboard.route('/model/xgboost_ai_model', methods=["POST"])
 def xgboost_ai_data():
     try:
-        print ('test')
-        predictions = ''
+        print ('route - xgboost')
+        data = request.get_json()
+        inputs = data.get("inputs")
+
+        if not isinstance(inputs, list) or not all(isinstance(row, list) and len(row) == 4 for row in inputs):
+            return jsonify({'error' : 'Invalid input format.'}), 400
+        
+        predictions = xgboost_ai_model_predict(inputs)
+        
         return jsonify({'xgboost_ai_result': predictions})
     except Exception as e:
         return jsonify({'error' : e}), 500
