@@ -1,7 +1,5 @@
 import os
 import requests
-import json
-import re
 
 API_KEY = os.getenv("KMA_SFCTM2_KEY")
 API_URL = "http://apihub.kma.go.kr/api/typ01/url/kma_sfctm2.php" 
@@ -25,7 +23,6 @@ def fetch_kma_sfctm2_data(tm, stn):
             # 텍스트에서 필요한 데이터 추출하는 로직 추가
             # 예: 필요한 정보 추출 후 JSON으로 변환
             data = parse_weather_data(response.text)
-            print(data)
             return data
         else:
             print(f"API 요청 실패: {response.status_code}")

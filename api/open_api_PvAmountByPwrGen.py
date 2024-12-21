@@ -1,6 +1,5 @@
 import os
 import requests
-import urllib3
 import xml.etree.ElementTree as ET
 
 # 공공데이터 포털 API 키 및 URL
