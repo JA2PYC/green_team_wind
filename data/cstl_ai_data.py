@@ -2,8 +2,8 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Conv1D, MaxPooling1D, Flatten
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.layers import LSTM, Dense, Conv1D, MaxPooling1D, Flatten
 import joblib
 
 def create_model_pkl(dataname, modelname):
