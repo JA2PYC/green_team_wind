@@ -1,62 +1,88 @@
-ALLUSERSPROFILE=C:\ProgramData
-APPDATA=C:\Users\dyk81\AppData\Roaming
-CHROME_CRASHPAD_PIPE_NAME=\\.\pipe\crashpad_8376_OYOUJCWSROYIHFLJ
-COMMONPROGRAMFILES=C:\Program Files\Common Files
-COMMONPROGRAMFILES(X86)=C:\Program Files (x86)\Common Files
-COMMONPROGRAMW6432=C:\Program Files\Common Files
-COMPUTERNAME=DESKTOP-KJSVE6D
-COMSPEC=C:\WINDOWS\system32\cmd.exe
-DRIVERDATA=C:\Windows\System32\Drivers\DriverData
-EFC_6732=1
-FPS_BROWSER_APP_PROFILE_STRING=Internet Explorer
-FPS_BROWSER_USER_PROFILE_STRING=Default
-HOMEDRIVE=C:
-HOMEPATH=\Users\dyk81
-IGCCSVC_DB=AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAgGcI66g4k0G6QU7+oUKwEQQAAAACAAAAAAAQZgAAAAEAACAAAACaOXVfy15P6/ebk3FLqylymve4rXmquoR0l098ViNfoAAAAAAOgAAAAAIAACAAAACA2ubPK8FTOp72sYKvXUJ7rqKU4HzmZw3L5upYCD/TZmAAAACb7R72nhrfbwKBxMafnzvqQbhMNmVAbk5w7o/aL3/GH4X1HvrJlTY6MOSbxx1jDZoVcwveSUfct2eINbIG77ftfOv4DoNvYewHawkAlBNhlbrfWFtq/z+FgBJR/ktK05RAAAAAJG6RTpgETCoESspq9DNwEdHL6ZaABN72M/UKpwxqVoWvEcww9DL/RJ3Rd8+YWQQEORmcYqYnwxsxakZh7e5QqQ==
-JAVA_HOME=C:\Program Files\Java\jdk-11
-LOCALAPPDATA=C:\Users\dyk81\AppData\Local
-LOGONSERVER=\\DESKTOP-KJSVE6D
-NUMBER_OF_PROCESSORS=20
-ONEDRIVE=C:\Users\dyk81\OneDrive
-ORIGINAL_XDG_CURRENT_DESKTOP=undefined
-OS=Windows_NT
-PATH=C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files\Java\jdk-11\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\bin;C:\Users\dyk81\AppData\Local\Programs\Python\Python310\Scripts\;C:\Users\dyk81\AppData\Local\Programs\Python\Python310\;C:\Users\dyk81\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\dyk81\AppData\Local\Programs\Python\Python313\;C:\Users\dyk81\AppData\Local\Microsoft\WindowsApps;C:\Users\dyk81\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\dyk81\AppData\Local\Programs\MiKTeX\miktex\bin\x64\;C:\Users\dyk81\AppData\Local\GitHubDesktop\bin;;C:\Program Files (x86)\ESTsoft\ALSee\x64
-PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.CPL
-PROCESSOR_ARCHITECTURE=AMD64
-PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 183 Stepping 1, GenuineIntel
-PROCESSOR_LEVEL=6
-PROCESSOR_REVISION=b701
-PROGRAMDATA=C:\ProgramData
-PROGRAMFILES=C:\Program Files
-PROGRAMFILES(X86)=C:\Program Files (x86)
-PROGRAMW6432=C:\Program Files
-PSMODULEPATH=C:\Users\dyk81\Documents\WindowsPowerShell\Modules;C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
-PUBLIC=C:\Users\Public
-SESSIONNAME=Console
-SYSTEMDRIVE=C:
-SYSTEMROOT=C:\WINDOWS
-TEMP=C:\Users\dyk81\AppData\Local\Temp
-TMP=C:\Users\dyk81\AppData\Local\Temp
-TMPDIR=C:\Users\Public\Documents\ESTsoft\CreatorTemp
-USERDOMAIN=DESKTOP-KJSVE6D
-USERDOMAIN_ROAMINGPROFILE=DESKTOP-KJSVE6D
-USERNAME=dyk81
-USERPROFILE=C:\Users\dyk81
-WINDIR=C:\WINDOWS
-ZES_ENABLE_SYSMAN=1
-TERM_PROGRAM=vscode
-TERM_PROGRAM_VERSION=1.96.2
-LANG=en_US.UTF-8
-COLORTERM=truecolor
-GIT_ASKPASS=c:\Users\dyk81\AppData\Local\Programs\Microsoft VS Code\resources\app\extensions\git\dist\askpass.sh
-VSCODE_GIT_ASKPASS_NODE=C:\Users\dyk81\AppData\Local\Programs\Microsoft VS Code\Code.exe
-VSCODE_GIT_ASKPASS_EXTRA_ARGS=
-VSCODE_GIT_ASKPASS_MAIN=c:\Users\dyk81\AppData\Local\Programs\Microsoft VS Code\resources\app\extensions\git\dist\askpass-main.js
-VSCODE_GIT_IPC_HANDLE=\\.\pipe\vscode-git-14d4131d3c-sock
-KMA_SFCTM2_KEY=gW1elmiyQWWtXpZoslFl8w
-VSCODE_ENV_REPLACE=KMA_SFCTM2_KEY=gW1elmiyQWWtXpZoslFl8w:PVAMOUNTBYPOWERGEN_KEY=eHgX5J93R2wPgAq/JUQzHP3xbkJ16lQIJXvQeY4fxh3EutJ9W/REVVrb84PbqmDitlWiLPtmcxDg8TqhaV0TlQ==:WIND_POWER_BY_HOUR_KEY=eHgX5J93R2wPgAq/JUQzHP3xbkJ16lQIJXvQeY4fxh3EutJ9W/REVVrb84PbqmDitlWiLPtmcxDg8TqhaV0TlQ==
-PVAMOUNTBYPOWERGEN_KEY=eHgX5J93R2wPgAq/JUQzHP3xbkJ16lQIJXvQeY4fxh3EutJ9W/REVVrb84PbqmDitlWiLPtmcxDg8TqhaV0TlQ==
-WIND_POWER_BY_HOUR_KEY=eHgX5J93R2wPgAq/JUQzHP3xbkJ16lQIJXvQeY4fxh3EutJ9W/REVVrb84PbqmDitlWiLPtmcxDg8TqhaV0TlQ==
-VSCODE_INJECTION=1
-VSCODE_NONCE=ed11fe3e-207e-46ce-afdb-c0a5ad29c526
-VSCODE_STABLE=1
+import os
+import subprocess
+import sys
+
+def create_virtualenv():
+    """가상환경 생성"""
+    if not os.path.exists("venv"):
+        print("가상환경이 존재하지 않습니다. 새로 생성합니다...")
+        try:
+            subprocess.check_call([sys.executable, "-m", "venv", "venv"])
+            print("가상환경 생성 완료!")
+        except Exception as e:
+            print(f"가상환경 생성 중 오류 발생: {e}")
+            sys.exit(1)
+
+def activate_virtualenv():
+    """가상환경 활성화"""
+    if os.environ.get("VIRTUAL_ENV"):
+        # 이미 가상환경이 활성화된 경우
+        print("가상환경이 이미 활성화되어 있습니다.")
+        return
+
+    activate_script = os.path.join("venv", "Scripts" if os.name == "nt" else "bin", "activate")
+    if not os.path.exists(activate_script):
+        print("가상환경 활성화 스크립트를 찾을 수 없습니다.")
+        sys.exit(1)
+    
+    os.environ["VIRTUAL_ENV"] = os.path.abspath("venv")
+    os.environ["PATH"] = os.path.join("venv", "bin") + os.pathsep + os.environ["PATH"]
+    print("가상환경 활성화 완료!")
+
+def install_dependencies():
+    """의존성 설치"""
+    # 환경 변수로 설치 여부 확인
+    if os.environ.get("DEPENDENCIES_CHECKED"):
+        print("의존성 설치를 건너뜁니다. (이미 확인됨)")
+        return
+
+    requirements_file = "requirements.txt"
+    if not os.path.exists(requirements_file):
+        print("requirements.txt 파일을 찾을 수 없습니다. 의존성 설치를 건너뜁니다.")
+        return
+
+    if os.path.getsize(requirements_file) == 0:
+        print("requirements.txt 파일이 비어 있습니다. 의존성 설치를 건너뜁니다.")
+        return
+
+    print("의존성을 설치합니다...")
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", requirements_file])
+        print("의존성 설치 완료!")
+
+        # 환경 변수 설정
+        os.environ["DEPENDENCIES_CHECKED"] = "true"
+    except Exception as e:
+        print(f"의존성 설치 중 오류 발생: {e}")
+        sys.exit(1)
+
+def run_flask_app():
+    """Flask 앱 실행"""
+    try:
+        from dashboard import create_app
+        print("Flask 앱을 실행합니다...")
+        app = create_app()
+
+        # Flask 서버 실행 (디버그 모드 활성화)
+        app.run(debug=True)
+    except ImportError as e:
+        print(f"Flask 앱 가져오는 중 오류 발생: {e}")
+        sys.exit(1)
+
+def main():
+    """메인 로직"""
+    # 가상환경 생성 및 활성화
+    create_virtualenv()
+    activate_virtualenv()
+
+    # 의존성 설치
+    install_dependencies()
+
+    # Flask 앱 실행
+    run_flask_app()
+
+if __name__ == "__main__":
+    # 재시작 방지 코드
+    if "FLASK_RUN_FROM_CLI" not in os.environ:
+        main()

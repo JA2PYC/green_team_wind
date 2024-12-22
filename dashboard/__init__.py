@@ -10,8 +10,9 @@ def create_app():
     from .dy_dashboard import dy_dashboard
 
     # 블루프린트 등록 (여기서는 블루프린트 사용하지 않고 직접 라우트 연결)
+    app.register_blueprint(dy_dashboard)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(ny_dashboard)
-    app.register_blueprint(dy_dashboard)
+
 
     return app
