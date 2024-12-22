@@ -3,7 +3,6 @@ import os
 import subprocess
 import pandas as pd
 import joblib
-from sklearn.preprocessing import MinMaxScaler
 from data.xgboost_ai_data import create_model_pkl
 
 # model.py 파일의 절대 경로를 직접 활용
@@ -14,7 +13,6 @@ file_dir = os.path.dirname(__file__)
 pkl_path = os.path.join(file_dir, 'saved_models', f'{modelname}.pkl')
 scaler_X_path = os.path.join(file_dir, 'saved_models', f'{modelname}_scaler_X.pkl')
 scaler_y_path = os.path.join(file_dir, 'saved_models', f'{modelname}_scaler_y.pkl')
-
 
 # pkl 파일 존재 여부 확인
 if not os.path.exists(pkl_path):
