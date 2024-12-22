@@ -1,0 +1,47 @@
+@charset "UTF-8";
+footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* flex: 0 0 3.5rem; */
+    height: 3.5rem;
+    background: var(--color-header-gradient);
+    background-color: #333; /* 어두운 배경 */
+    font-size: 14px;
+    color: #f0f0f0; /* 흰색 텍스트 */
+    text-align: center;
+    overflow: hidden;
+    z-index: 1001;
+}
+
+footer a,
+footer a:link,
+footer a:hover,
+footer a:active  {
+    color: #f0f0f0; /* 버튼 색상과 동일한 주황색 */
+    text-decoration: underline;
+}
+
+
+footer .footer_links {
+    /* font-size: 12px; */
+    margin : 0 1rem;
+}
+
+footer .footer_info {
+    display: flex;
+    /* font-size: 14px; */
+    margin : 0 1rem;
+}
+
+footer .info_team {
+    margin : 0 1rem;
+}
+
+/* 모바일에서도 보기 좋은 푸터 */
+@media (max-width: 768px) {
+    footer {
+        font-size: 12px;
+        padding: 15px 0;
+    }
+}
