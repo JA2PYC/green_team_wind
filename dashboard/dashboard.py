@@ -4,6 +4,7 @@ from api.kma_sfctm2 import fetch_kma_sfctm2_data
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
 from models.jeju_xgboost_ai_model import xgboost_ai_model_predict
+# from models.jeju_cstl_ai_model import cstl_ai_model_predict
 
 # 라우트 설정
 dashboard = Blueprint('dashboard', __name__)
