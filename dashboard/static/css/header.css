@@ -1,0 +1,24 @@
+:root {
+    --color-header-gradient: linear-gradient(to right, #4CAF50, #2196F3);
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* flex: 0 0 3.5rem; */
+    height: 3.5rem;
+    background: var(--color-header-gradient);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #f0f0f0;
+    overflow: hidden;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+header a,
+header a:link,
+header a:hover,
+header a:active {
+    color: #f0f0f0;
+}

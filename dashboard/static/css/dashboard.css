@@ -1,0 +1,124 @@
+:root {
+    --widget-bg: #fff;
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4개의 열 */
+    grid-template-rows: auto;
+    /* 행은 필요한 만큼 자동으로 추가 */
+    max-width: 1600px;
+    gap: 20px;
+    padding: 20px;
+    animation: fadeIn 1s ease-in-out;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.widget {
+    background: var(--widget-bg);
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.6s ease-in-out forwards;
+    animation-delay: 0.2s;
+}
+
+/* widget 요소에 2x2 배치가 적용되도록 더 구체적으로 지정 */
+.widget.wind-map {
+    grid-column: span 2;
+    grid-row: span 2;
+    position: relative; /* iframe을 정확하게 배치하기 위한 부모 컨테이너의 상대적 위치 지정 */
+
+}
+
+.widget .wind-map iframe {
+    width: 100%;
+    /* iframe이 부모의 너비에 맞게 100% 차지 */
+    height: 100%;
+    /* iframe이 부모의 높이에 맞게 100% 차지 */
+    border: none;
+    /* iframe의 기본 테두리 제거 */
+}
+
+.widget.windPowerChart {
+    grid-column: span 4;
+}
+
+.widget button {
+    border: none;
+    background: linear-gradient(135deg, #4CAF50, #2196F3);
+    color: white;
+    padding: 5px 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.widget button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #45a049, #1e88e5);
+}
+
+.widget button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+h2::after {
+    content: '';
+    display: block;
+    height: 4px;
+    background: linear-gradient(to right, #4CAF50, #2196F3);
+    margin-top: 8px;
+    border-radius: 2px;
+}
+
+.chart {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.chart canvas {
+    width: 100%;
+    height: 200px;
+}
