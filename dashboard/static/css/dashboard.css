@@ -50,6 +50,14 @@
     grid-column: span 4;
 }
 
+/* 3D 풍력 발전기 위젯 */
+.widget.widget turbine-3d{
+    grid-column: span 2; 
+    grid-row: span 2;
+    position: relative; /* iframe을 정확하게 배치하기 위한 부모 컨테이너의 상대적 위치 지정 */
+
+}
+
 .widget button {
     border: none;
     background: linear-gradient(135deg, #4CAF50, #2196F3);

@@ -1,6 +1,7 @@
 # app/kma.py
-from flask import Flask, Blueprint, render_template, request, jsonify
+from flask import Flask, Blueprint, render_template, request, jsonify, url_for
 from train_chatbot_model import predict_answer #chatbot_model에서 predict_answer함수를 import
+import time  # time 모듈 추가
 
 # Flask 애플리케이션 객체 생성
 app = Flask(__name__)  
@@ -12,6 +13,15 @@ dy_dashboard = Blueprint('dy_dashboard', __name__)
 # Blueprint는 Flask 애플리케이션의 라우트를 모듈별로 분리하여 관리
 # 'dy_dashboard'는 블루프린트 이름, __name__은 이 블루프린트가 정의된 모듈의 이름
 
+# 정적 파일 캐싱 방지 코드
+@app.context_processor
+def override_url_for():
+    return dict(url_for=dated_url_for)
+
+def dated_url_for(endpoint, **values):
+    if endpoint == 'static':
+        values['q'] = int(time.time())  # 타임스탬프 추가
+    return url_for(endpoint, **values)
 
 # 대시보드 라우트 정의
 @dy_dashboard.route("/dy_dashboard")
