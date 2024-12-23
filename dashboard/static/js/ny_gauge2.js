@@ -1,145 +1,355 @@
-  am4core.ready(function () {
-    // Themes begin
-    am4core.useTheme(am4themes_animated);
-    // Themes end
+$(document).ready(() => {
+    function initialize() {
+        // callData();
+        // callPowerAPI();
+        // callWindAPI();
 
-    // Create chart instance
-    var chart = am4core.create("chartdiv2", am4charts.XYChart);
-
-    // Remove logo
-    if (chart.logo) {
-      chart.logo.disabled = true;
+        // Dummy data
+        // feature_names = ["기온(°C)", "풍속(m/s)", "현지기압(hPa)", "공기밀도(kg/m^3)"]        
+        initWidget();
+        // callChart();
+        eventHandler();
     }
 
-    chart.paddingRight = 30;
+    function eventHandler() {
+        // 문서 전체에 클릭 이벤트 감지
+        $(document).on("click", function (e) {
+            // 클릭된 요소가 .forecast-energy 아래의 .model_rf인지 확인
+            if ($(e.target).closest(".forecast-energy .model_rf").length) {
+                let inputs = [
+                    [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
+                ];
 
-    // Add data
-    var data = [
-      { category: "20", value: 0, color: am4core.color("#ee1f25") },
-      { category: "40", value: 0, color: am4core.color("#ee1f25") },
-      { category: "60", value: 0, color: am4core.color("#ee1f25") },
-      { category: "80", value: 0, color: am4core.color("#f04922") },
-      { category: "100", value: 0, color: am4core.color("#f04922") },
-      { category: "120", value: 0, color: am4core.color("#f04922") },
-      { category: "140", value: 0, color: am4core.color("#fdae19") },
-      { category: "160", value: 0, color: am4core.color("#fdae19") },
-      { category: "180", value: 0, color: am4core.color("#fdae19") },
-      { category: "200", value: 0, color: am4core.color("#f3eb0c") },
-      { category: "220", value: 0, color: am4core.color("#f3eb0c") },
-      { category: "240", value: 0, color: am4core.color("#f3eb0c") },
-      { category: "260", value: 0, color: am4core.color("#0f9747") },
-      { category: "280", value: 0, color: am4core.color("#0f9747") },
-      { category: "300", value: 0, color: am4core.color("#0f9747") },
-      // { category: "320", value: 100, color: am4core.color("#0f9747"), isMax: true }
-    ];
+                // callRFModel 함수 호출
+                callRFModel(inputs)
+                    .then(function (response) {
+                        // console.log("Returned data:", response);
 
-    chart.data = data;
-
-    // Create axes
-    var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-    categoryAxis.dataFields.category = "category";
-    categoryAxis.renderer.grid.template.disabled = true;
-    categoryAxis.renderer.labels.template.disabled = true;
-
-    var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-    valueAxis.min = 0;
-    valueAxis.max = 300;
-    valueAxis.strictMinMax = true;
-    valueAxis.renderer.grid.template.disabled = true;
-    valueAxis.renderer.labels.template.disabled = true;
-
-    // Create series
-    var series = chart.series.push(new am4charts.ColumnSeries());
-    series.dataFields.valueY = "value";
-    series.dataFields.categoryX = "category";
-    series.columns.template.propertyFields.fill = "color";
-    series.columns.template.propertyFields.stroke = "color";
-    series.columns.template.strokeWidth = 2;
-    series.columns.template.width = am4core.percent(80); // 컬럼 너비를 줄임
-    series.columns.template.marginRight = 5; // 컬럼 사이 간격 추가
-
-
-    // Add custom X-axis labels
-    function addAxisLabel(category, text) {
-      var range = categoryAxis.axisRanges.create();
-      range.category = category;
-      range.label.text = text;
-      range.label.fill = am4core.color("#000");
-      range.label.fontSize = 15;
-      range.grid.strokeOpacity = 0;
+                        // 예상 발전량을 forecast-now 요소에 업데이트
+                        if (response && response.rf_result && response.rf_result.length > 0) {
+                            $("#forecast-now").text(response.rf_result.join(", ") + " MW");
+                        } else {
+                            console.error("Invalid data format:", response);
+                            $("#forecast-now").text("Error");
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error("Error calling RF model:", error);
+                        $("#forecast-now").text("Error");
+                    });
+            }
+        });
     }
 
-    // addAxisLabel("300", "300");
-    // addAxisLabel("240", "240");
-    // addAxisLabel("180", "180");
-    // addAxisLabel("120", "120");
-    // addAxisLabel("60", "60");
+    function initWidget() {
+        widgetForecastEnergy(184);
+        widgetWindPowerChart();
+    }
 
-    // Add a dedicated container for labels
-    let labelContainer = chart.createChild(am4core.Container);
-    labelContainer.isMeasured = false;
-    
-    // Function to update chart for current value
-    function highlightProgressively(currentCategory, rawValue) {
-      let categories = chart.data.map((item) => item.category);
-      let targetIndex = categories.indexOf(currentCategory);
-      if (targetIndex === -1) return;
 
-    // Reset all bar heights to 0 and clear existing labels
-    chart.data.forEach((item) => {
-      item.value = 0;
-    });
-    labelContainer.children.clear(); // Clear labels
-    chart.invalidateRawData(); // Refresh chart data to reflect reset state
-      
-      let stepDuration = 200; // Delay between steps
-      for (let i = 0; i <= targetIndex; i++) {
-        setTimeout(() => {
-          chart.data[i].value = (i + 1) * (100 / (targetIndex + 1)); // Incremental height
-          chart.invalidateRawData(); // Refresh chart data
-        }, i * stepDuration);
-      }
+    function widgetForecastEnergy(station_id) {
+        let inputs = [
+            [12, 1, 1023, 1023 * 100 / (287.05 * (12 + 273.15))],
+            // [15, 2, 1015, 1015 * 100 / (287.05 * (15 + 273.15))],
+            // [10, 3, 1020, 1020 * 100 / (287.05 * (10 + 273.15))],
+            // [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
+        ];
 
-      // Add label to current value only after the highlight effect
-      setTimeout(() => {
-        // Clear existing labels from label container
-        labelContainer.children.clear();
+        callRFModel(inputs).then(function (response) {
+            // console.log("Returned data:", response);
 
-        // Create a label for the current value
-        let label = labelContainer.createChild(am4core.Label);
-        label.text = rawValue;
-        label.fontSize = 20;
-        label.fill = am4core.color("#000");
-        label.horizontalCenter = "middle";
-        label.verticalCenter = "bottom";
-        label.dy = -10; // Slightly above the bar
+            // 예상 발전량을 forecast-now 요소에 업데이트
+            if (response && response.rf_result && response.rf_result.length > 0) {
+                $("#forecast-now").text(response.rf_result.join(", ") + " MW");
+                useResponse(response); // response를 다른 함수로 전달
+            } else {
+                console.error("Invalid data format:", response);
+                $("#forecast-now").text("Error");
+            }
+        })
+            .catch(function (error) {
+                console.error("Error calling RF model:", error);
+                $("#forecast-now").text("Error");
+            });
 
-        // Position the label at the target column
-        let targetColumn = series.columns.getIndex(targetIndex);
-        if (targetColumn) {
-          label.x = targetColumn.pixelX + targetColumn.pixelWidth / 2; // Align with the column
-          label.y = targetColumn.pixelY;
+    }
+
+    function widgetWindPowerChart() {
+        callkma_sfctm2Data().then(function (kma_sfctm2Data) {
+
+            let rf_model_inputs = processWeathertoRFData(kma_sfctm2Data);
+
+            callRFModel(rf_model_inputs).then(function (rf_model_response) {
+                if (rf_model_response && rf_model_response.rf_result && rf_model_response.rf_result.length > 0) {
+                    let windPowerChartData = processWindPowerChart(kma_sfctm2Data, rf_model_response.rf_result);
+                    let $windPowerChart = $('#windPowerChart');
+                    callChartGraph($windPowerChart, windPowerChartData, 'line')
+                }
+            });
+
+
+        });
+    }
+
+    function processWeathertoRFData(weatherData) {
+        const inputs = [];
+        weatherData.forEach(item => {
+            inputs.push([item.temperature, item.wind_speed, item.air_pressure, item.density]);
+        });
+        return inputs;
+    }
+
+    function processWindPowerChart(weatherData, rf_model_data) {
+        // 데이터를 처리하여 그래프에 필요한 데이터 배열을 만듭니다.
+        const labels = []; // datetime 배열
+        const rf_model = []; // 기압 배열
+        const windSpeeds = []; // 풍속 배열
+
+        // 데이터 반복 처리
+        weatherData.forEach(item => {
+            labels.push(item.station_id); // datetime을 x축 레이블로 사용
+            windSpeeds.push(parseFloat(item.wind_speed)); // 풍속을 배열에 추가
+        });
+        rf_model_data.forEach(item => {
+            rf_model.push(parseFloat(item));
+        })
+
+
+        return {
+            labels: labels,
+            datasets: [
+                {
+                    label: '풍속 (m/s)', // 풍속 그래프
+                    data: windSpeeds,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgb(78, 230, 184)',
+                    borderWidth: 1,
+                    yAxisID: 'y1' // 첫 번째 y축
+                },
+                {
+                    label: 'RF Model (MW)', // 기압 그래프
+                    data: rf_model,
+                    backgroundColor: 'rgba(243, 84, 97, 0.2)',
+                    borderColor: 'rgb(243, 84, 97)',
+                    borderWidth: 1,
+                    yAxisID: 'y2' // 첫 번째 y축
+                },
+            ],
+            yAxisConfig: { // y축 설정 추가
+                y1: {
+                    title: '풍속 (m/s)',
+                    beginAtZero: true,
+                    type: 'linear',
+                    position: 'left'
+                },
+                y2: {
+                    title: '발전량 (MW)',
+                    beginAtZero: true,
+                    type: 'linear',
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false // 오른쪽 y축의 격자선 제거
+                    }
+                }
+            }
         }
-      }, stepDuration * (targetIndex + 1)); // Ensure the label is added after the animation
     }
 
-    // Example: Set current value
-    var currentValue = "120"; // Change this value dynamically
-    highlightProgressively(currentValue, 120);
+    function callPowerAPI() {
+        $("#powerForm").on("submit", function (event) {
+            event.preventDefault(); // 기본 폼 제출 방지
 
-// Automatically update value periodically
-setInterval(function () {
-    var randomValue = Math.floor(Math.random() * 300) + 1; // 1에서 300 사이 랜덤 값 생성
-    console.log("Random Value (Raw):", randomValue);
+            // 폼 데이터 가져오기
+            const tradeYmd = $("#tradeYmd").val();
 
-    // 가장 가까운 20 단위로 반올림
-    var roundedValue = Math.round(randomValue / 20) * 20;
-    console.log("Rounded Value (Nearest 20):", roundedValue);
+            // POST 요청 보내기
+            $.ajax({
+                url: "/api/power",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    tradeYmd: tradeYmd,
+                    pageNo: 1,
+                    numOfRows: 30
+                }),
+                success: function (data) {
+                    console.log(data);
+                    // 성공 시 응답 데이터를 화면에 표시
+                    if (data.response.body.items.item.length > 0) {
+                        let resultHtml = "<ul>";
+                        data.response.body.items.item.forEach(item => {
+                            resultHtml += `<li>Location: ${item.locationName}, Generation: ${item.amount}</li>`;
+                        });
+                        resultHtml += "</ul>";
+                        $("#result").html(resultHtml);
+                    } else {
+                        $("#result").html("<p>No data available for the given date.</p>");
+                    }
+                },
+                error: function (error) {
+                    // 에러 시 메시지 표시
+                    $("#result").html("<p>Error occurred: " + error.responseJSON.error + "</p>");
+                }
+            });
+        });
+    }
 
-    // 막대는 반올림된 값으로 업데이트
-    highlightProgressively(roundedValue.toString(), randomValue);
-}, 3000);
+    function callkma_sfctm2Data(tn = 0, stn = 0) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/api/kma_sfctm2",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    // tm: 202412160900,
+                    // stn: 184,
+                }),
+                success: function (data) {
+                    if (data.kma_sfctm2_result) {
+                        // console.log(data.kma_sfctm2_result)
+                        resolve(data.kma_sfctm2_result);
+                    } else {
+                        reject("error")
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            });
+        });
+    }
 
-    // Animate on load
-    chart.appear(1000, 100);
-  }); // end am4core.ready()
+    function callRFModel(inputs) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/model/rf_model",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    inputs: inputs
+                }),
+                success: function (data) {
+                    // console.log("Response Data:", data);
+                    resolve(data); // 성공 시 데이터 반환
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error); // 에러 발생 시 에러 반환
+                }
+            });
+        });
+    }
+
+    // Make Chart Graph
+    function callChartGraph($target, chartData, chartType = 'line') {
+        // jQuery로 캔버스 요소를 가져옵니다.
+        const ctx = $($target)[0].getContext('2d');
+        const scales = {};
+
+        // y축 설정이 chartData에 있을 경우 적용, 없으면 기본 설정을 사용
+        if (chartData.yAxisConfig) {
+            // chartData의 y축 설정을 사용
+            Object.keys(chartData.yAxisConfig).forEach(axis => {
+                scales[axis] = {
+                    type: chartData.yAxisConfig[axis].type,
+                    position: chartData.yAxisConfig[axis].position
+                };
+            });
+        }
+        console.log(scales);
+        // Chart.js로 그래프를 생성합니다.
+        new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: chartData.labels, // x축 레이블 (datetime)
+                datasets: chartData.datasets // 데이터셋
+            },
+            options: {
+                responsive: true,
+                scales: scales
+            }
+        });
+    }
+
+
+
+    // const ctx = document.getElementById('myChart').getContext('2d');
+    // const chart = new Chart(ctx, {
+    //     type: 'bar',
+    //     data: {
+    //         labels: [], // 초기 레이블
+    //         datasets: [{
+    //             label: '예상 발전량 (MW)',
+    //             data: [], // 초기 데이터
+    //             backgroundColor: 'rgba(75, 192, 192, 0.2)',
+    //             borderColor: 'rgba(75, 192, 192, 1)',
+    //             borderWidth: 1
+    //         }]
+    //     },
+    //     options: {
+    //         responsive: true, // 차트 크기가 자동으로 조절되도록 설정
+    //         maintainAspectRatio: true, // 차트의 가로 세로 비율을 유지하지 않음
+    //         // 차트 애니메이션 효과를 설정
+    //         animation: {
+    //             duration: 500, // 애니메이션 지속 시간을 설정
+    //             easing: 'ease-in-out' // 애니메이션의 변화 속도 설정
+    //         },
+    //         scales: {
+    //             y: {
+    //                 beginAtZero: true
+    //             }
+    //         }
+    //     }
+    // });
+
+    // // 차트 업데이트 함수
+    // function updateChart(labels, values) {
+    //     chart.data.labels = labels; // X축 레이블 업데이트
+    //     chart.data.datasets[0].data = values; // Y축 데이터 업데이트
+    //     chart.update(); // 차트 다시 렌더링
+    // }
+
+    // // Call Chart
+    // function callChart() {
+    //     let inputs = [
+    //         [12, 1, 1023, 1023 * 100 / (287.05 * (12 + 273.15))],
+    //         [15, 2, 1015, 1015 * 100 / (287.05 * (15 + 273.15))],
+    //         [10, 3, 1020, 1020 * 100 / (287.05 * (10 + 273.15))],
+    //         [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
+    //     ];
+
+    //     // callRFModel 실행 후 서버로 데이터 전송 및 차트 업데이트
+    //     callRFModel(inputs).then(function (response) {
+    //         // console.log(response)
+    //         if (response && response.rf_result && response.rf_result.length > 0) {
+    //             // Flask로 데이터 전송
+    //             fetch('/api/chart_data', {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify({ rf_result: response.rf_result })
+    //             })
+    //                 .then(res => res.json())
+    //                 .then(data => {
+    //                     // console.log("Received data from Flask:", data);
+    //                     updateChart(data.labels, data.values); // 차트 업데이트
+    //                 })
+    //                 .catch(error => {
+    //                     console.error("Error updating chart:", error);
+    //                 });
+
+    //         } else {
+    //             console.error("Invalid data format:", response);
+    //         }
+    //     })
+    //         .catch(function (error) {
+    //             console.error("Error calling RF model:", error);
+    //         });
+
+
+    // }
+
+
+    initialize();
+
+});

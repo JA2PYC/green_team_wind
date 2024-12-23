@@ -76,36 +76,21 @@ $(document).ready(() => {
     function widgetWindPowerChart() {
         callkma_sfctm2Data().then(function (kma_sfctm2Data) {
 
-            let processedWeatehr = processWeatherData(kma_sfctm2Data);
-            let rfData;
-            let xgbData;
+            let rf_model_inputs = processWeathertoRFData(kma_sfctm2Data);
 
-            // callXGBModel과 callRFModel의 결과를 기다린 후 진행
-            Promise.all([
-                callXGBModel(processedWeatehr), // XGB 모델 호출
-                callRFModel(processedWeatehr)   // RF 모델 호출
-            ]).then(function ([xgb_response, rf_model_response]) {
-                // XGB 모델 응답 처리
-                if (xgb_response && xgb_response.xgboost_ai_result && xgb_response.xgboost_ai_result.length > 0) {
-                    xgbData = xgb_response.xgboost_ai_result;
-                }
-
-                // RF 모델 응답 처리
+            callRFModel(rf_model_inputs).then(function (rf_model_response) {
                 if (rf_model_response && rf_model_response.rf_result && rf_model_response.rf_result.length > 0) {
-                    rfData = rf_model_response.rf_result;
+                    let windPowerChartData = processWindPowerChart(kma_sfctm2Data, rf_model_response.rf_result);
+                    let $windPowerChart = $('#windPowerChart');
+                    callChartGraph($windPowerChart, windPowerChartData, 'line')
                 }
-
-                // 차트 데이터 처리
-                let windPowerChartData = processWindPowerChart(kma_sfctm2Data, xgbData, rfData);
-                let $windPowerChart = $('#windPowerChart');
-                callChartGraph($windPowerChart, windPowerChartData, 'line');
-            }).catch(function (error) {
-                console.error('Error in fetching XGB or RF model data:', error);
             });
+
+
         });
     }
 
-    function processWeatherData(weatherData) {
+    function processWeathertoRFData(weatherData) {
         const inputs = [];
         weatherData.forEach(item => {
             inputs.push([item.temperature, item.wind_speed, item.air_pressure, item.density]);
@@ -113,24 +98,20 @@ $(document).ready(() => {
         return inputs;
     }
 
-    function processWindPowerChart(weatherData, xgbData, rfData) {
+    function processWindPowerChart(weatherData, rf_model_data) {
         // 데이터를 처리하여 그래프에 필요한 데이터 배열을 만듭니다.
         const labels = []; // datetime 배열
-        const windSpeeds = []; // 풍속 배열
-        const xgb_model = []; // 기압 배열
         const rf_model = []; // 기압 배열
+        const windSpeeds = []; // 풍속 배열
 
         // 데이터 반복 처리
         weatherData.forEach(item => {
             labels.push(item.station_id); // datetime을 x축 레이블로 사용
             windSpeeds.push(parseFloat(item.wind_speed)); // 풍속을 배열에 추가
         });
-        xgbData.forEach(item => {
-            xgb_model.push(parseFloat(item));
-        })
-        rfData.forEach(item => {
+        rf_model_data.forEach(item => {
             rf_model.push(parseFloat(item));
-        });
+        })
 
 
         return {
@@ -139,24 +120,16 @@ $(document).ready(() => {
                 {
                     label: '풍속 (m/s)', // 풍속 그래프
                     data: windSpeeds,
-                    backgroundColor: 'rgba(78, 230, 129, 0.2)',
-                    borderColor: 'rgb(78, 230, 129)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgb(78, 230, 184)',
                     borderWidth: 1,
                     yAxisID: 'y1' // 첫 번째 y축
                 },
                 {
-                    label: 'XGB Model (MW)', // 기압 그래프
-                    data: xgb_model,
-                    backgroundColor: 'rgba(243, 84, 97, 0.2)',
-                    borderColor: 'rgb(243, 84, 97)',
-                    borderWidth: 1,
-                    yAxisID: 'y2' // 첫 번째 y축
-                },
-                {
                     label: 'RF Model (MW)', // 기압 그래프
                     data: rf_model,
-                    backgroundColor: 'rgba(84, 100, 243, 0.2)',
-                    borderColor: 'rgb(84, 100, 243)',
+                    backgroundColor: 'rgba(243, 84, 97, 0.2)',
+                    borderColor: 'rgb(243, 84, 97)',
                     borderWidth: 1,
                     yAxisID: 'y2' // 첫 번째 y축
                 },
@@ -246,26 +219,6 @@ $(document).ready(() => {
         });
     }
 
-    function callXGBModel(inputs) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "/model/xgboost_ai_model",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    inputs: inputs
-                }),
-                success: function (data) {
-                    resolve(data);
-                },
-                error: function (data) {
-                    console.error("Error:", error);
-                    reject(error);
-                }
-            })
-        })
-    }
-
     function callRFModel(inputs) {
         return new Promise(function (resolve, reject) {
             $.ajax({
@@ -287,7 +240,6 @@ $(document).ready(() => {
         });
     }
 
-
     // Make Chart Graph
     function callChartGraph($target, chartData, chartType = 'line') {
         // jQuery로 캔버스 요소를 가져옵니다.
@@ -304,7 +256,7 @@ $(document).ready(() => {
                 };
             });
         }
-
+        console.log(scales);
         // Chart.js로 그래프를 생성합니다.
         new Chart(ctx, {
             type: chartType,
