@@ -44,7 +44,6 @@ def create_model_pkl(dataname, modelname):
     for i in range(len(X_scaled) - sequence_length):
         X_seq.append(X_scaled[i : i + sequence_length])
         y_seq.append(y_scaled[i + sequence_length])
-
     X_seq, y_seq = np.array(X_seq), np.array(y_seq)
 
     # CNN + LSTM 모델 생성

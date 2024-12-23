@@ -36,7 +36,7 @@ def dashboard_route():
 #     # 결과 반환
 #     return jsonify(result)
 
-# 기상 데이터 
+# kma_sfctm2 기상 데이터
 @dashboard.route("/api/kma_sfctm2", methods=["POST"])
 def kma_sfctm2_data():
     try:
@@ -76,7 +76,6 @@ def rf_model_data():
 @dashboard.route('/model/xgboost_ai_model', methods=["POST"])
 def xgboost_ai_data():
     try:
-        print ('route - xgboost')
         data = request.get_json()
         inputs = data.get("inputs")
 
@@ -89,21 +88,38 @@ def xgboost_ai_data():
     except Exception as e:
         return jsonify({'error' : e}), 500
 
+# CSTL 모델
+@dashboard.route('/model/cstl_ai_model', methods=["POST"])
+def cstl_ai_data():
+    try:
+        print ('route - cstl')
+        data = request.get_json()
+        inputs = data.get("inputs")
 
-@dashboard.route('/api/chart_data', methods=['POST'])
-def chart_data():
-    # 클라이언트에서 보낸 데이터를 가져옴
-    received_data = request.json
-    print(received_data)
-    if not received_data or 'rf_result' not in received_data:
-        return jsonify({"error": "Invalid data format"}), 400
+        if not isinstance(inputs, list) or not all(isinstance(row, list) and len(row) == 4 for row in inputs):
+            return jsonify({'error' : 'Invalid input format.'}), 400
+        
+        predictions = cstl_ai_model_predict(inputs)
+        
+        return jsonify({'cstl_ai_result': predictions})
+    except Exception as e:
+        return jsonify({'error' : e}), 500
+
+# Chart Data
+# @dashboard.route('/api/chart_data', methods=['POST'])
+# def chart_data():
+#     # 클라이언트에서 보낸 데이터를 가져옴
+#     received_data = request.json
+#     print(received_data)
+#     if not received_data or 'rf_result' not in received_data:
+#         return jsonify({"error": "Invalid data format"}), 400
     
-    # Flask에서 처리된 결과를 반환
-    data = {
-        "labels": ["00:00", "01:00", "02:00", "03:00"],
-        "values": received_data['rf_result']  # 클라이언트로부터 받은 데이터 사용
-    }
-    return jsonify(data)
+#     # Flask에서 처리된 결과를 반환
+#     data = {
+#         "labels": ["00:00", "01:00", "02:00", "03:00"],
+#         "values": received_data['rf_result']  # 클라이언트로부터 받은 데이터 사용
+#     }
+#     return jsonify(data)
 
 # Dummy Chart
 # @dashboard_bp.route('/data')
