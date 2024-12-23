@@ -191,13 +191,20 @@ am4core.ready(function() {
   //   // Add a dedicated container for labels
   //   let labelContainer = chart.createChild(am4core.Container);
   //   labelContainer.isMeasured = false;
-
+    
   //   // Function to update chart for current value
   //   function highlightProgressively(currentValue) {
   //     let categories = chart.data.map((item) => item.category);
   //     let targetIndex = categories.indexOf(currentValue);
   //     if (targetIndex === -1) return;
 
+  //   // Reset all bar heights to 0 and clear existing labels
+  //   chart.data.forEach((item) => {
+  //     item.value = 0;
+  //   });
+  //   labelContainer.children.clear(); // Clear labels
+  //   chart.invalidateRawData(); // Refresh chart data to reflect reset state
+      
   //     let stepDuration = 200; // Delay between steps
   //     for (let i = 0; i <= targetIndex; i++) {
   //       setTimeout(() => {
@@ -232,6 +239,12 @@ am4core.ready(function() {
   //   // Example: Set current value
   //   var currentValue = "120"; // Change this value dynamically
   //   highlightProgressively(currentValue);
+
+  //   // Automatically update value periodically
+  //   setInterval(function () {
+  //       var randomValue = Math.floor(Math.random() * 15) * 20; // Random value between 0 and 300 (step 20)
+  //       highlightProgressively(randomValue.toString());
+  //   }, 5000);
 
   //   // Animate on load
   //   chart.appear(1000, 100);

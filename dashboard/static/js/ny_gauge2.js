@@ -1,4 +1,4 @@
-am4core.ready(function () {
+  am4core.ready(function () {
     // Themes begin
     am4core.useTheme(am4themes_animated);
     // Themes end
@@ -43,7 +43,7 @@ am4core.ready(function () {
 
     var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.min = 0;
-    valueAxis.max = 400;
+    valueAxis.max = 300;
     valueAxis.strictMinMax = true;
     valueAxis.renderer.grid.template.disabled = true;
     valueAxis.renderer.labels.template.disabled = true;
@@ -78,13 +78,20 @@ am4core.ready(function () {
     // Add a dedicated container for labels
     let labelContainer = chart.createChild(am4core.Container);
     labelContainer.isMeasured = false;
-
+    
     // Function to update chart for current value
-    function highlightProgressively(currentValue) {
+    function highlightProgressively(currentCategory, rawValue) {
       let categories = chart.data.map((item) => item.category);
-      let targetIndex = categories.indexOf(currentValue);
+      let targetIndex = categories.indexOf(currentCategory);
       if (targetIndex === -1) return;
 
+    // Reset all bar heights to 0 and clear existing labels
+    chart.data.forEach((item) => {
+      item.value = 0;
+    });
+    labelContainer.children.clear(); // Clear labels
+    chart.invalidateRawData(); // Refresh chart data to reflect reset state
+      
       let stepDuration = 200; // Delay between steps
       for (let i = 0; i <= targetIndex; i++) {
         setTimeout(() => {
@@ -100,7 +107,7 @@ am4core.ready(function () {
 
         // Create a label for the current value
         let label = labelContainer.createChild(am4core.Label);
-        label.text = currentValue;
+        label.text = rawValue;
         label.fontSize = 20;
         label.fill = am4core.color("#000");
         label.horizontalCenter = "middle";
@@ -116,15 +123,22 @@ am4core.ready(function () {
       }, stepDuration * (targetIndex + 1)); // Ensure the label is added after the animation
     }
 
-    // // Example: Set current value
-    // var currentValue = "120"; // Change this value dynamically
-    // highlightProgressively(currentValue);
+    // Example: Set current value
+    var currentValue = "120"; // Change this value dynamically
+    highlightProgressively(currentValue, 120);
 
-    // Automatically update value periodically
-    setInterval(function () {
-        var randomValue = Math.floor(Math.random() * 15) * 20; // Random value between 0 and 300 (step 20)
-        highlightProgressively(randomValue.toString());
-    }, 2000);
+// Automatically update value periodically
+setInterval(function () {
+    var randomValue = Math.floor(Math.random() * 300) + 1; // 1에서 300 사이 랜덤 값 생성
+    console.log("Random Value (Raw):", randomValue);
+
+    // 가장 가까운 20 단위로 반올림
+    var roundedValue = Math.round(randomValue / 20) * 20;
+    console.log("Rounded Value (Nearest 20):", roundedValue);
+
+    // 막대는 반올림된 값으로 업데이트
+    highlightProgressively(roundedValue.toString(), randomValue);
+}, 3000);
 
     // Animate on load
     chart.appear(1000, 100);
