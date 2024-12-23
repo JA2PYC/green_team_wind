@@ -6,6 +6,13 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <!-- Resources -->
+  <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+  <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+  <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+  <script src="{{ url_for('static', filename='js/ny_gauge.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ny_gauge2.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ny_gauge.css') }}" />
 </head>
 
 <body>
@@ -57,7 +64,9 @@
       </div>
       <div class="widget charts">
         <h2>성능 차트</h2>
-        <canvas id="myChart"></canvas>
+        <div id="chartdiv"></div>
+        <div id="chartdiv2"></div>
+        <!-- <canvas id="chartdiv2"></canvas> -->
 
       </div>
       <div class="widget windPowerChart">
