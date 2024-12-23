@@ -42,11 +42,11 @@ def dashboard_route():
 @dashboard.route("/api/kma_station", methods=["POST"])
 def kma_station_data():
     try:
-        print('route - station')
+        # print('route - station')
         # 클라이언트로부터 요청받은 파라미터
         params = request.json
         stn = params.get("stn")
-        print(stn, type(stn))
+        # print(stn, type(stn))
         
         # fetch_station_data 함수 호출
         result = fetch_station_data(stn)

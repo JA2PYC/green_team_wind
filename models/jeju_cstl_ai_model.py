@@ -12,11 +12,11 @@ scriptname = "cstl_ai_data"
 dataname = "Jeju_MergedData_20241217"
 modelname = "jeju_cstl_ai"
 file_dir = os.path.dirname(__file__)
+keras_path = os.path.join(file_dir, "saved_models", f"{modelname}.keras")
 pkl_path = os.path.join(file_dir, "saved_models", f"{modelname}.pkl")
 scaler_X_path = os.path.join(file_dir, "saved_models", f"{modelname}_scaler_X.pkl")
 scaler_y_path = os.path.join(file_dir, "saved_models", f"{modelname}_scaler_y.pkl")
 
-model_h5_path = os.path.join(file_dir, "saved_models", f"{modelname}.h5")
 script_path = os.path.join(file_dir, "data", f"{scriptname}.py")
 
 if not os.path.exists(pkl_path):
@@ -34,9 +34,9 @@ try:
     scaler_X = joblib.load(open(scaler_X_path, "rb"))
     scaler_y = joblib.load(open(scaler_y_path, "rb"))
 
-    # HDF5 형식
-    loaded_model_h5 = load_model(model_h5_path)
-    print("HDF5 model loaded successfully.")
+    # Keras 형식
+    model_keras_file = load_model(keras_path)
+    print("CSTL Model loaded successfully.")
 except Exception as e:
     raise RuntimeError(f"모델 로드 중 오류 발생: {e}")
 

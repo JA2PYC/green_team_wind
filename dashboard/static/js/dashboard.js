@@ -1,9 +1,7 @@
 $(document).ready(() => {
     function initialize() {
-        // callData();
         // callPowerAPI();
         // callWindAPI();
-        callkma_stationData([90, 184]);
         // callkma_sfctm3Data();
         initWidget();
         eventHandler();
@@ -45,6 +43,11 @@ $(document).ready(() => {
     function widgetPredictPower(station_id = 184) {
         callkma_sfctm2Data(tm = 0, station_id).then(function (kma_sfctm2Data) {
             let processedWeatehr = processWeatherData(kma_sfctm2Data);
+            let gaugeInputs = [];
+            let gaugeChartContainer = 'gaugeChart';
+            let gaugeChart = createGaugeChart(gaugeChartContainer);
+            let gaugeXYChartContainer = 'gaugeXYChart';
+            let gaugeXYChart = createGaugeXYChart(gaugeXYChartContainer);
 
             Promise.all([
                 callXGBModel(processedWeatehr),
@@ -52,20 +55,27 @@ $(document).ready(() => {
                 callCSTLModel(processedWeatehr)
             ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
                 if (xgb_response.xgboost_ai_result) {
+                    gaugeInputs.push(Math.round(xgb_response.xgboost_ai_result[0]));
                     $(".widget.predictPower .xgboost_value").text(xgb_response.xgboost_ai_result[0] + ' MW');
                 }
                 if (rf_model_response.rf_result) {
+                    gaugeInputs.push(Math.round(rf_model_response.rf_result[0]));
                     $(".widget.predictPower .rf_value").text(rf_model_response.rf_result[0] + ' MW');
                 }
                 if (cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
                     $(".widget.predictPower .cstl_value").text(cstl_model_response.cstl_ai_result[0] + ' MW');
                 }
+
+                updateGaugeChart(gaugeChart, gaugeInputs); // 150으로 업데이트
+                updateGaugeXYChart(gaugeXYChart, gaugeInputs);
+
             }).catch(function (error) {
                 console.log("Error:", error)
             });
         });
 
     }
+
 
     // Widget Wind Power Chart
     function widgetWindPowerChart() {
@@ -145,6 +155,7 @@ $(document).ready(() => {
         });
     }
 
+    // 기상청 스테이션 정보보
     function callkma_stationData(stn = []) {
         return new Promise(function (resolve, reject) {
             $.ajax({
@@ -169,6 +180,7 @@ $(document).ready(() => {
         });
     }
 
+    // 기상청 kma_sfctm2 API
     function callkma_sfctm2Data(tm = 0, stn = 0) {
         return new Promise(function (resolve, reject) {
             $.ajax({
@@ -195,6 +207,7 @@ $(document).ready(() => {
         });
     }
 
+    // 기상청 kma_sfctm3 API
     function callkma_sfctm3Data(tm1 = 0, tm2 = 0, stn = 0) {
         return new Promise(function (resolve, reject) {
             $.ajax({
@@ -222,7 +235,20 @@ $(document).ready(() => {
         });
     }
 
+    // 기상 데이터 모델 입력 형태로로 전처리
+    function processWeatherData(weatherData) {
+        const inputs = [];
+        weatherData.forEach(item => {
+            inputs.push([item.temperature, item.wind_speed, item.air_pressure, item.density]);
+        });
+        return inputs;
+    }
 
+    function processWeatherTimeSeriesData(weatherData) {
+
+    }
+
+    // XGB Model Predict
     function callXGBModel(inputs) {
         return new Promise(function (resolve, reject) {
             $.ajax({
@@ -243,6 +269,7 @@ $(document).ready(() => {
         })
     }
 
+    // RF Model Predict
     function callRFModel(inputs) {
         return new Promise(function (resolve, reject) {
             $.ajax({
@@ -264,6 +291,7 @@ $(document).ready(() => {
         });
     }
 
+    // CSTL Model Predict
     function callCSTLModel(inputs) {
         return new Promise(function (resolve, reject) {
             $.ajax({
@@ -284,7 +312,7 @@ $(document).ready(() => {
         });
     }
 
-    // Make Chart Graph
+    // Chartjs Graph
     function callChartGraph($target, chartData, chartType = 'line') {
         // jQuery로 캔버스 요소를 가져옵니다.
         const ctx = $($target)[0].getContext('2d');
@@ -313,14 +341,6 @@ $(document).ready(() => {
                 scales: scales
             }
         });
-    }
-
-    function processWeatherData(weatherData) {
-        const inputs = [];
-        weatherData.forEach(item => {
-            inputs.push([item.temperature, item.wind_speed, item.air_pressure, item.density]);
-        });
-        return inputs;
     }
 
     function processWindPowerChart(weatherData, xgbData, rfData, cstlData) {
@@ -409,84 +429,217 @@ $(document).ready(() => {
         }
     }
 
+    function createGaugeChart(target) {
+        // Apply theme
+        am4core.useTheme(am4themes_animated);
+
+        // Create chart
+        let chart = am4core.create(target, am4charts.GaugeChart);
+
+        // Disable logo
+        if (chart.logo) {
+            chart.logo.disabled = true;
+        }
+
+        // Chart settings
+        chart.radius = 120;
+        chart.innerRadius = -30;
+        chart.startAngle = 180;
+        chart.endAngle = 360;
+
+        // Create axis
+        let axis = chart.xAxes.push(new am4charts.ValueAxis());
+        axis.min = 0;
+        axis.max = 300;
+        axis.strictMinMax = true;
+
+        // Add ranges
+        let bandsData = [
+            { title: "", color: "#ee1f25", startValue: 0, endValue: 60 },
+            { title: "", color: "#f04922", startValue: 60, endValue: 120 },
+            { title: "", color: "#fdae19", startValue: 120, endValue: 180 },
+            { title: "", color: "#f3eb0c", startValue: 180, endValue: 240 },
+            { title: "", color: "#0f9747", startValue: 240, endValue: 300 }
+        ];
+
+        bandsData.forEach(function (data) {
+            let range = axis.axisRanges.create();
+            range.value = data.startValue;
+            range.endValue = data.endValue;
+            range.axisFill.fill = am4core.color(data.color);
+            range.axisFill.fillOpacity = 1.0;
+            range.label.text = data.title;
+            range.label.inside = true;
+            range.label.location = 0.5;
+            range.label.radius = 50;
+            range.label.fill = am4core.color("#ffffff");
+        });
+
+        // Filter axis labels
+        axis.renderer.labels.template.adapter.add("text", function (text, target) {
+            const value = target.dataItem.value;
+            return bandsData.some(band => band.startValue === value || band.endValue === value) ? text : "";
+        });
+
+        // Add hand
+        let hand = chart.hands.push(new am4charts.ClockHand());
+        hand.value = 0;  // value: 바늘이 처음 가리킬 값(50).
+        hand.pin.radius = 25;
+        hand.radius = am4core.percent(85);
+        hand.innerRadius = am4core.percent(23);
+        hand.startWidth = 10;
+        hand.fill = am4core.color("#000000");
+        hand.pin.fill = am4core.color("#000000");
+
+        // Add value label
+        let valueLabel = chart.radarContainer.createChild(am4core.Label);
+        valueLabel.horizontalCenter = "middle";
+        valueLabel.verticalCenter = "middle";
+        valueLabel.fontSize = 20;
+        valueLabel.fill = am4core.color("#ffffff");
+        valueLabel.padding(10, 10, 10, 10);
+
+        // Attach components to chart for updating later
+        chart.hand = hand;
+        chart.valueLabel = valueLabel;
+
+        return chart;
+    }
+
+    let intervalGaugeId = null;
+
+    function updateGaugeChart(chart, values) {
+        if (intervalGaugeId) {
+            clearInterval(intervalGaugeId); // Stop any existing cycle
+        }
+
+        let index = 1; // Start with the second value in the array
+
+        // Immediately display the first value
+        const initialValue = values[0];
+        chart.hand.showValue(initialValue, 1000, am4core.ease.cubicOut);
+
+        let animation = chart.hand.animate(
+            { property: "value", to: initialValue },
+            1000,
+            am4core.ease.cubicOut
+        );
+
+        animation.events.on("animationprogress", function (ev) {
+            chart.valueLabel.text = Math.round(ev.progress * initialValue).toString();
+        });
+
+        animation.events.on("animationended", function () {
+            chart.valueLabel.text = initialValue.toString();
+        });
+
+        intervalGaugeId = setInterval(() => {
+            const value = values[index];
+            // console.log(index)
+            chart.hand.showValue(value, 1000, am4core.ease.cubicOut);
+
+            // Animate value label
+            let animation = chart.hand.animate(
+                { property: "value", to: value },
+                1000,
+                am4core.ease.cubicOut
+            );
+
+            animation.events.on("animationprogress", function (ev) {
+                chart.valueLabel.text = Math.round(ev.progress * value).toString();
+            });
+
+            animation.events.on("animationended", function () {
+                chart.valueLabel.text = value.toString();
+            });
+
+            // Move to the next value in the array
+            index = (index + 1) % values.length;
+        }, 3000); // Update every 3 seconds
+    }
+
+    function createGaugeXYChart(target) {
+        am4core.useTheme(am4themes_animated);
+
+        // Create chart instance
+        let chart = am4core.create(target, am4charts.XYChart);
+
+        // Remove logo
+        if (chart.logo) {
+            chart.logo.disabled = true;
+        }
+
+        chart.paddingRight = 30;
+
+        // Initial data
+        chart.data = [
+            { category: "20", value: 0, color: am4core.color("#ee1f25") },
+            { category: "40", value: 0, color: am4core.color("#ee1f25") },
+            { category: "60", value: 0, color: am4core.color("#ee1f25") },
+            { category: "80", value: 0, color: am4core.color("#f04922") },
+            { category: "100", value: 0, color: am4core.color("#f04922") },
+            { category: "120", value: 0, color: am4core.color("#f04922") },
+            { category: "140", value: 0, color: am4core.color("#fdae19") },
+            { category: "160", value: 0, color: am4core.color("#fdae19") },
+            { category: "180", value: 0, color: am4core.color("#fdae19") },
+            { category: "200", value: 0, color: am4core.color("#f3eb0c") },
+            { category: "220", value: 0, color: am4core.color("#f3eb0c") },
+            { category: "240", value: 0, color: am4core.color("#f3eb0c") },
+            { category: "260", value: 0, color: am4core.color("#0f9747") },
+            { category: "280", value: 0, color: am4core.color("#0f9747") },
+            { category: "300", value: 0, color: am4core.color("#0f9747") },
+            // { category: "320", value: 100, color: am4core.color("#0f9747"), isMax: true }
+        ];
+
+        // Create axes
+        let categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "category";
+        categoryAxis.renderer.grid.template.disabled = true;
+
+        let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.min = 0;
+        valueAxis.max = 100;
+        valueAxis.strictMinMax = true;
+
+        // Create series
+        let series = chart.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "category";
+        series.columns.template.propertyFields.fill = "color";
+        series.columns.template.width = am4core.percent(80);
+
+        // Add a dedicated container for labels
+        let labelContainer = chart.createChild(am4core.Container);
+        labelContainer.isMeasured = false;
+
+        // Return chart instance
+        return chart;
+    }
 
 
-    // const ctx = document.getElementById('myChart').getContext('2d');
-    // const chart = new Chart(ctx, {
-    //     type: 'bar',
-    //     data: {
-    //         labels: [], // 초기 레이블
-    //         datasets: [{
-    //             label: '예상 발전량 (MW)',
-    //             data: [], // 초기 데이터
-    //             backgroundColor: 'rgba(75, 192, 192, 0.2)',
-    //             borderColor: 'rgba(75, 192, 192, 1)',
-    //             borderWidth: 1
-    //         }]
-    //     },
-    //     options: {
-    //         responsive: true, // 차트 크기가 자동으로 조절되도록 설정
-    //         maintainAspectRatio: true, // 차트의 가로 세로 비율을 유지하지 않음
-    //         // 차트 애니메이션 효과를 설정
-    //         animation: {
-    //             duration: 500, // 애니메이션 지속 시간을 설정
-    //             easing: 'ease-in-out' // 애니메이션의 변화 속도 설정
-    //         },
-    //         scales: {
-    //             y: {
-    //                 beginAtZero: true
-    //             }
-    //         }
-    //     }
-    // });
+    function updateGaugeXYChart(chart, targetCategory, rawValue) {
+        let targetIndex = chart.data.findIndex((item) => item.category === targetCategory);
+        if (targetIndex === -1) return;
 
-    // // 차트 업데이트 함수
-    // function updateChart(labels, values) {
-    //     chart.data.labels = labels; // X축 레이블 업데이트
-    //     chart.data.datasets[0].data = values; // Y축 데이터 업데이트
-    //     chart.update(); // 차트 다시 렌더링
-    // }
+        // Reset and animate
+        chart.data.forEach((item, index) => {
+            item.value = index <= targetIndex ? (index + 1) * (100 / (targetIndex + 1)) : 0;
+        });
+        chart.invalidateRawData();
 
-    // // Call Chart
-    // function callChart() {
-    //     let inputs = [
-    //         [12, 1, 1023, 1023 * 100 / (287.05 * (12 + 273.15))],
-    //         [15, 2, 1015, 1015 * 100 / (287.05 * (15 + 273.15))],
-    //         [10, 3, 1020, 1020 * 100 / (287.05 * (10 + 273.15))],
-    //         [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
-    //     ];
-
-    //     // callRFModel 실행 후 서버로 데이터 전송 및 차트 업데이트
-    //     callRFModel(inputs).then(function (response) {
-    //         // console.log(response)
-    //         if (response && response.rf_result && response.rf_result.length > 0) {
-    //             // Flask로 데이터 전송
-    //             fetch('/api/chart_data', {
-    //                 method: 'POST',
-    //                 headers: { 'Content-Type': 'application/json' },
-    //                 body: JSON.stringify({ rf_result: response.rf_result })
-    //             })
-    //                 .then(res => res.json())
-    //                 .then(data => {
-    //                     // console.log("Received data from Flask:", data);
-    //                     updateChart(data.labels, data.values); // 차트 업데이트
-    //                 })
-    //                 .catch(error => {
-    //                     console.error("Error updating chart:", error);
-    //                 });
-
-    //         } else {
-    //             console.error("Invalid data format:", response);
-    //         }
-    //     })
-    //         .catch(function (error) {
-    //             console.error("Error calling RF model:", error);
-    //         });
-
-
-    // }
+        // Add label to the top of the target column
+        let series = chart.series.values[0];
+        let targetColumn = series.columns.getIndex(targetIndex);
+        if (targetColumn) {
+            let label = chart.createChild(am4core.Label);
+            label.text = rawValue.toString();
+            label.horizontalCenter = "middle";
+            label.verticalCenter = "bottom";
+            label.x = targetColumn.pixelX + targetColumn.pixelWidth / 2;
+            label.y = targetColumn.pixelY - 10;
+        }
+    }
 
 
     initialize();
-
 });

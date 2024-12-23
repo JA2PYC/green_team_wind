@@ -45,14 +45,16 @@
       
       <div class="widget predictPower">
         <h2>모델별 예상 발전량</h2>
-        <p><span class="model_xgboost">XBGoost Model</span><span class="xgboost_value">-</span></p>
-        <p><span class="model_rf">RF Model</span><span class="rf_value">-</span></p>
-        <p><span class="model_cstl">CSTL Model</span><span class="cstl_value">-</span></p>
+        <div class="gaugeChart"></div>
+        <div class="gaugeXYChart"></div>
+        <div class="modelList">
+          <p><span class="model_xgboost">XBGoost Model</span><span class="xgboost_value">-</span></p>
+          <p><span class="model_rf">RF Model</span><span class="rf_value">-</span></p>
+          <p><span class="model_cstl">CSTL Model</span><span class="cstl_value">-</span></p>
+        </div>
       </div>
-      <div class="widget charts">
+      <div class="widget powerGuage">
         <h2>성능 차트</h2>
-        <canvas id="myChart"></canvas>
-
       </div>
       <div class="widget windPowerChart">
         <h2>풍속 발전량 차트</h2>
