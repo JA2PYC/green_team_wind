@@ -7,6 +7,7 @@ function useResponse(response) {
 
     // 이후 차트 초기화
     initializeChart();
+    initializeChart2();
 }
 
 function initializeChart() {
@@ -98,25 +99,25 @@ am4core.ready(function() {
     valueLabel.padding(10, 10, 10, 10);
   
     // Animate the hand and update value label
-    setInterval(function() {
-        var targetValue = Math.random() * 300;
-        hand.showValue(targetValue, 1000, am4core.ease.cubicOut);
+    // setInterval(function() {
+    //     var targetValue = Math.random() * 300;
+    //     hand.showValue(targetValue, 1000, am4core.ease.cubicOut);
         
-        // Smoothly update the label during the animation
-        var animation = hand.animate(
-            { property: "value", to: targetValue },
-            1000,
-            am4core.ease.cubicOut
-        );
+    //     // Smoothly update the label during the animation
+    //     var animation = hand.animate(
+    //         { property: "value", to: targetValue },
+    //         1000,
+    //         am4core.ease.cubicOut
+    //     );
 
-        animation.events.on("animationprogress", function() {
-            valueLabel.text = Math.round(hand.value).toString();
-        });
+    //     animation.events.on("animationprogress", function() {
+    //         valueLabel.text = Math.round(hand.value).toString();
+    //     });
         
-        animation.events.on("animationended", function() {
-            valueLabel.text = Math.round(targetValue).toString();
-        });
-    }, 2000);
+    //     animation.events.on("animationended", function() {
+    //         valueLabel.text = Math.round(targetValue).toString();
+    //     });
+    // }, 2000);
 
   
   }); // end am4core.ready()
@@ -126,8 +127,9 @@ am4core.ready(function() {
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+function initializeChart2() {
   am4core.ready(function () {
+    console.log("Using response data4:", initial_value);
   // Themes begin
   am4core.useTheme(am4themes_animated);
   // Themes end
@@ -253,22 +255,25 @@ am4core.ready(function() {
   }
 
   // Example: Set current value
-  var currentValue = "120"; // Change this value dynamically
-  highlightProgressively(currentValue, 120);
+  var currentValue = initial_value; // Change this value dynamically
+  var roundedValue = Math.round(currentValue / 20) * 20;
+  console.log("Rounded Value (Nearest 20):", roundedValue);
+  highlightProgressively(roundedValue.toString(), initial_value);
 
 // Automatically update value periodically
-setInterval(function () {
-  var randomValue = Math.floor(Math.random() * 300) + 1; // 1에서 300 사이 랜덤 값 생성
-  console.log("Random Value (Raw):", randomValue);
+// setInterval(function () {
+//   var randomValue = Math.floor(Math.random() * 300) + 1; // 1에서 300 사이 랜덤 값 생성
+//   console.log("Random Value (Raw):", randomValue);
 
-  // 가장 가까운 20 단위로 반올림
-  var roundedValue = Math.round(randomValue / 20) * 20;
-  console.log("Rounded Value (Nearest 20):", roundedValue);
+//   // 가장 가까운 20 단위로 반올림
+//   var roundedValue = Math.round(randomValue / 20) * 20;
+//   console.log("Rounded Value (Nearest 20):", roundedValue);
 
-  // 막대는 반올림된 값으로 업데이트
-  highlightProgressively(roundedValue.toString(), randomValue);
-}, 3000);
+//   // 막대는 반올림된 값으로 업데이트
+//   highlightProgressively(roundedValue.toString(), randomValue);
+// }, 3000);
 
   // Animate on load
   chart.appear(1000, 100);
 }); // end am4core.ready()
+}
