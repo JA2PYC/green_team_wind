@@ -124,7 +124,7 @@ $(document).ready(() => {
                     numOfRows: 30
                 }),
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     // 성공 시 응답 데이터를 화면에 표시
                     if (data.response.body.items.item.length > 0) {
                         let resultHtml = "<ul>";
@@ -208,7 +208,7 @@ $(document).ready(() => {
                 }),
                 success: function (data) {
                     if (data.kma_sfctm3_result) {
-                        console.log(data.kma_sfctm3_result)
+                        // console.log(data.kma_sfctm3_result)
                         resolve(data.kma_sfctm3_result);
                     } else {
                         reject("error")
@@ -346,7 +346,7 @@ $(document).ready(() => {
             cstl_model.push(parseFloat(item));
         })
 
-        console.log(stations)
+        // console.log(stations)
         callkma_stationData(stations).then(function (stationData) {
             stationData.forEach(item => {
                 labels.push(item.station_name);
