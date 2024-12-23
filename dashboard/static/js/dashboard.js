@@ -3,12 +3,15 @@ $(document).ready(() => {
         // callData();
         // callPowerAPI();
         // callWindAPI();
-
-        // Dummy data
-        // feature_names = ["기온(°C)", "풍속(m/s)", "현지기압(hPa)", "공기밀도(kg/m^3)"]        
+        callkma_stationData([90, 184]);
+        // callkma_sfctm3Data();
         initWidget();
-        // callChart();
         eventHandler();
+    }
+
+    function initWidget() {
+        widgetPredictPower(184);
+        widgetWindPowerChart();
     }
 
     function eventHandler() {
@@ -21,137 +24,86 @@ $(document).ready(() => {
                 ];
 
                 // callRFModel 함수 호출
-                callRFModel(inputs)
-                    .then(function (response) {
-                        // console.log("Returned data:", response);
+                callRFModel(inputs).then(function (response) {
+                    // console.log("Returned data:", response);
 
-                        // 예상 발전량을 forecast-now 요소에 업데이트
-                        if (response && response.rf_result && response.rf_result.length > 0) {
-                            $("#forecast-now").text(response.rf_result.join(", ") + " MW");
-                        } else {
-                            console.error("Invalid data format:", response);
-                            $("#forecast-now").text("Error");
-                        }
-                    })
-                    .catch(function (error) {
-                        console.error("Error calling RF model:", error);
+                    // 예상 발전량을 forecast-now 요소에 업데이트
+                    if (response && response.rf_result && response.rf_result.length > 0) {
+                        $("#forecast-now").text(response.rf_result.join(", ") + " MW");
+                    } else {
+                        console.error("Invalid data format:", response);
                         $("#forecast-now").text("Error");
-                    });
+                    }
+                }).catch(function (error) {
+                    console.error("Error calling RF model:", error);
+                    $("#forecast-now").text("Error");
+                });
             }
         });
     }
 
-    function initWidget() {
-        widgetForecastEnergy(184);
-        widgetWindPowerChart();
-    }
+    function widgetPredictPower(station_id = 184) {
+        callkma_sfctm2Data(tm = 0, station_id).then(function (kma_sfctm2Data) {
+            let processedWeatehr = processWeatherData(kma_sfctm2Data);
 
-
-    function widgetForecastEnergy(station_id) {
-        let inputs = [
-            [12, 1, 1023, 1023 * 100 / (287.05 * (12 + 273.15))],
-            // [15, 2, 1015, 1015 * 100 / (287.05 * (15 + 273.15))],
-            // [10, 3, 1020, 1020 * 100 / (287.05 * (10 + 273.15))],
-            // [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
-        ];
-
-        callRFModel(inputs).then(function (response) {
-            // console.log("Returned data:", response);
-
-            // 예상 발전량을 forecast-now 요소에 업데이트
-            if (response && response.rf_result && response.rf_result.length > 0) {
-                $("#forecast-now").text(response.rf_result.join(", ") + " MW");
-            } else {
-                console.error("Invalid data format:", response);
-                $("#forecast-now").text("Error");
-            }
-        })
-            .catch(function (error) {
-                console.error("Error calling RF model:", error);
-                $("#forecast-now").text("Error");
+            Promise.all([
+                callXGBModel(processedWeatehr),
+                callRFModel(processedWeatehr),
+                callCSTLModel(processedWeatehr)
+            ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
+                if (xgb_response.xgboost_ai_result) {
+                    $(".widget.predictPower .xgboost_value").text(xgb_response.xgboost_ai_result[0] + ' MW');
+                }
+                if (rf_model_response.rf_result) {
+                    $(".widget.predictPower .rf_value").text(rf_model_response.rf_result[0] + ' MW');
+                }
+                if (cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
+                    $(".widget.predictPower .cstl_value").text(cstl_model_response.cstl_ai_result[0] + ' MW');
+                }
+            }).catch(function (error) {
+                console.log("Error:", error)
             });
+        });
 
     }
 
+    // Widget Wind Power Chart
     function widgetWindPowerChart() {
         callkma_sfctm2Data().then(function (kma_sfctm2Data) {
+            let processedWeatehr = processWeatherData(kma_sfctm2Data);
+            let rfData;
+            let xgbData;
+            let cstlData;
 
-            let rf_model_inputs = processWeathertoRFData(kma_sfctm2Data);
+            // 모델 응답 결과를 기다린 후 진행
+            Promise.all([
+                callXGBModel(processedWeatehr), // XGB 모델 호출
+                callRFModel(processedWeatehr),   // RF 모델 호출
+                callCSTLModel(processedWeatehr)
+            ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
+                // XGB 모델 응답 처리
+                if (xgb_response && xgb_response.xgboost_ai_result && xgb_response.xgboost_ai_result.length > 0) {
+                    xgbData = xgb_response.xgboost_ai_result;
+                }
 
-            callRFModel(rf_model_inputs).then(function (rf_model_response) {
+                // RF 모델 응답 처리
                 if (rf_model_response && rf_model_response.rf_result && rf_model_response.rf_result.length > 0) {
-                    let windPowerChartData = processWindPowerChart(kma_sfctm2Data, rf_model_response.rf_result);
-                    let $windPowerChart = $('#windPowerChart');
-                    callChartGraph($windPowerChart, windPowerChartData, 'line')
+                    rfData = rf_model_response.rf_result;
                 }
+
+                // CSTL 모델 응답 처리
+                if (cstl_model_response && cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
+                    cstlData = cstl_model_response.cstl_ai_result;
+                }
+
+                // 차트 데이터 처리
+                let windPowerChartData = processWindPowerChart(kma_sfctm2Data, xgbData, rfData, cstlData);
+                let $windPowerChart = $('#windPowerChart');
+                callChartGraph($windPowerChart, windPowerChartData, 'line');
+            }).catch(function (error) {
+                console.error('Error in fetching model data:', error);
             });
-
-
         });
-    }
-
-    function processWeathertoRFData(weatherData) {
-        const inputs = [];
-        weatherData.forEach(item => {
-            inputs.push([item.temperature, item.wind_speed, item.air_pressure, item.density]);
-        });
-        return inputs;
-    }
-
-    function processWindPowerChart(weatherData, rf_model_data) {
-        // 데이터를 처리하여 그래프에 필요한 데이터 배열을 만듭니다.
-        const labels = []; // datetime 배열
-        const rf_model = []; // 기압 배열
-        const windSpeeds = []; // 풍속 배열
-
-        // 데이터 반복 처리
-        weatherData.forEach(item => {
-            labels.push(item.station_id); // datetime을 x축 레이블로 사용
-            windSpeeds.push(parseFloat(item.wind_speed)); // 풍속을 배열에 추가
-        });
-        rf_model_data.forEach(item => {
-            rf_model.push(parseFloat(item));
-        })
-
-
-        return {
-            labels: labels,
-            datasets: [
-                {
-                    label: '풍속 (m/s)', // 풍속 그래프
-                    data: windSpeeds,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgb(78, 230, 184)',
-                    borderWidth: 1,
-                    yAxisID: 'y1' // 첫 번째 y축
-                },
-                {
-                    label: 'RF Model (MW)', // 기압 그래프
-                    data: rf_model,
-                    backgroundColor: 'rgba(243, 84, 97, 0.2)',
-                    borderColor: 'rgb(243, 84, 97)',
-                    borderWidth: 1,
-                    yAxisID: 'y2' // 첫 번째 y축
-                },
-            ],
-            yAxisConfig: { // y축 설정 추가
-                y1: {
-                    title: '풍속 (m/s)',
-                    beginAtZero: true,
-                    type: 'linear',
-                    position: 'left'
-                },
-                y2: {
-                    title: '발전량 (MW)',
-                    beginAtZero: true,
-                    type: 'linear',
-                    position: 'right',
-                    grid: {
-                        drawOnChartArea: false // 오른쪽 y축의 격자선 제거
-                    }
-                }
-            }
-        }
     }
 
     function callPowerAPI() {
@@ -172,7 +124,7 @@ $(document).ready(() => {
                     numOfRows: 30
                 }),
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     // 성공 시 응답 데이터를 화면에 표시
                     if (data.response.body.items.item.length > 0) {
                         let resultHtml = "<ul>";
@@ -193,15 +145,39 @@ $(document).ready(() => {
         });
     }
 
-    function callkma_sfctm2Data(tn = 0, stn = 0) {
+    function callkma_stationData(stn = []) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/api/kma_station",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    stn: stn
+                }),
+                success: function (data) {
+                    if (data.kma_station_result) {
+                        resolve(data.kma_station_result);
+                    } else {
+                        reject("Error")
+                    }
+                },
+                error: function (data) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            })
+        });
+    }
+
+    function callkma_sfctm2Data(tm = 0, stn = 0) {
         return new Promise(function (resolve, reject) {
             $.ajax({
                 url: "/api/kma_sfctm2",
                 method: "POST",
                 contentType: "application/json",
                 data: JSON.stringify({
-                    // tm: 202412160900,
-                    // stn: 184,
+                    tm: tm,
+                    stn: stn,
                 }),
                 success: function (data) {
                     if (data.kma_sfctm2_result) {
@@ -217,6 +193,54 @@ $(document).ready(() => {
                 }
             });
         });
+    }
+
+    function callkma_sfctm3Data(tm1 = 0, tm2 = 0, stn = 0) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/api/kma_sfctm3",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    tm1: tm1,
+                    tm2: tm2,
+                    stn: stn,
+                }),
+                success: function (data) {
+                    if (data.kma_sfctm3_result) {
+                        // console.log(data.kma_sfctm3_result)
+                        resolve(data.kma_sfctm3_result);
+                    } else {
+                        reject("error")
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            });
+        });
+    }
+
+
+    function callXGBModel(inputs) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/model/xgboost_ai_model",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    inputs: inputs
+                }),
+                success: function (data) {
+                    resolve(data);
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            })
+        })
     }
 
     function callRFModel(inputs) {
@@ -240,6 +264,26 @@ $(document).ready(() => {
         });
     }
 
+    function callCSTLModel(inputs) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "model/cstl_ai_model",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    inputs: inputs
+                }),
+                success: function (data) {
+                    resolve(data);
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            })
+        });
+    }
+
     // Make Chart Graph
     function callChartGraph($target, chartData, chartType = 'line') {
         // jQuery로 캔버스 요소를 가져옵니다.
@@ -256,7 +300,7 @@ $(document).ready(() => {
                 };
             });
         }
-        console.log(scales);
+
         // Chart.js로 그래프를 생성합니다.
         new Chart(ctx, {
             type: chartType,
@@ -269,6 +313,100 @@ $(document).ready(() => {
                 scales: scales
             }
         });
+    }
+
+    function processWeatherData(weatherData) {
+        const inputs = [];
+        weatherData.forEach(item => {
+            inputs.push([item.temperature, item.wind_speed, item.air_pressure, item.density]);
+        });
+        return inputs;
+    }
+
+    function processWindPowerChart(weatherData, xgbData, rfData, cstlData) {
+        // 데이터를 처리하여 그래프에 필요한 데이터 배열을 만듭니다.
+        const labels = []; // datetime 배열
+        const stations = []; // datetime 배열
+        const windSpeeds = []; // 풍속 배열
+        const xgb_model = []; // 기압 배열
+        const rf_model = []; // 기압 배열
+        const cstl_model = []; // 기압 배열
+        // 데이터 반복 처리
+        weatherData.forEach(item => {
+            stations.push(item.station_id); // datetime을 x축 레이블로 사용
+            windSpeeds.push(parseFloat(item.wind_speed)); // 풍속을 배열에 추가
+        });
+        xgbData.forEach(item => {
+            xgb_model.push(parseFloat(item));
+        });
+        rfData.forEach(item => {
+            rf_model.push(parseFloat(item));
+        });
+        cstlData.forEach(item => {
+            cstl_model.push(parseFloat(item));
+        })
+
+        // console.log(stations)
+        callkma_stationData(stations).then(function (stationData) {
+            stationData.forEach(item => {
+                labels.push(item.station_name);
+            })
+        });
+
+        return {
+            labels: labels,
+            datasets: [
+                {
+                    label: '풍속 (m/s)', // 풍속 그래프
+                    data: windSpeeds,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgb(78, 230, 184)',
+                    borderWidth: 1,
+                    yAxisID: 'y1' // 첫 번째 y축
+                },
+                {
+                    label: 'XGB Model (MW)', // 기압 그래프
+                    data: xgb_model,
+                    backgroundColor: 'rgba(243, 84, 97, 0.2)',
+                    borderColor: 'rgb(243, 84, 97)',
+                    borderWidth: 1,
+                    yAxisID: 'y2' // 첫 번째 y축
+                },
+                {
+                    label: 'RF Model (MW)', // 기압 그래프
+                    data: rf_model,
+                    backgroundColor: 'rgba(84, 100, 243, 0.2)',
+                    borderColor: 'rgb(84, 100, 243)',
+                    borderWidth: 1,
+                    yAxisID: 'y2' // 첫 번째 y축
+                },
+                {
+                    label: 'CSTL Model (MW)', // 기압 그래프
+                    data: cstl_model,
+                    backgroundColor: 'rgba(210, 31, 255, 0.2)',
+                    borderColor: 'rgb(210, 31, 255)',
+                    borderWidth: 1,
+                    yAxisID: 'y2' // 첫 번째 y축
+                },
+            ],
+            yAxisConfig: { // y축 설정 추가
+                y1: {
+                    title: '풍속 (m/s)',
+                    beginAtZero: true,
+                    type: 'linear',
+                    position: 'left'
+                },
+                y2: {
+                    title: '발전량 (MW)',
+                    beginAtZero: true,
+                    type: 'linear',
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false // 오른쪽 y축의 격자선 제거
+                    }
+                }
+            }
+        }
     }
 
 

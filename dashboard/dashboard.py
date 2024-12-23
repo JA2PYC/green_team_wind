@@ -1,10 +1,12 @@
 from flask import Blueprint, render_template, request, jsonify
+from api.kma_station import fetch_station_data
 from api.kma_sfctm2 import fetch_kma_sfctm2_data
+from api.kma_sfctm3 import fetch_kma_sfctm3_data
 # from api.open_api_PvAmountByPwrGen import fetch_power_data
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
 from models.jeju_xgboost_ai_model import xgboost_ai_model_predict
-# from models.jeju_cstl_ai_model import cstl_ai_model_predict
+from models.jeju_cstl_ai_model import cstl_ai_model_predict
 
 # 라우트 설정
 dashboard = Blueprint('dashboard', __name__)
@@ -36,7 +38,24 @@ def dashboard_route():
 #     # 결과 반환
 #     return jsonify(result)
 
-# 기상 데이터 
+# kma_station_id 스테이션 정보
+@dashboard.route("/api/kma_station", methods=["POST"])
+def kma_station_data():
+    try:
+        print('route - station')
+        # 클라이언트로부터 요청받은 파라미터
+        params = request.json
+        stn = params.get("stn")
+        print(stn, type(stn))
+        
+        # fetch_station_data 함수 호출
+        result = fetch_station_data(stn)
+
+        return jsonify({'kma_station_result': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# kma_sfctm2 기상 데이터
 @dashboard.route("/api/kma_sfctm2", methods=["POST"])
 def kma_sfctm2_data():
     try:
@@ -50,6 +69,38 @@ def kma_sfctm2_data():
         return jsonify({'kma_sfctm2_result': result})
     except Exception as e:
         return jsonify({'error' : str(e)}), 500
+
+# kma_sfctm3 기상 데이터
+@dashboard.route("/api/kma_sfctm3", methods=["POST"])
+def kma_sfctm3_data():
+    try:
+        # 클라이언트로부터 요청받은 파라미터
+        params = request.json
+        tm1 = params.get("tm1")
+        tm2 = params.get("tm2")
+        stn = params.get("stn")
+        
+        result = fetch_kma_sfctm3_data(tm1, tm2, stn)
+
+        return jsonify({'kma_sfctm3_result': result})
+    except Exception as e:
+        return jsonify({'error' : str(e)}), 500
+
+# XGB 모델
+@dashboard.route('/model/xgboost_ai_model', methods=["POST"])
+def xgboost_ai_data():
+    try:
+        data = request.get_json()
+        inputs = data.get("inputs")
+
+        if not isinstance(inputs, list) or not all(isinstance(row, list) and len(row) == 4 for row in inputs):
+            return jsonify({'error' : 'Invalid input format.'}), 400
+        
+        predictions = xgboost_ai_model_predict(inputs)
+        
+        return jsonify({'xgboost_ai_result': predictions})
+    except Exception as e:
+        return jsonify({'error' : e}), 500
 
 # RF 모델
 @dashboard.route("/model/rf_model", methods=["POST"])
@@ -72,38 +123,37 @@ def rf_model_data():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# XGB 모델
-@dashboard.route('/model/xgboost_ai_model', methods=["POST"])
-def xgboost_ai_data():
+# CSTL 모델
+@dashboard.route('/model/cstl_ai_model', methods=["POST"])
+def cstl_ai_data():
     try:
-        print ('route - xgboost')
         data = request.get_json()
         inputs = data.get("inputs")
 
         if not isinstance(inputs, list) or not all(isinstance(row, list) and len(row) == 4 for row in inputs):
             return jsonify({'error' : 'Invalid input format.'}), 400
         
-        predictions = xgboost_ai_model_predict(inputs)
+        predictions = cstl_ai_model_predict(inputs)
         
-        return jsonify({'xgboost_ai_result': predictions})
+        return jsonify({'cstl_ai_result': predictions})
     except Exception as e:
         return jsonify({'error' : e}), 500
 
-
-@dashboard.route('/api/chart_data', methods=['POST'])
-def chart_data():
-    # 클라이언트에서 보낸 데이터를 가져옴
-    received_data = request.json
-    print(received_data)
-    if not received_data or 'rf_result' not in received_data:
-        return jsonify({"error": "Invalid data format"}), 400
+# Chart Data
+# @dashboard.route('/api/chart_data', methods=['POST'])
+# def chart_data():
+#     # 클라이언트에서 보낸 데이터를 가져옴
+#     received_data = request.json
+#     print(received_data)
+#     if not received_data or 'rf_result' not in received_data:
+#         return jsonify({"error": "Invalid data format"}), 400
     
-    # Flask에서 처리된 결과를 반환
-    data = {
-        "labels": ["00:00", "01:00", "02:00", "03:00"],
-        "values": received_data['rf_result']  # 클라이언트로부터 받은 데이터 사용
-    }
-    return jsonify(data)
+#     # Flask에서 처리된 결과를 반환
+#     data = {
+#         "labels": ["00:00", "01:00", "02:00", "03:00"],
+#         "values": received_data['rf_result']  # 클라이언트로부터 받은 데이터 사용
+#     }
+#     return jsonify(data)
 
 # Dummy Chart
 # @dashboard_bp.route('/data')
