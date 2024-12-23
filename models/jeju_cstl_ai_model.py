@@ -18,9 +18,9 @@ script_path = os.path.join(file_dir, 'data', f'{scriptname}.py')
 if not os.path.exists(pkl_path):
     print (f'{modelname}.pkl 파일이 존재하지 않습니다. 새로 생성합니다...')
     try:
-        # create_model_pkl(dataname, modelname)
+        create_model_pkl(dataname, modelname)
         # subprocess.run(['python', create_model_pkl, dataname, modelname], check=True)
-        subprocess.run([sys.executable, script_path, dataname, modelname], check=True)
+        # subprocess.run([sys.executable, script_path, dataname, modelname], check=True)
     except Exception as e:
         raise RuntimeError(f'{modelname}.pkl 파일 생성중 오류 발생: {e}')
     

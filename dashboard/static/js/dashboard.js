@@ -291,6 +291,7 @@ $(document).ready(() => {
     // Make Chart Graph
     function callChartGraph($target, chartData, chartType = 'line') {
         // jQuery로 캔버스 요소를 가져옵니다.
+        console.log(chartData)
         const ctx = $($target)[0].getContext('2d');
         const scales = {};
 
