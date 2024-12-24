@@ -1,0 +1,5 @@
+/* 3D 풍력 발전기 위젯 */
+.widget.turbine-3d {
+    grid-column: span 1; /* 위젯 1칸 크기 */
+    position: relative; /* 자식 요소를 상대적으로 배치 */
+}
