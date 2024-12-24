@@ -1,8 +1,8 @@
 /* 챗봇 아이콘 */
 .chatbot-icon {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    top: 3px;
+    right: 35px;
     width: 50px;
     height: 50px;
     background-color: #007aff;
@@ -13,17 +13,56 @@
     cursor: pointer;
     z-index: 1000;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s ease; /* 부드럽게 빛나기 */
 }
 .hidden {
     display: none; /* 숨김 상태 */
     opacity: 0;
     visibility: hidden;
-    
+}
+
+/* 챗봇 아이콘에 마우스 올렸을 때 빛나는(glow) 효과 */
+.chatbot-icon:hover { 
+    box-shadow: 0 0 15px 5px rgba(0, 122, 255, 0.8); /* blue glow effect */
 }
 .chatbot-icon img {
     width: 30px;
     height: 30px;
     transition: transform 0.3s ease;
+}
+
+/* FAQ 챗봇 텍스트 스타일 */
+.faq-chatbot-text { 
+    position: fixed;
+    top: 60px;  /* 아이콘 아래쪽 위치 */
+    right: 20px;
+    background-color: #fffd82;  /* 포스트잇 노란색 */
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    display: block; /* 기본적으로 숨김 */
+    animation: slideIn 0.5s ease; /* 애니메이션 효과 추가 */
+}
+
+/* FAQ 텍스트를 화면에 표시할 때 */
+.chatbot-icon:hover + .faq-chatbot-text {
+    display: block;
+}
+
+/* FAQ 챗봇 애니메이션: 포스트잇 텍스트가 슬라이드 인하는 효과 */
+@keyframes slideIn {
+    from {
+        right: -200px;
+        opacity: 0;
+    }
+    to {
+        right: 20px;
+        opacity: 1;
+    }
 }
 
 .chatbot-icon img:hover {
