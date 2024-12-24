@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from api.kma_station import fetch_station_data
 from api.kma_sfctm2 import fetch_kma_sfctm2_data
 from api.kma_sfctm3 import fetch_kma_sfctm3_data
+from api.fct_afs_dl import fetch_fct_afs_dl_data
 # from api.open_api_PvAmountByPwrGen import fetch_power_data
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
@@ -83,6 +84,23 @@ def kma_sfctm3_data():
         result = fetch_kma_sfctm3_data(tm1, tm2, stn)
 
         return jsonify({'kma_sfctm3_result': result})
+    except Exception as e:
+        return jsonify({'error' : str(e)}), 500
+    
+@dashboard.route("/api/fct_afs_dl", methods=["POST"])
+def fct_afs_dl_data():
+    try:
+        # 클라이언트로부터 요청받은 파라미터
+        params = request.json
+        stn = params.get("stn")
+        reg = params.get("reg")
+        tmfc = params.get("tmfc")
+        tmfc1 = params.get("tmfc1")
+        tmfc2 = params.get("tmfc2")
+        
+        result = fetch_fct_afs_dl_data(stn, reg, tmfc, tmfc1, tmfc2)
+
+        return jsonify({'fct_afs_dl_result': result})
     except Exception as e:
         return jsonify({'error' : str(e)}), 500
 
