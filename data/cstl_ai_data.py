@@ -84,7 +84,7 @@ def create_model_pkl(dataname, modelname):
         os.makedirs(model_dir)
 
     # 모델 저장 (HDF5 형식)
-    model_h5_path = os.path.join(model_dir, f"{modelname}.h5")
+    model_h5_path = os.path.join(model_dir, f"{modelname}.keras")
     model.save(model_h5_path)
     print(f"Model saved to {model_h5_path}")
     
