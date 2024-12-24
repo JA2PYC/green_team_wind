@@ -2,6 +2,13 @@ $(document).ready(() => {
     function initialize() {
         // callPowerAPI();
         // callWindAPI();
+        callfct_afs_dlData("11B20201").then(function (data) {
+            console.log(data);
+        });
+
+        callkma_regData(["11B20201", "11B20601"]).then(function (data) {
+            console.log(data);
+        });
         // callkma_sfctm3Data();
         initWidget();
         eventHandler();
@@ -200,6 +207,59 @@ $(document).ready(() => {
                 error: function (error) {
                     // 에러 시 메시지 표시
                     $("#result").html("<p>Error occurred: " + error.responseJSON.error + "</p>");
+                }
+            });
+        });
+    }
+
+    function callkma_regData(reg = []) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/api/kma_reg",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    reg: reg
+                }),
+                success: function (data) {
+                    if (data.kma_reg_result) {
+                        resolve(data.kma_reg_result);
+                    } else {
+                        reject("Error")
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    // 기상 예보
+    function callfct_afs_dlData(reg = 0, tmfc1 = 0, tmfc2 = 0) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/api/fct_afs_dl",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    reg: reg,
+                    tmfc1: tmfc1,
+                    tmfc2: tmfc2,
+                    // pageNo: pageNo,
+                    // numOfRows: numOfRows
+                }),
+                success: function (data) {
+                    if (data.fct_afs_dl_result) {
+                        resolve(data.fct_afs_dl_result);
+                    } else {
+                        reject("Error")
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
                 }
             });
         });

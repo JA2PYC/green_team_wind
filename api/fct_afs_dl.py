@@ -1,5 +1,6 @@
 import os
 import requests
+from api.kma_reg import fetch_reg_data
 
 API_KEY = os.getenv("KMA_SFCTM2_KEY")
 API_URL = "http://apihub.kma.go.kr/api/typ01/url/fct_afs_dl.php" 
@@ -26,9 +27,7 @@ def fetch_fct_afs_dl_data(stn, reg, tmfc1, tmfc2):
             response.encoding = 'euc-kr'  # 인코딩 처리
             
             # 텍스트에서 필요한 데이터 추출하는 로직 추가
-            # 예: 필요한 정보 추출 후 JSON으로 변환
             data = parse_weather_data(response.text)
-            # data = response.text
             return data
         else:
             print(f"API 요청 실패: {response.status_code}")
@@ -52,14 +51,22 @@ def parse_weather_data(data):
         # 각 라인에서 데이터를 추출
         parts = line.split()
         
+        # reg_id가 여러 개일 경우, 쉼표로 분리
+        reg_ids = parts[0].split(',')  # 예시: "11B20201,11B20202" -> ["11B20201", "11B20202"]
+        
+        # stn_name을 각 reg_id에 대해 가져오기
+        stn_names = fetch_reg_data(reg_ids)  # reg_ids를 전달하여 각각에 대해 처리
+
+
         # 각 데이터를 JSON에 적합한 형태로 변환
-        if len(parts) >= 18:  # 최소 18개의 값이 있어야 정상적인 데이터라고 가정
+        if len(parts) >= 10:
             weather_info = {
                 "reg_id": parts[0],
                 "tm_fc": parts[1],
                 "tm_ef": parts[2],
                 "ne": parts[4],
                 "stn": parts[5],
+                "stn_name": stn_names,
                 "ta": parts[12],
                 "st": parts[13],
                 "sky": parts[14],

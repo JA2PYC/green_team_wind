@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify
+from api.kma_reg import fetch_reg_data
 from api.kma_station import fetch_station_data
 from api.kma_sfctm2 import fetch_kma_sfctm2_data
 from api.kma_sfctm3 import fetch_kma_sfctm3_data
@@ -38,6 +39,21 @@ def dashboard_route():
 
 #     # 결과 반환
 #     return jsonify(result)
+
+# kma_reg 지역 정보
+@dashboard.route("/api/kma_reg", methods=["POST"])
+def kma_reg_data():
+    try:
+        # 클라이언트로부터 요청받은 파라미터
+        params = request.json
+        reg = params.get("reg")
+        
+        # fetch_reg_data 함수 호출
+        result = fetch_reg_data(reg)
+
+        return jsonify({'kma_reg_result': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # kma_station_id 스테이션 정보
 @dashboard.route("/api/kma_station", methods=["POST"])
@@ -94,11 +110,11 @@ def fct_afs_dl_data():
         params = request.json
         stn = params.get("stn")
         reg = params.get("reg")
-        tmfc = params.get("tmfc")
+        # tmfc = params.get("tmfc")
         tmfc1 = params.get("tmfc1")
         tmfc2 = params.get("tmfc2")
         
-        result = fetch_fct_afs_dl_data(stn, reg, tmfc, tmfc1, tmfc2)
+        result = fetch_fct_afs_dl_data(stn, reg, tmfc1, tmfc2)
 
         return jsonify({'fct_afs_dl_result': result})
     except Exception as e:
