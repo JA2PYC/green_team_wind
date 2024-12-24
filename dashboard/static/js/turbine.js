@@ -1,45 +1,68 @@
-// Babylon.js 초기화 코드 수정
-const canvas = document.getElementById("renderCanvas"); // 캔버스 가져오기
+import { GLTFLoader } from 'https://unpkg.com/three@0.141.0/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from 'https://unpkg.com/three@0.141.0/build/three.module.js';
+import { OrbitControls } from 'https://unpkg.com/three@0.141.0/examples/jsm/controls/OrbitControls.js';
 
-if (!canvas) {
-    console.error("Canvas not found!");
-}
-
-const engine = new BABYLON.Engine(canvas, true); // 엔진 생성
-let scene;
-
-try {
-    scene = new BABYLON.Scene(engine); // 장면 생성
-} catch (error) {
-    console.error("Scene creation failed:", error);
-}
-
-// 카메라 및 조명 추가
-const camera = new BABYLON.ArcRotateCamera(
-    "Camera",
-    Math.PI / 2,
-    Math.PI / 2,
-    2,
-    BABYLON.Vector3.Zero(),
-    scene
-);
-camera.attachControl(canvas, true);
-
-const light = new BABYLON.HemisphericLight(
-    "light",
-    new BABYLON.Vector3(1, 1, 0),
-    scene
-);
-light.intensity = 0.7;
-
-// 애니메이션 루프
-engine.runRenderLoop(() => {
-    if (scene) {
-        scene.render();
-    }
+let scene = new THREE.Scene();
+let renderer = new THREE.WebGLRenderer({
+    canvas: document.querySelector('#canvas')
 });
 
-// 창 크기 조정 처리
-window.addEventListener("resize", () => {
-    engine.resize();
+// Set the background color to white
+scene.background = new THREE.Color(0xffffff);
+
+// Set canvas size to match window size
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+// Create camera
+let camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 10);
+
+// Lighting setup
+let ambientLight = new THREE.AmbientLight(0x404040, 1);
+scene.add(ambientLight);
+
+let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(10, 10, 10).normalize();
+scene.add(directionalLight);
+
+// Add OrbitControls
+let controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.25;
+
+// Load the GLTF model
+let loader = new GLTFLoader();
+let mixer;
+
+loader.load('/static/models/wind_turbine/scene.gltf', function (gltf) {
+    const turbineModel = gltf.scene;
+    scene.add(turbineModel);
+
+    // Center the model
+    let box = new THREE.Box3().setFromObject(turbineModel);
+    let center = box.getCenter(new THREE.Vector3());
+    turbineModel.position.sub(center);
+
+    // Animation mixer
+    mixer = new THREE.AnimationMixer(turbineModel);
+    gltf.animations.forEach((clip) => {
+        mixer.clipAction(clip).play();
+    });
 });
+
+// Window resize handling
+window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+});
+
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate);
+    if (mixer) mixer.update(0.03);
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+animate();

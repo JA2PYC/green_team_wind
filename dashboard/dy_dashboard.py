@@ -5,16 +5,7 @@ from flask_cors import CORS
 import time  # time 모듈 추가
 
 # Flask 애플리케이션 생성
-app = Flask(__name__, static_folder='static', template_folder='templates')
-CORS(app)
-
-# Content Security Policy 헤더 추가
-@app.after_request
-def add_csp_header(response):
-    response.headers['Content-Security-Policy'] = (
-        "script-src 'self' https://cdnstatic.ventusky.com; worker-src blob:;"
-    )
-    return response
+app = Flask(__name__)
 
 # Flask Blueprint 생성
 dy_dashboard = Blueprint('dy_dashboard', __name__)  
@@ -23,11 +14,6 @@ dy_dashboard = Blueprint('dy_dashboard', __name__)
 @dy_dashboard.route("/dy_dashboard")
 def dashboard():
     return render_template('dy_dashboard.html')
-
-# 정적 파일 매핑
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    return send_from_directory(app.static_folder, filename)
 
 # 챗봇 API 라우트 정의
 @dy_dashboard.route('/api/chatbot', methods=['POST'])
@@ -53,13 +39,6 @@ def chatbot():
 # Flask 애플리케이션에 Blueprint 등록
 app.register_blueprint(dy_dashboard)
 # Blueprint를 Flask 애플리케이션에 등록하여 해당 라우트를 사용할 수 있도록 설정.
-
-# 기상청 openAPI 풍속 값 불러옴.
-@app.route('/get_wind_speed', methods=['GET'])
-def get_wind_speed():
-    wind_speed = 10
-    # 풍속 데이터를 반환
-    return jsonify({"wind_speed": wind_speed}) #고정값 반환
 
 # Flask 서버 실행
 if __name__ == "__main__":
