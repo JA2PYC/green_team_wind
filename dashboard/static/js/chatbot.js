@@ -75,9 +75,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         chatbotMessages.innerHTML += `<div class="message bot"><div class="message-icon">🤖</div>
                         <div class="message-bubble">${data.response}</div></div>`;
                     }
+                    chatbotMessages.lastElementChild.scrollIntoView({ behavior: "smooth" }); // 챗봇의 답변 후 스크롤 맨 하단으로 내리기
                 })
                 .catch(error => {
                     chatbotMessages.innerHTML += `<div class="message bot">네트워크 오류: ${error.message}</div>`;
+                    chatbotMessages.lastElementChild.scrollIntoView({ behavior: "smooth" }); // 오류 메시지 후 스크롤 맨 하단으로 내리기
                 });
                 chatbotInput.value = ""; // 입력창 초기화
         }

@@ -1,43 +1,37 @@
 # app/kma.py
-from flask import Flask, Blueprint, render_template, request, jsonify, url_for
+from flask import Flask, Blueprint, render_template, request, jsonify, send_from_directory, url_for
 from train_chatbot_model import predict_answer #chatbot_model에서 predict_answer함수를 import
+from flask_cors import CORS
 import time  # time 모듈 추가
 
-# Flask 애플리케이션 객체 생성
-app = Flask(__name__)  
-# Flask 클래스를 사용해 웹 애플리케이션 객체를 생성
-# __name__은 현재 모듈의 이름. Flask가 현재 파일의 경로를 기준으로 애플리케이션을 설정하도록 도와줌
+# Flask 애플리케이션 생성
+app = Flask(__name__, static_folder='static', template_folder='templates')
+CORS(app)
+
+# Content Security Policy 헤더 추가
+@app.after_request
+def add_csp_header(response):
+    response.headers['Content-Security-Policy'] = (
+        "script-src 'self' https://cdnstatic.ventusky.com; worker-src blob:;"
+    )
+    return response
 
 # Flask Blueprint 생성
 dy_dashboard = Blueprint('dy_dashboard', __name__)  
-# Blueprint는 Flask 애플리케이션의 라우트를 모듈별로 분리하여 관리
-# 'dy_dashboard'는 블루프린트 이름, __name__은 이 블루프린트가 정의된 모듈의 이름
-
-# 정적 파일 캐싱 방지 코드
-@app.context_processor
-def override_url_for():
-    return dict(url_for=dated_url_for)
-
-def dated_url_for(endpoint, **values):
-    if endpoint == 'static':
-        values['q'] = int(time.time())  # 타임스탬프 추가
-    return url_for(endpoint, **values)
 
 # 대시보드 라우트 정의
 @dy_dashboard.route("/dy_dashboard")
 def dashboard():
-    """
-    /dy_dashboard URL 요청 시 dy_dashboard.html 템플릿을 렌더링합니다.
-    """
     return render_template('dy_dashboard.html')
 
+# 정적 파일 매핑
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(app.static_folder, filename)
 
 # 챗봇 API 라우트 정의
 @dy_dashboard.route('/api/chatbot', methods=['POST'])
 def chatbot():
-    """
-    클라이언트에서 챗봇 메시지를 전송할 때 호출되는 API 라우트입니다.
-    """
     try:
         # 클라이언트로부터 JSON 데이터를 가져옵니다.
         user_input = request.json.get("message")
@@ -59,6 +53,13 @@ def chatbot():
 # Flask 애플리케이션에 Blueprint 등록
 app.register_blueprint(dy_dashboard)
 # Blueprint를 Flask 애플리케이션에 등록하여 해당 라우트를 사용할 수 있도록 설정.
+
+# 기상청 openAPI 풍속 값 불러옴.
+@app.route('/get_wind_speed', methods=['GET'])
+def get_wind_speed():
+    wind_speed = 10
+    # 풍속 데이터를 반환
+    return jsonify({"wind_speed": wind_speed}) #고정값 반환
 
 # Flask 서버 실행
 if __name__ == "__main__":

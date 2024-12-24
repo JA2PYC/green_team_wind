@@ -20,12 +20,22 @@ print(f"pkl_path: {pkl_path}")
 json_path = os.path.join(file_dir, 'data', 'chatbot', 'chatbot_dataset.json')
 print(f"json_path: {json_path}")
 
+# 디렉토리 존재 여부 확인 후, 없으면 생성
+if not os.path.exists(os.path.dirname(pkl_path)):
+    os.makedirs(os.path.dirname(pkl_path))
+    print(f"{os.path.dirname(pkl_path)} 경로가 생성되었습니다.")
+
 # 저장된 모델 로드
 model_path = "models/saved_models/chatbot_random_forest.pkl"
-model_data = joblib.load(model_path)
-model = model_data['model']
-vectorizer = model_data['vectorizer']
-
+if os.path.exists(model_path):
+    model_data = joblib.load(model_path)
+    model = model_data['model']
+    vectorizer = model_data['vectorizer']
+else:
+    print("모델 파일이 존재하지 않습니다. 새로 학습합니다...")
+    model = None
+    vectorizer = None
+    
 # 데이터셋 로드 함수
 def load_dataset():
     """JSON 파일에서 데이터셋을 로드"""

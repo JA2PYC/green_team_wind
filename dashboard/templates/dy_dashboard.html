@@ -6,8 +6,12 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/5.56.0/babylon.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs-loaders/5.56.0/babylon.objFileLoader.min.js"></script>  
+  <script src="/static/js/turbine.js"></script>
+  <!-- Content Security Policy 설정 -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdnstatic.ventusky.com; worker-src blob:;">
 </head>
-
 <body>
   {% include 'header.html' %}
   <main>
@@ -70,8 +74,8 @@
       </div>
 
       <div class="widget turbine-3d">
-        <h2>3D 풍력 발전기</h2>
-        <canvas id="turbine-canvas"></canvas>
+        <h2>3D 실시간 풍력 발전기</h2>
+        <canvas id="renderCanvas"></canvas>
       </div>
     
     </div>
