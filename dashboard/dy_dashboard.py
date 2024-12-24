@@ -5,7 +5,16 @@ from flask_cors import CORS
 import time  # time 모듈 추가
 
 # Flask 애플리케이션 생성
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
+CORS(app)
+
+# Content Security Policy(CSP) 설정
+@app.after_request
+def add_csp_header(response):
+    response.headers['Content-Security-Policy'] = (
+        "script-src 'self'; worker-src blob:;"
+    )
+    return response
 
 # Flask Blueprint 생성
 dy_dashboard = Blueprint('dy_dashboard', __name__)  

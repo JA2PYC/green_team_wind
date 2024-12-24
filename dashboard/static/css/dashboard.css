@@ -58,10 +58,9 @@ canvas {
     grid-column: span 3;
 }
 
-/* 3D 풍력 발전기 위젯 */
+/* 3D 풍력발전기 */
 .widget.turbine-3d {
-    grid-column: span 1; /* 위젯 1칸 크기 */
-    position: relative; /* 자식 요소를 상대적으로 배치 */
+    grid-column: span 1; /* 1칸 차지 */
 }
 .widget button {
     border: none;
