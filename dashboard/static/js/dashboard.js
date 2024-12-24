@@ -43,7 +43,9 @@ $(document).ready(() => {
     function widgetPredictPower(station_id = 184) {
         callkma_sfctm2Data(tm = 0, station_id).then(function (kma_sfctm2Data) {
             let processedWeatehr = processWeatherData(kma_sfctm2Data);
+
             let gaugeInputs = [];
+            let gaugeIntervalId = null;
             let gaugeChartContainer = 'gaugeChart';
             let gaugeChart = createGaugeChart(gaugeChartContainer);
             let gaugeXYChartContainer = 'gaugeXYChart';
@@ -66,8 +68,23 @@ $(document).ready(() => {
                     $(".widget.predictPower .cstl_value").text(cstl_model_response.cstl_ai_result[0] + ' MW');
                 }
 
-                updateGaugeChart(gaugeChart, gaugeInputs); // 150으로 업데이트
-                updateGaugeXYChart(gaugeXYChart, gaugeInputs);
+                updateGaugeChart(gaugeChart, gaugeInputs[0]);
+                updateGaugeXYChart(gaugeXYChart, gaugeInputs[0]);
+                showModelAtIndex("modelList", 0);
+
+                let index = 1; // Start with the second value in the array
+                if (gaugeIntervalId) {
+                    clearInterval(gaugeIntervalId);
+                }
+                gaugeIntervalId = setInterval(() => {
+                    const value = gaugeInputs[index];
+
+                    // Move to the next value in the array
+                    updateGaugeChart(gaugeChart, value);
+                    updateGaugeXYChart(gaugeXYChart, value);
+                    showModelAtIndex("modelList", index);
+                    index = (index + 1) % gaugeInputs.length;
+                }, 3000);
 
             }).catch(function (error) {
                 console.log("Error:", error)
@@ -75,7 +92,6 @@ $(document).ready(() => {
         });
 
     }
-
 
     // Widget Wind Power Chart
     function widgetWindPowerChart() {
@@ -116,6 +132,40 @@ $(document).ready(() => {
         });
     }
 
+
+    // Show Model List
+    function showModelAtIndex(containerClass, index) {
+        const $container = $(`.${containerClass}`);
+        const $items = $container.children();
+
+        if (!$items.length) {
+            console.error("Invalid index or container not initialized.");
+            return;
+        }
+
+        // 현재 visible 상태인 항목 찾기
+        const $currentItem = $items.filter(".item_visible");
+        const $nextItem = $items.eq(index);
+
+        // 현재 항목 왼쪽으로 사라짐
+        $currentItem
+            .removeClass("item_visible")
+            .addClass("exit-left")
+            .one("transitionend", function () {
+                $(this).removeClass("exit-left");
+            });
+
+        // 다음 항목 오른쪽에서 나타남
+        $nextItem
+            .addClass("enter-right")
+            .get(0).offsetWidth; // 강제로 리플로우를 발생시켜 애니메이션 트리거
+        $nextItem
+            .removeClass("enter-right")
+            .addClass("item_visible");
+    }
+
+
+    // OPEN API Power API
     function callPowerAPI() {
         $("#powerForm").on("submit", function (event) {
             event.preventDefault(); // 기본 폼 제출 방지
@@ -429,6 +479,7 @@ $(document).ready(() => {
         }
     }
 
+    // GaugeChart
     function createGaugeChart(target) {
         // Apply theme
         am4core.useTheme(am4themes_animated);
@@ -506,56 +557,25 @@ $(document).ready(() => {
         return chart;
     }
 
-    let intervalGaugeId = null;
-
-    function updateGaugeChart(chart, values) {
-        if (intervalGaugeId) {
-            clearInterval(intervalGaugeId); // Stop any existing cycle
-        }
-
-        let index = 1; // Start with the second value in the array
-
+    // Updage GaugeChart
+    function updateGaugeChart(chart, value) {
         // Immediately display the first value
-        const initialValue = values[0];
-        chart.hand.showValue(initialValue, 1000, am4core.ease.cubicOut);
+        chart.hand.showValue(value, 1000, am4core.ease.cubicOut);
 
         let animation = chart.hand.animate(
-            { property: "value", to: initialValue },
+            { property: "value", to: value },
             1000,
             am4core.ease.cubicOut
         );
 
         animation.events.on("animationprogress", function (ev) {
-            chart.valueLabel.text = Math.round(ev.progress * initialValue).toString();
+            chart.valueLabel.text = Math.round(ev.progress * value).toString();
         });
 
         animation.events.on("animationended", function () {
-            chart.valueLabel.text = initialValue.toString();
+            chart.valueLabel.text = value.toString();
         });
 
-        intervalGaugeId = setInterval(() => {
-            const value = values[index];
-            // console.log(index)
-            chart.hand.showValue(value, 1000, am4core.ease.cubicOut);
-
-            // Animate value label
-            let animation = chart.hand.animate(
-                { property: "value", to: value },
-                1000,
-                am4core.ease.cubicOut
-            );
-
-            animation.events.on("animationprogress", function (ev) {
-                chart.valueLabel.text = Math.round(ev.progress * value).toString();
-            });
-
-            animation.events.on("animationended", function () {
-                chart.valueLabel.text = value.toString();
-            });
-
-            // Move to the next value in the array
-            index = (index + 1) % values.length;
-        }, 3000); // Update every 3 seconds
     }
 
     function createGaugeXYChart(target) {
@@ -595,51 +615,58 @@ $(document).ready(() => {
         let categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
         categoryAxis.dataFields.category = "category";
         categoryAxis.renderer.grid.template.disabled = true;
+        categoryAxis.renderer.labels.template.disabled = true;
 
         let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
         valueAxis.min = 0;
         valueAxis.max = 100;
         valueAxis.strictMinMax = true;
+        valueAxis.renderer.grid.template.disabled = true;
+        valueAxis.renderer.labels.template.disabled = true;
 
         // Create series
         let series = chart.series.push(new am4charts.ColumnSeries());
         series.dataFields.valueY = "value";
         series.dataFields.categoryX = "category";
         series.columns.template.propertyFields.fill = "color";
-        series.columns.template.width = am4core.percent(80);
+        series.columns.template.propertyFields.stroke = "color";
+        series.columns.template.strokeWidth = 2;
+        series.columns.template.width = am4core.percent(80); // 컬럼 너비를 줄임
+        series.columns.template.marginRight = 5; // 컬럼 사이 간격 추가
 
         // Add a dedicated container for labels
-        let labelContainer = chart.createChild(am4core.Container);
-        labelContainer.isMeasured = false;
+        // let labelContainer = chart.createChild(am4core.Container);
+        // labelContainer.isMeasured = false;
 
         // Return chart instance
         return chart;
     }
 
-
-    function updateGaugeXYChart(chart, targetCategory, rawValue) {
-        let targetIndex = chart.data.findIndex((item) => item.category === targetCategory);
+    // 값을 업데이트하는 함수
+    function updateGaugeXYChart(chart, rawValue) {
+        let categories = chart.data.map((item) => item.category);
+        let roundedValue = Math.round(rawValue / 20) * 20;
+        let targetIndex = categories.indexOf(roundedValue.toString());
         if (targetIndex === -1) return;
 
-        // Reset and animate
-        chart.data.forEach((item, index) => {
-            item.value = index <= targetIndex ? (index + 1) * (100 / (targetIndex + 1)) : 0;
+        // 모든 막대 높이 초기화 및 기존 라벨 제거
+        chart.data.forEach((item) => {
+            item.value = 0;
         });
+        // labelContainer.children.clear();
         chart.invalidateRawData();
 
-        // Add label to the top of the target column
-        let series = chart.series.values[0];
-        let targetColumn = series.columns.getIndex(targetIndex);
-        if (targetColumn) {
-            let label = chart.createChild(am4core.Label);
-            label.text = rawValue.toString();
-            label.horizontalCenter = "middle";
-            label.verticalCenter = "bottom";
-            label.x = targetColumn.pixelX + targetColumn.pixelWidth / 2;
-            label.y = targetColumn.pixelY - 10;
+        // 막대 높이 점진적 증가
+        let stepDuration = 100;
+        for (let i = 0; i <= targetIndex; i++) {
+            setTimeout(() => {
+                chart.data[i].value = (i + 1) * (100 / (targetIndex + 1));
+                chart.invalidateRawData();
+            }, i * stepDuration);
         }
+        // 로드 시 애니메이션
+        chart.appear(500, 50);
     }
-
 
     initialize();
 });
