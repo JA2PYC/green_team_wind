@@ -36,13 +36,15 @@ canvas {
     opacity: 0;
     animation: slideUp 0.6s ease-in-out forwards;
     animation-delay: 0.2s;
+    overflow: hidden;
 }
 
 /* widget 요소에 2x2 배치가 적용되도록 더 구체적으로 지정 */
 .widget.wind-map {
     grid-column: span 2;
     grid-row: span 2;
-    position: relative; /* iframe을 정확하게 배치하기 위한 부모 컨테이너의 상대적 위치 지정 */
+    position: relative;
+    /* iframe을 정확하게 배치하기 위한 부모 컨테이너의 상대적 위치 지정 */
 }
 
 .widget .wind-map iframe {
@@ -52,6 +54,94 @@ canvas {
     /* iframe이 부모의 높이에 맞게 100% 차지 */
     border: none;
     /* iframe의 기본 테두리 제거 */
+}
+
+.widget.predictPower {
+    font-size: 14px;
+}
+
+.widget.predictPower .gaugeChart {
+    width: 100%;
+    height: 55%;
+    overflow: hidden;
+}
+
+.widget.predictPower .gaugeXYChart {
+    width: 100%;
+    height: 50px;
+    margin-top: -10px;
+}
+
+.widget.predictPower .modelList {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    overflow: hidden;
+}
+
+/* Item style */
+.widget.predictPower .modelList .model_item {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 1s ease, opacity 1s ease;
+}
+
+.widget.predictPower .modelList .model_item.item_visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* 왼쪽으로 사라질 때 */
+.widget.predictPower .modelList .model_item.exit-left {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+/* 오른쪽에서 나타날 때 */
+.widget.predictPower .modelList .model_item.enter-right {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.widget .model_xgboost {
+    color: #fefefe;
+    line-height: 1;
+    background-color: rgba(243, 84, 97, 0.60);
+    border: 1px solid rgba(243, 84, 97, 1);
+    border-radius: 5px;
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.5rem 0 0;
+    cursor: pointer;
+
+}
+
+.widget .model_rf {
+    color: #fefefe;
+    line-height: 1;
+    background-color: rgba(84, 100, 243, 0.60);
+    border: 1px solid rgba(84, 100, 243, 1);
+    border-radius: 5px;
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.5rem 0 0;
+    cursor: pointer;
+}
+
+.widget .model_cstl {
+    color: #fefefe;
+    line-height: 1;
+    background-color: rgba(210, 31, 255, 0.60);
+    border: 1px solid rgba(210, 31, 255, 1);
+    border-radius: 5px;
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.5rem 0 0;
+    cursor: pointer;
 }
 
 .widget.windPowerChart {

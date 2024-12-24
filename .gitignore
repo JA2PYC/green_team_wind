@@ -125,6 +125,8 @@ yarn-error.log*
 # 모델 파일
 models/saved_models/*.pkl
 models/saved_models/*.h5
+models/saved_models/*.keras
 *.pkl
 *.h5
+*.keras
 
