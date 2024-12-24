@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <title>풍력 발전량 예측 모니터링</title>
   {% include 'headScript.html' %}
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard_tjs.js') }}"></script>
 </head>
 
 <body>
@@ -42,27 +44,21 @@
           현재 발전량: <span id="current-output">-</span> MW
         </p>
       </div>
-      
+
       <div class="widget predictPower">
         <h2>모델별 예상 발전량</h2>
         <div class="gaugeChart"></div>
         <div class="gaugeXYChart"></div>
         <div class="modelList">
-          <span class="model_item"><span class="model_xgboost">XBGoost Model</span><span class="xgboost_value">-</span></span>
+          <span class="model_item"><span class="model_xgboost">XBGoost Model</span><span
+              class="xgboost_value">-</span></span>
           <span class="model_item"><span class="model_rf">RF Model</span><span class="rf_value">-</span></span>
           <span class="model_item"><span class="model_cstl">CSTL Model</span><span class="cstl_value">-</span></span>
         </div>
       </div>
       <div class="widget powerGuage">
         <h2>성능 차트</h2>
-        <div id="scrollContainer">
-          <span>Item 1</span>
-          <span> | Item 2</span>
-          <span> | Item 3</span>
-          <span> | Item 4</span>
-          <span> | Item 5</span>
-        </div>
-        
+        <div id="dashboard_tjs"></div>
       </div>
       <div class="widget windPowerChart">
         <h2>풍속 발전량 차트</h2>
@@ -74,4 +70,5 @@
   </main>
   {% include 'footer.html' %}
 </body>
+
 </html>
