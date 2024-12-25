@@ -7,7 +7,6 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/dashboard_tjs.js') }}"></script>
 </head>
 
 <body>
@@ -58,7 +57,7 @@
       </div>
       <div class="widget powerGuage">
         <h2>성능 차트</h2>
-        <div id="dashboard_tjs"></div>
+        <canvas id="dashboard_tjs"></canvas>
       </div>
       <div class="widget windPowerChart">
         <h2>풍속 발전량 차트</h2>
