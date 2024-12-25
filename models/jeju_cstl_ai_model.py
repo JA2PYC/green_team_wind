@@ -19,7 +19,7 @@ scaler_y_path = os.path.join(file_dir, "saved_models", f"{modelname}_scaler_y.pk
 
 script_path = os.path.join(file_dir, "data", f"{scriptname}.py")
 
-if not os.path.exists(pkl_path):
+if not os.path.exists(pkl_path) or not os.path.exists(keras_path) or not os.path.exists(scaler_X_path) or not os.path.exists(scaler_y_path):
     print(f"{modelname}.pkl 파일이 존재하지 않습니다. 새로 생성합니다...")
     try:
         create_model_pkl(dataname, modelname)
