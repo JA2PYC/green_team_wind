@@ -4,11 +4,12 @@ $(document).ready(() => {
         // callWindAPI();
         callfct_afs_dlData("11B20201").then(function (data) {
             console.log(data);
+            displayWeather(data);
         });
 
-        callkma_regData(["11B20201", "11B20601"]).then(function (data) {
-            console.log(data);
-        });
+        // callkma_regData(["11B20201", "11B20601"]).then(function (data) {
+        //     console.log(data);
+        // });
         // callkma_sfctm3Data();
         initWidget();
         eventHandler();
@@ -47,6 +48,47 @@ $(document).ready(() => {
         });
     }
 
+
+    function displayWeather(data) {
+        const widget = $(".widget.weather");
+        let validWeather = null;
+
+        // Find the first valid weather data
+        for (let weather of data) {
+            if (weather.wf && weather.ta != "-99") {
+                validWeather = weather;
+                break;
+            }
+        }
+
+        if (validWeather) {
+            const iconClass = getWeatherIcon(validWeather.wf);
+            widget.find(".weather-icon").html(`<i class="${iconClass}"></i>`);
+            widget.find(".weather-text").html(`
+                <div>${validWeather.stn_name}</div>
+                <div>${validWeather.wf}</div>
+                <div>${validWeather.ta}°C</div>
+            `);
+        } else {
+            widget.find(".weather-icon").html(`<i class="bi-exclamation-circle"></i>`);
+            widget.find(".weather-text").text("데이터가 유효하지 않습니다.");
+        }
+    }
+
+    function getWeatherIcon(wf) {
+        // Bootstrap icons mapping based on weather forecast (wf)
+        const iconMap = {
+            "맑음": "bi-sun",
+            "구름많음": "bi-cloud-sun",
+            "흐림": "bi-cloud",
+            "비": "bi-cloud-rain",
+            "눈": "bi-cloud-snow",
+            "소나기": "bi-cloud-lightning-rain"
+        };
+        return iconMap[wf] || "bi-question-circle"; // Default icon if wf is unknown
+    }
+
+    // 모델별 예상 발전량 위젯젯
     function widgetPredictPower(station_id = 184) {
         callkma_sfctm2Data(tm = 0, station_id).then(function (kma_sfctm2Data) {
             let processedWeatehr = processWeatherData(kma_sfctm2Data);
@@ -100,7 +142,7 @@ $(document).ready(() => {
 
     }
 
-    // Widget Wind Power Chart
+    // 풍속 발전량 차트 위젯젯
     function widgetWindPowerChart() {
         callkma_sfctm2Data().then(function (kma_sfctm2Data) {
             let processedWeatehr = processWeatherData(kma_sfctm2Data);
@@ -131,7 +173,7 @@ $(document).ready(() => {
 
                 // 차트 데이터 처리
                 let windPowerChartData = processWindPowerChart(kma_sfctm2Data, xgbData, rfData, cstlData);
-                let $windPowerChart = $('#windPowerChart');
+                let $windPowerChart = $('#windPowerCanvas');
                 callChartGraph($windPowerChart, windPowerChartData, 'line');
             }).catch(function (error) {
                 console.error('Error in fetching model data:', error);

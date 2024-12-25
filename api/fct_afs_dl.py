@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 from api.kma_reg import fetch_reg_data
 
@@ -56,7 +57,12 @@ def parse_weather_data(data):
         
         # stn_name을 각 reg_id에 대해 가져오기
         stn_names = fetch_reg_data(reg_ids)  # reg_ids를 전달하여 각각에 대해 처리
-
+        try:
+            stn_name = stn_names[0]['reg_name']
+        except (IndexError, KeyError):
+            stn_name = '미확인'
+            
+        wf_clean = re.sub(r'^"|"$', '', parts[16]) if len(parts) > 16 else ''
 
         # 각 데이터를 JSON에 적합한 형태로 변환
         if len(parts) >= 10:
@@ -66,12 +72,12 @@ def parse_weather_data(data):
                 "tm_ef": parts[2],
                 "ne": parts[4],
                 "stn": parts[5],
-                "stn_name": stn_names,
+                "stn_name": stn_name,
                 "ta": parts[12],
                 "st": parts[13],
                 "sky": parts[14],
                 "prep": parts[15],
-                "wf": parts[16],
+                "wf": wf_clean,
             }
             
             # 리스트에 추가

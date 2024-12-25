@@ -6,6 +6,7 @@
   {% include 'headScript.html' %}
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/widget.css') }}" />
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </head>
 
@@ -27,6 +28,9 @@
       </div>
       <div class="widget weather">
         <h2>현재 날씨</h2>
+        <div class="weather-icon"></div>
+        <div class="weather-text"></div>
+        <!-- <h2>현재 날씨</h2>
         <p>
           기온 : <span id="temperature">-</span> °C
         </p>
@@ -35,7 +39,7 @@
         </p>
         <p>
           습도 : <span id="humidity">-</span> %
-        </p>
+        </p> -->
       </div>
       <div class="widget current-energy">
         <h2>현재 발전량</h2>
@@ -61,7 +65,7 @@
       </div>
       <div class="widget windPowerChart">
         <h2>풍속 발전량 차트</h2>
-        <canvas id="windPowerChart"></canvas>
+        <canvas id="windPowerCanvas" class="windPowerCanvas"></canvas>
 
       </div>
 
