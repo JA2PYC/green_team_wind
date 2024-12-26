@@ -1,0 +1,83 @@
+<style>
+    .col-sm-3 {
+        width: 300px;
+    }
+</style>
+
+<!-- 테이블  -->
+<div class="col-sm-3">
+    <div class="well">
+        <table>
+            <thead>
+                <th>
+                    <span id="date">오늘:</span><br />
+                    <hr>
+                </th>
+            </thead>
+            <tbody>
+                <tr class="spacer2"></tr>
+                <tr>
+                    <td valign="top"><span id="countryList"><i class="fa fa-spinner fa-pulse"></i>데이터 로딩중...</span></td>
+                    <td class="spacer">
+                    <td>
+                    <td valign="top"><span id="tooltip"></span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="col-sm-3">
+    <div class="well">
+        <table class="table table-sm">
+            <tbody>
+                <tr>
+                    <td>서울: <span id="seoul"></span></td>
+                    <td>부산: <span id="busan"></span></td>
+                    <td>대구: <span id="daegu"></span></td>
+                    <td>인천: <span id="incheon"></span></td>
+                    <td>광주: <span id="gwangju"></span></td>
+                </tr>
+                <tr>
+                    <td>대전: <span id="daejeon"></span></td>
+                    <td>울산: <span id="ulsan"></span></td>
+                    <td>세종: <span id="sejong"></span></td>
+                    <td>경기도: <span id="gyeonggi"></span></td>
+                    <td>강원: <span id="gangwon"></span></td>
+                </tr>
+                <tr>
+                    <td>충청북도: <span id="north chungcheong"></span></td>
+                    <td>충청남도: <span id="south chungcheong"></span></td>
+                    <td>전라북도: <span id="north jeolla"></span></td>
+                    <td>전라남도: <span id="south jeolla"></span></td>
+                    <td>경상북도: <span id="north gyeongsang"></span></td>
+                </tr>
+                <tr>
+                    <td>경상남도: <span id="south gyeongsang"></span></td>
+                    <td>제주도: <span id="jeju"></span></td>
+                </tr>
+
+            </tbody>
+            <p id="afternoon"></p>
+
+        </table>
+    </div>
+</div>
+
+<script>
+
+    var todayDate = new Date().toISOString().slice(5, 10);
+    // var tooltip = document.querySelector('.map-tooltip');
+    var ctotal = 0; //전국 확진자 수 
+    // var dtotal =0; //전국 사망자 수
+    document.getElementById("date").innerHTML = '오늘: ' + todayDate;
+
+    for (var k in confirmed) {
+        ctotal += confirmed[k];
+        //  dtotal += death[k];
+    }
+    document.getElementById("countryList").innerHTML = '<b>전국</b><br /></b>예상 발전량:<b>' + ctotal
+    for (var k in confirmed) {
+        document.getElementById(k).innerHTML = confirmed[k];
+    }
+</script>
