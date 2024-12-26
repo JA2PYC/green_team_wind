@@ -1,8 +1,6 @@
 $(document).ready(() => {
     function initialize() {
         // callWindAPI();
-
-        // console.log(today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString());
         // callkma_sfctm3Data();
         initWidget();
         eventHandler();
