@@ -6,7 +6,6 @@
   {% include 'headScript.html' %}
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/widget.css') }}" />
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </head>
 
@@ -26,22 +25,21 @@
           </div>
         </div>
       </div>
-      <div class="widget weather">
-        <h2>현재 날씨</h2>
-        <div class="weather-icon"></div>
-        <div class="weather-text"></div>
-        <!-- <h2>현재 날씨</h2>
-        <p>
-          기온 : <span id="temperature">-</span> °C
-        </p>
-        <p>
-          풍속 : <span id="wind-speed">-</span> m/s
-        </p>
-        <p>
-          습도 : <span id="humidity">-</span> %
-        </p> -->
+      <div class="widget weatherForecast">
+        <h2>현재 날씨<span class="widgetIndicator fcLocation"></span>
+        </h2>
+        <div class="weatehrInfo">
+          <div class="weather-data">
+            <div class="weather-icon"></div>
+            <div class="weather-text">
+              <div class="weather-temp"></div>
+              <div class="weather-desc"></div>
+            </div>
+          </div>
+          <div class="weather-detail"></div>
+        </div>
       </div>
-      <div class="widget current-energy">
+      <div class="widget currentPower">
         <h2>현재 발전량</h2>
         <p>
           현재 발전량: <span id="current-output">-</span> MW
