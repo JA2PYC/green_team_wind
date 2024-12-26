@@ -1,0 +1,2 @@
+var confirmed = {'seoul':56,'busan':61,'daegu':1132,'incheon':1113,'gwangju':9,'daejeon':9,'ulsan':11,'sejong':1,
+      'gyeonggi':62,'gangwon':6,'north chungcheong':8,'south chungcheong':12,'north jeolla':5,'south jeolla':1,'north gyeongsang':345,'south gyeongsang':43,'jeju':2};

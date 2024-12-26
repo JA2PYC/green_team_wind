@@ -7,7 +7,6 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/dashboard_tjs.js') }}"></script>
 </head>
 
 <body>
@@ -26,25 +25,20 @@
           </div>
         </div>
       </div>
-      <div class="widget weather">
-        <h2>현재 날씨</h2>
-        <p>
-          기온 : <span id="temperature">-</span> °C
-        </p>
-        <p>
-          풍속 : <span id="wind-speed">-</span> m/s
-        </p>
-        <p>
-          습도 : <span id="humidity">-</span> %
-        </p>
+      <div class="widget weatherForecast">
+        <h2>날씨 예보<span class="widgetIndicator fcLocation"></span>
+        </h2>
+        <div class="weatehrInfo">
+          <div class="weather-data">
+            <div class="weather-icon"></div>
+            <div class="weather-text">
+              <div class="weather-temp"></div>
+              <div class="weather-desc"></div>
+            </div>
+          </div>
+          <div class="weather-detail"></div>
+        </div>
       </div>
-      <div class="widget current-energy">
-        <h2>현재 발전량</h2>
-        <p>
-          현재 발전량: <span id="current-output">-</span> MW
-        </p>
-      </div>
-
       <div class="widget predictPower">
         <h2>모델별 예상 발전량</h2>
         <div class="gaugeChart"></div>
@@ -56,13 +50,18 @@
           <span class="model_item"><span class="model_cstl">CSTL Model</span><span class="cstl_value">-</span></span>
         </div>
       </div>
+      <div class="widget powerStation">
+        <h2>발전원별 발전량</h2>
+        <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+      </div>
+
       <div class="widget powerGuage">
         <h2>성능 차트</h2>
-        <div id="dashboard_tjs"></div>
+        <canvas id="dashboard_tjs"></canvas>
       </div>
       <div class="widget windPowerChart">
         <h2>풍속 발전량 차트</h2>
-        <canvas id="windPowerChart"></canvas>
+        <canvas id="windPowerCanvas" class="windPowerCanvas"></canvas>
 
       </div>
 

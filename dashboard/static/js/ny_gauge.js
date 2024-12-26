@@ -277,3 +277,7 @@ function initializeChart2() {
   chart.appear(1000, 100);
 }); // end am4core.ready()
 }
+
+function click(){
+  alert("오홍")
+}

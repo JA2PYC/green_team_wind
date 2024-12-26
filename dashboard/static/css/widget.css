@@ -1,0 +1,342 @@
+.widget h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.widget h2::after {
+    content: '';
+    display: block;
+    height: 4px;
+    background: linear-gradient(to right, #4CAF50, #2196F3);
+    margin-top: 8px;
+    border-radius: 2px;
+}
+
+.widget {
+    background: var(--widget-bg);
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.6s ease-in-out forwards;
+    animation-delay: 0.2s;
+    overflow: hidden;
+}
+
+.widget .widgetIndicator {
+    float: inline-end;
+    font-size: 12px;
+    color: #fefefe;
+    background: linear-gradient(135deg, #4CAF50, #2196F3);
+    border-radius: 5px;
+    padding: 4px 8px;
+}
+
+/* widget 요소에 2x2 배치가 적용되도록 더 구체적으로 지정 */
+.widget.wind-map {
+    grid-column: span 2;
+    grid-row: span 2;
+    position: relative;
+    /* iframe을 정확하게 배치하기 위한 부모 컨테이너의 상대적 위치 지정 */
+}
+
+.widget .wind-map iframe {
+    width: 100%;
+    /* iframe이 부모의 너비에 맞게 100% 차지 */
+    height: 100%;
+    /* iframe이 부모의 높이에 맞게 100% 차지 */
+    border: none;
+    /* iframe의 기본 테두리 제거 */
+}
+
+/* 날씨 위젯 */
+.widget.weatherForecast .weatehrInfo {
+    font-size: 14px;
+    text-align: center;
+}
+
+.widget.weatherForecast .weather-data {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.widget.weatherForecast .weather-icon {
+    display: flex;
+}
+
+.widget.weatherForecast .weather-temp {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #0f0f0f;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.widget.weatherForecast .weather-desc {
+    /* background-color: #ffffff21; */
+    margin-bottom:-1rem;
+}
+
+.widget.weatherForecast .weather-detail {
+    margin-top: 10px;
+}
+
+.widget.weatherForecast i {
+    color: #ffcc00;
+    font-size: 4rem;
+    /* 기본 색상 (맑음) */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    /* 텍스트 그림자 */
+    transition: transform 0.3s ease, color 0.3s ease;
+    /* 부드러운 애니메이션 */
+}
+
+.widget.weatherForecast i.bi-sun::before {
+    color: #f39c12;
+    /* 맑음 아이콘 색상 */
+    animation: spin 4s linear infinite !important;
+    /* 회전 애니메이션 */
+}
+
+.widget.weatherForecast i.bi-cloud-sun::before {
+    color: #ffeb00;
+    /* 맑음 아이콘 색상 */
+    animation: float 6s ease-in-out infinite; /* 부드러운 흐름 */
+}
+
+.widget.weatherForecast i.bi-cloud::before {
+    color: #95a5a6;
+    /* 구름 아이콘 색상 */
+    animation: float 6s ease-in-out infinite; /* 부드러운 흐름 */
+
+}
+
+.widget.weatherForecast i.bi-clouds::before {
+    color: #5e6f70;
+    /* 구름 아이콘 색상 */
+    animation: float 6s ease-in-out infinite; /* 부드러운 흐름 */
+}
+.widget.weatherForecast i.bi-cloud-rain::before {
+    color: #3498db;
+    /* 비 아이콘 색상 */
+    animation: rain-drop 1s infinite;
+    /* 비 애니메이션 */
+}
+
+.widget.weatherForecast i.bi-cloud-drizzle::before {
+    color: #5dade2;
+    /* 소나기 아이콘 색상 */
+    animation: rain-drop 1s infinite;
+}
+
+.widget.weatherForecast i.bi-cloud-sleet::before {
+    color: #4172a3;
+    /* 진눈깨비 아이콘 색상 */
+    animation: rain-drop 1s infinite;
+}
+
+.widget.weatherForecast i.bi-cloud-snow::before {
+    color: #535295;
+    /* 눈 아이콘 색상 */
+    animation: snow-fall 2s infinite;
+    /* 눈 애니메이션 */
+}
+
+.widget.weatherForecast i.bi-question-circle {
+    color: #e74c3c;
+    /* 알 수 없는 날씨 아이콘 색상 */
+}
+
+.widget.weatherForecast i.bi-exclamation-circle {
+    color: #e74c3c;
+    /* 알 수 없는 날씨 아이콘 색상 */
+}
+
+/* 애니메이션 정의 */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 흐르는 구름 애니메이션 */
+@keyframes float {
+    0%, 100% {
+        transform: translateX(0); /* 기본 위치 */
+    }
+    50% {
+        transform: translateX(10px); /* 오른쪽으로 약간 이동 */
+    }
+}
+
+@keyframes rain-drop {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(4px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes snow-fall {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(6px);
+    }
+}
+
+
+/* 모델별 발전량 위젯 */
+.widget.predictPower {
+    font-size: 14px;
+}
+
+.widget.predictPower .gaugeChart {
+    width: 100%;
+    height: 55%;
+    overflow: hidden;
+}
+
+.widget.predictPower .gaugeXYChart {
+    width: 100%;
+    height: 50px;
+    margin-top: -10px;
+}
+
+.widget.predictPower .modelList {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    overflow: hidden;
+}
+
+/* Item style */
+.widget.predictPower .modelList .model_item {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 1s ease, opacity 1s ease;
+}
+
+.widget.predictPower .modelList .model_item.item_visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* 왼쪽으로 사라질 때 */
+.widget.predictPower .modelList .model_item.exit-left {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+/* 오른쪽에서 나타날 때 */
+.widget.predictPower .modelList .model_item.enter-right {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.widget .model_xgboost {
+    color: #fefefe;
+    line-height: 1;
+    background-color: rgba(243, 84, 97, 0.60);
+    border: 1px solid rgba(243, 84, 97, 1);
+    border-radius: 5px;
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.5rem 0 0;
+    cursor: pointer;
+
+}
+
+.widget .model_rf {
+    color: #fefefe;
+    line-height: 1;
+    background-color: rgba(84, 100, 243, 0.60);
+    border: 1px solid rgba(84, 100, 243, 1);
+    border-radius: 5px;
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.5rem 0 0;
+    cursor: pointer;
+}
+
+.widget .model_cstl {
+    color: #fefefe;
+    line-height: 1;
+    background-color: rgba(210, 31, 255, 0.60);
+    border: 1px solid rgba(210, 31, 255, 1);
+    border-radius: 5px;
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.5rem 0 0;
+    cursor: pointer;
+}
+
+.widget.windPowerChart {
+    grid-column: span 2;
+}
+
+.widget.predictPower .windPowerCanvas {
+    height: 350px;
+}
+
+/* 3D 풍력 발전기 위젯 */
+.widget.turbine-3d {
+    grid-column: span 1;
+    /* 위젯 1칸 크기 */
+    position: relative;
+    /* 자식 요소를 상대적으로 배치 */
+}
+
+.widget button {
+    border: none;
+    background: linear-gradient(135deg, #4CAF50, #2196F3);
+    color: white;
+    padding: 5px 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.widget button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #45a049, #1e88e5);
+}
+
+.widget button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
