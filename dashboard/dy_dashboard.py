@@ -45,6 +45,8 @@ def chatbot():
         # 예외 발생 시 에러 메시지를 JSON으로 반환
         return jsonify({"error": str(e)}), 500
 
+
+
 # Flask 애플리케이션에 Blueprint 등록
 app.register_blueprint(dy_dashboard)
 # Blueprint를 Flask 애플리케이션에 등록하여 해당 라우트를 사용할 수 있도록 설정.

@@ -151,7 +151,16 @@ canvas {
 /* 3D 풍력발전기 */
 .widget.turbine-3d {
     grid-column: span 1; /* 1칸 차지 */
+  
 }
+.widget.turbine-3d canvas {
+    width: 100%; /* 부모 컨테이너 너비에 맞춤 */
+    height: auto; /* 비율 유지하며 높이 자동 조정 */
+    max-height: 500px; /* 최대 높이 설정 */
+    border-radius: 8px; /* 경계 둥글게 */
+    box-shadow: var(--box-shadow); /* 그림자 추가 */
+}    
+
 .widget button {
     border: none;
     background: linear-gradient(135deg, #4CAF50, #2196F3);
