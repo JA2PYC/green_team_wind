@@ -1,31 +1,66 @@
 $(document).ready(function () {
-    let currentSlide = 0;
-    const widgetContainer = document.querySelector('.widgetContainer');
-    const totalWidgets = document.querySelectorAll('.widget').length;
-    const widgetWidth = document.querySelector('.widget').offsetWidth + 20; // widget width + gap
-
-    function goToSlide(slideIndex) {
-        if (slideIndex < 0) {
-            currentSlide = totalWidgets - 1;
-        } else if (slideIndex >= totalWidgets) {
-            currentSlide = 0;
-        } else {
-            currentSlide = slideIndex;
-        }
-
-        const offset = -currentSlide * widgetWidth;
-        widgetContainer.style.transform = `translateX(${offset}px)`;
+    function initialize() {
+        widgetSlide();
+        widgetSlideInterval();
+        eventHandler();
     }
 
-    document.getElementById('prev-btn').addEventListener('click', () => {
-        goToSlide(currentSlide - 1);
-    });
+    function eventHandler() {
+        $(document).on('click', function (e) {
+            if ($(e.target).hasClass('prev-btn')) {
+                widgetSlide(currentIndex - 1, -1);
+            } else if ($(e.target).hasClass('next-btn')) {
+                widgetSlide(currentIndex + 1, 1);
 
-    document.getElementById('next-btn').addEventListener('click', () => {
-        goToSlide(currentSlide + 1);
-    });
+            }
+        });
+    }
 
-    setInterval(() => {
-        goToSlide(currentSlide + 1);
-    }, 5000); // 5초마다 자동 슬라이드
+    let currentIndex = 0;
+    const $dashboardContainer = $(document).find(".dashboard");
+    const $widgetContainers = $dashboardContainer.find(".widgetContainer");
+    const totalContainers = $widgetContainers.length;
+    function widgetSlide(targetIndex, slideDirection) {
+        console.log(targetIndex)
+        console.log(currentIndex)
+        if (targetIndex < 0) {
+            targetIndex = totalContainers - 1;
+        } else if (targetIndex >= totalContainers) {
+            targetIndex = 0;
+        }
+
+        const $current = $($widgetContainers[currentIndex]);
+        const $target = $($widgetContainers[targetIndex]);
+
+        // 위치 초기화
+        $target.css("left", slideDirection === 1 ? "100%" : "-100%");
+
+        // 방향에 따른 클래스 추가
+        if (slideDirection === 1) {
+            $current.removeClass("slideInLeft").addClass("slideOutLeft");
+            $target.removeClass("slideOutRight").addClass("slideInLeft");
+        } else {
+            $current.removeClass("slideInRight").addClass("slideOutRight");
+            $target.removeClass("slideOutLeft").addClass("slideInRight");
+        }
+
+        currentIndex = targetIndex;
+    }
+
+    let slideIntervaId;
+    let isWidgetSliding = false;
+    function widgetSlideInterval() {
+        if (isWidgetSliding) {
+            clearInterval(slideIntervaId);
+            isWidgetSliding = false;
+        }
+
+        isWidgetSliding = true;
+        slideIntervaId = setInterval(() => {
+            widgetSlide(currentIndex + 1, 1);
+        }, 5000); // 5초마다 자동 슬라이드
+
+    }
+
+    initialize();
 });
