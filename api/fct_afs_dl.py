@@ -47,7 +47,6 @@ def parse_weather_data(data):
         # '#'로 시작하는 주석 라인과 공백 라인은 무시
         if line.startswith('#') or not line.strip():
             continue
-        print(line)
         
         # 각 라인에서 데이터를 추출
         parts = line.split(',')
@@ -62,9 +61,7 @@ def parse_weather_data(data):
         except (IndexError, KeyError):
             stn_name = '미확인'
             
-        print(parts[16])
         wf_clean = re.sub(r'^"|"$', '', parts[16]) if len(parts) > 16 else ''
-        print(wf_clean)
 
         # 각 데이터를 JSON에 적합한 형태로 변환
         if len(parts) >= 10:

@@ -1,15 +1,17 @@
 $(document).ready(() => {
     function initialize() {
-        callOpen_pabpg();
         // callWindAPI();
 
+        // console.log(today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString());
         // callkma_sfctm3Data();
         initWidget();
         eventHandler();
     }
 
     function initWidget() {
+        let today = new Date();
         widgetWeather("11G00201");
+        widgetPowerStation(today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString());
         widgetPredictPower(184);
         widgetWindPowerChart();
     }
@@ -47,7 +49,7 @@ $(document).ready(() => {
         callfct_afs_dlData(reg_id).then(function (fct_afs_data) {
             const widget = $(".widget.weatherForecast");
             let validWeather = null;
-            console.log(fct_afs_data);
+            // console.log(fct_afs_data);
 
             // Find the first valid weather data
             for (let weather of fct_afs_data) {
@@ -117,7 +119,39 @@ $(document).ready(() => {
         return formattedDate;
     }
 
-    // 모델별 예상 발전량 위젯젯
+    // 실시간 발전원 위젯
+    function widgetPowerStation(today) {
+        callOpen_pabg(today).then(function (open_pabg_data) {
+            const items = open_pabg_data.response.body.items.item;
+
+            if (items.length > 0) {
+                // 가장 최근 데이터를 추출
+                const latestData = items[items.length - 1];
+                console.log(items[items.length - 1]);
+                // 발전량 데이터를 정리
+                const chartData = {
+                    // "수력": parseFloat(latestData.fuelPwr1 || 0),
+                    // "유류": parseFloat(latestData.fuelPwr2 || 0),
+                    "유연탄": parseFloat(latestData.fuelPwr3 || 0),
+                    "원자력": parseFloat(latestData.fuelPwr4 || 0),
+                    // "양수": parseFloat(latestData.fuelPwr5 || 0),
+                    "가스": parseFloat(latestData.fuelPwr6 || 0),
+                    // "국내탄": parseFloat(latestData.fuelPwr7 || 0),
+                    "신재생(풍력)": parseFloat(latestData.fuelPwr8 || 0),
+                    "태양광": parseFloat(latestData.fuelPwr9 || 0)
+                };
+
+                // 도넛 차트를 렌더링
+                let $powerStationChart = $('#powerStationCanvas');
+
+                createDonutChart($powerStationChart, chartData, 'doughnut');
+            }
+        }).catch(function (error) {
+            console.error("Error(WidgetPowerStation):", error);
+        });
+    }
+
+    // 모델별 예상 발전량 위젯
     function widgetPredictPower(station_id = 184) {
         callkma_sfctm2Data(tm = 0, station_id).then(function (kma_sfctm2Data) {
             let processedWeatehr = processWeatherData(kma_sfctm2Data);
@@ -203,7 +237,7 @@ $(document).ready(() => {
                 // 차트 데이터 처리
                 let windPowerChartData = processWindPowerChart(kma_sfctm2Data, xgbData, rfData, cstlData);
                 let $windPowerChart = $('#windPowerCanvas');
-                callChartGraph($windPowerChart, windPowerChartData, 'line');
+                createChartGraph($windPowerChart, windPowerChartData, 'line');
             }).catch(function (error) {
                 console.error('Error in fetching model data:', error);
             });
@@ -242,6 +276,33 @@ $(document).ready(() => {
             .addClass("item_visible");
     }
 
+    // 한국전력거래소_발전원별 발전량(계통기준) OPEN API PABG
+    function callOpen_pabg(baseDate, pageNo = 1, numOfRows = 300, dataType = "json") {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/api/open_pabg",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    baseDate: baseDate,
+                    pageNo: pageNo,
+                    numOfRows: numOfRows,
+                    dataType: dataType
+                }),
+                success: function (data) {
+                    if (data.open_pabg_result) {
+                        resolve(data.open_pabg_result);
+                    } else {
+                        reject("Error");
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            });
+        });
+    }
 
     // OPEN API Power API
     function callOpen_pabpg() {
@@ -519,7 +580,7 @@ $(document).ready(() => {
     }
 
     // Chartjs Graph
-    function callChartGraph($target, chartData, chartType = 'line') {
+    function createChartGraph($target, chartData, chartType = 'line') {
         // jQuery로 캔버스 요소를 가져옵니다.
         const ctx = $($target)[0].getContext('2d');
         const scales = {};
@@ -635,6 +696,59 @@ $(document).ready(() => {
         }
     }
 
+    // Chart.js를 사용해 도넛 차트를 생성
+    function createDonutChart($target, chartData, chartType = 'doughnut') {
+        const ctx = $($target)[0].getContext('2d');
+        const labels = Object.keys(chartData);
+        const values = Object.values(chartData);
+
+        new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '발전원별 발전량',
+                    data: values,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)',
+                        'rgba(199, 199, 199, 0.6)',
+                        'rgba(83, 102, 255, 0.6)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 10,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                return `${label}: ${value.toLocaleString()} MWh`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // AmChart
     // GaugeChart
     function createGaugeChart(target) {
         // Apply theme
@@ -660,14 +774,38 @@ $(document).ready(() => {
         axis.max = 300;
         axis.strictMinMax = true;
 
-        // Add ranges
+        // // Add ranges
+        // let bandsData = [
+        //     { title: "", color: "#ee1f25", startValue: 0, endValue: 60 },
+        //     { title: "", color: "#f04922", startValue: 60, endValue: 120 },
+        //     { title: "", color: "#fdae19", startValue: 120, endValue: 180 },
+        //     { title: "", color: "#f3eb0c", startValue: 180, endValue: 240 },
+        //     { title: "", color: "#0f9747", startValue: 240, endValue: 300 }
+        // ];
+        // #ff7d82
+        // #ffbc7d
+        // #fdff7d
+        // #bcff7d
+        // #7da6ff
+        // #c07dff
+
+        // '#ff6384',
+        // '#ff9f40',
+        // '#ffce56',
+        // '#4bc0c0',
+        // '#36a2eb',
+        // 'rgba(153, 102, 255, 0.6)',
+        // 'rgba(199, 199, 199, 0.6)',
+        // 'rgba(83, 102, 255, 0.6)'
         let bandsData = [
-            { title: "", color: "#ee1f25", startValue: 0, endValue: 60 },
-            { title: "", color: "#f04922", startValue: 60, endValue: 120 },
-            { title: "", color: "#fdae19", startValue: 120, endValue: 180 },
-            { title: "", color: "#f3eb0c", startValue: 180, endValue: 240 },
-            { title: "", color: "#0f9747", startValue: 240, endValue: 300 }
+            { title: "", color: "#ff6384", startValue: 0, endValue: 60 },    // 부드러운 빨강
+            { title: "", color: "#ff9f40", startValue: 60, endValue: 120 },  // 파스텔 핑크
+            { title: "", color: "#ffce56", startValue: 120, endValue: 180 }, // 연한 핑크/살구색
+            { title: "", color: "#4bc0c0", startValue: 180, endValue: 240 }, // 부드러운 민트 그린
+            { title: "", color: "#36a2eb", startValue: 240, endValue: 300 }  // 파스텔 블루
         ];
+
+
 
         bandsData.forEach(function (data) {
             let range = axis.axisRanges.create();
@@ -747,24 +885,29 @@ $(document).ready(() => {
 
         chart.paddingRight = 30;
 
+        // '#ff6384',
+        // '#ff9f40',
+        // '#ffce56',
+        // '#4bc0c0',
+        // '#36a2eb',
         // Initial data
         chart.data = [
-            { category: "20", value: 0, color: am4core.color("#ee1f25") },
-            { category: "40", value: 0, color: am4core.color("#ee1f25") },
-            { category: "60", value: 0, color: am4core.color("#ee1f25") },
-            { category: "80", value: 0, color: am4core.color("#f04922") },
-            { category: "100", value: 0, color: am4core.color("#f04922") },
-            { category: "120", value: 0, color: am4core.color("#f04922") },
-            { category: "140", value: 0, color: am4core.color("#fdae19") },
-            { category: "160", value: 0, color: am4core.color("#fdae19") },
-            { category: "180", value: 0, color: am4core.color("#fdae19") },
-            { category: "200", value: 0, color: am4core.color("#f3eb0c") },
-            { category: "220", value: 0, color: am4core.color("#f3eb0c") },
-            { category: "240", value: 0, color: am4core.color("#f3eb0c") },
-            { category: "260", value: 0, color: am4core.color("#0f9747") },
-            { category: "280", value: 0, color: am4core.color("#0f9747") },
-            { category: "300", value: 0, color: am4core.color("#0f9747") },
-            // { category: "320", value: 100, color: am4core.color("#0f9747"), isMax: true }
+            { category: "20", value: 0, color: am4core.color("#ff6384") },
+            { category: "40", value: 0, color: am4core.color("#ff7a8f") },
+            { category: "60", value: 0, color: am4core.color("#ff918a") },
+            { category: "80", value: 0, color: am4core.color("#ff9f40") },
+            { category: "100", value: 0, color: am4core.color("#ffb454") },
+            { category: "120", value: 0, color: am4core.color("#ffc768") },
+            { category: "140", value: 0, color: am4core.color("#ffce56") },
+            { category: "160", value: 0, color: am4core.color("#ffd86a") },
+            { category: "180", value: 0, color: am4core.color("#ffe27e") },
+            { category: "200", value: 0, color: am4core.color("#80dfd0") },
+            { category: "220", value: 0, color: am4core.color("#66d2c6") },
+            { category: "240", value: 0, color: am4core.color("#4bc0c0") },
+            { category: "260", value: 0, color: am4core.color("#4ab9d8") },
+            { category: "280", value: 0, color: am4core.color("#40aee5") },
+            { category: "300", value: 0, color: am4core.color("#36a2eb") },
+            // { category: "320", value: 100, color: am4core.color("#36a2eb"), isMax: true }
         ];
 
         // Create axes

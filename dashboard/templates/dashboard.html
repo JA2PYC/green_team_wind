@@ -26,7 +26,7 @@
         </div>
       </div>
       <div class="widget weatherForecast">
-        <h2>현재 날씨<span class="widgetIndicator fcLocation"></span>
+        <h2>날씨 예보<span class="widgetIndicator fcLocation"></span>
         </h2>
         <div class="weatehrInfo">
           <div class="weather-data">
@@ -39,13 +39,6 @@
           <div class="weather-detail"></div>
         </div>
       </div>
-      <div class="widget currentPower">
-        <h2>현재 발전량</h2>
-        <p>
-          현재 발전량: <span id="current-output">-</span> MW
-        </p>
-      </div>
-
       <div class="widget predictPower">
         <h2>모델별 예상 발전량</h2>
         <div class="gaugeChart"></div>
@@ -57,6 +50,11 @@
           <span class="model_item"><span class="model_cstl">CSTL Model</span><span class="cstl_value">-</span></span>
         </div>
       </div>
+      <div class="widget powerStation">
+        <h2>발전원별 발전량</h2>
+        <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+      </div>
+
       <div class="widget powerGuage">
         <h2>성능 차트</h2>
         <canvas id="dashboard_tjs"></canvas>

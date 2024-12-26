@@ -12,7 +12,6 @@ def fetch_power_data(trade_ymd, page_no=1, num_of_rows=30):
         "tradeYmd": trade_ymd,
         "pageNo": page_no,
         "numOfRows": num_of_rows,
-        
         "dataType": "json",
         "serviceKey": API_KEY,
     }
