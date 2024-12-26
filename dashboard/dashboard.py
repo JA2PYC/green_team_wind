@@ -4,8 +4,8 @@ from api.kma_station import fetch_station_data
 from api.kma_sfctm2 import fetch_kma_sfctm2_data
 from api.kma_sfctm3 import fetch_kma_sfctm3_data
 from api.fct_afs_dl import fetch_fct_afs_dl_data
+from api.open_api_PwrAmountByGen import fetch_open_pabg_data
 from api.open_api_PvAmountByPwrGen import fetch_power_data
-
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
 from models.jeju_xgboost_ai_model import xgboost_ai_model_predict
@@ -26,6 +26,24 @@ dashboard = Blueprint("dashboard", __name__)
 @dashboard.route("/")
 def dashboard_route():
     return render_template("dashboard.html")
+
+# 한국전력거래소_발전원별 발전량(계통기준) OPEN API PABG
+@dashboard.route("/api/open_pabg", methods=["POST"])
+def open_pabg_data():
+    try:
+        # 클라이언트로부터 요청받은 파라미터
+        params = request.json
+        baseDate = params.get("baseDate")
+        pageNo = params.get("pageNo", 1)
+        numOfRows = params.get("numOfRows", 300)
+        dataType = params.get("dataType", "json")
+
+        # fetch_open_pabg_data 함수 호출
+        result = fetch_open_pabg_data(baseDate, pageNo, numOfRows, dataType)
+
+        return jsonify({"open_pabg_result": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # 공공 데이터 PvAmountByPowerGen API
 @dashboard.route("/api/open_pabpg", methods=["POST"])
