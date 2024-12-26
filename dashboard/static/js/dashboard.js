@@ -1,21 +1,15 @@
 $(document).ready(() => {
     function initialize() {
-        // callPowerAPI();
+        callOpen_pabpg();
         // callWindAPI();
-        callfct_afs_dlData("11B20201").then(function (data) {
-            console.log(data);
-            displayWeather(data);
-        });
 
-        // callkma_regData(["11B20201", "11B20601"]).then(function (data) {
-        //     console.log(data);
-        // });
         // callkma_sfctm3Data();
         initWidget();
         eventHandler();
     }
 
     function initWidget() {
+        widgetWeather("11G00201");
         widgetPredictPower(184);
         widgetWindPowerChart();
     }
@@ -48,44 +42,79 @@ $(document).ready(() => {
         });
     }
 
+    // 날씨 위젯
+    function widgetWeather(reg_id) {
+        callfct_afs_dlData(reg_id).then(function (fct_afs_data) {
+            const widget = $(".widget.weatherForecast");
+            let validWeather = null;
+            console.log(fct_afs_data);
 
-    function displayWeather(data) {
-        const widget = $(".widget.weather");
-        let validWeather = null;
-
-        // Find the first valid weather data
-        for (let weather of data) {
-            if (weather.wf && weather.ta != "-99") {
-                validWeather = weather;
-                break;
+            // Find the first valid weather data
+            for (let weather of fct_afs_data) {
+                if (weather.wf && weather.ta != "-99") {
+                    validWeather = weather;
+                    break;
+                }
             }
-        }
 
-        if (validWeather) {
-            const iconClass = getWeatherIcon(validWeather.wf);
-            widget.find(".weather-icon").html(`<i class="${iconClass}"></i>`);
-            widget.find(".weather-text").html(`
-                <div>${validWeather.stn_name}</div>
-                <div>${validWeather.wf}</div>
-                <div>${validWeather.ta}°C</div>
-            `);
-        } else {
-            widget.find(".weather-icon").html(`<i class="bi-exclamation-circle"></i>`);
-            widget.find(".weather-text").text("데이터가 유효하지 않습니다.");
-        }
+            if (validWeather) {
+                const iconClass = getWeatherIcon(validWeather.wf);
+                let foreacastTime = formatDateTimeToKorean(validWeather.tm_ef, true);
+                widget.find(".widgetIndicator.fcLocation").text(validWeather.stn_name);
+                widget.find(".weather-icon").html(`<i class="${iconClass}"></i>`);
+                widget.find(".weather-temp").text(validWeather.ta + "°C");
+                widget.find(".weather-desc").text(validWeather.wf + ' ' + validWeather.st + '% ' + validWeather.w1);
+                widget.find(".weather-detail").text(foreacastTime);
+            } else {
+                widget.find(".weather-icon").html(`<i class="bi-exclamation-circle"></i>`);
+                widget.find(".weather-text").text("데이터가 유효하지 않습니다.");
+            }
+        });
+
     }
 
+    // 날씨 아이콘 매핑
     function getWeatherIcon(wf) {
         // Bootstrap icons mapping based on weather forecast (wf)
         const iconMap = {
             "맑음": "bi-sun",
-            "구름많음": "bi-cloud-sun",
-            "흐림": "bi-cloud",
+            "흐림": "bi-cloud-sun",
+            "구름": "bi-cloud",
+            "구름조금": "bi-cloud",
+            "구름많음": "bi-clouds",
+            "흐리고 비": "bi-cloud-rain",
+            "흐리고 눈": "bi-cloud-rain",
+            "흐리고 비/눈": "bi-cloud-sleet",
+            "흐리고 눈/비": "bi-cloud-sleet",
+            "구름많고 비": "bi-cloud-rain",
+            "구름많고 눈": "bi-cloud-rain",
+            "구름많고 비/눈": "bi-cloud-sleet",
+            "구름많고 눈/비": "bi-cloud-sleet",
+            "소나기": "bi-cloud-drizzle",
             "비": "bi-cloud-rain",
             "눈": "bi-cloud-snow",
-            "소나기": "bi-cloud-lightning-rain"
         };
         return iconMap[wf] || "bi-question-circle"; // Default icon if wf is unknown
+    }
+
+    // 날짜 변환
+    function formatDateTimeToKorean(timeString, includeTime = false) {
+        // 입력값에서 연도, 월, 일, 시, 분 추출
+        const year = timeString.slice(0, 4);
+        const month = timeString.slice(4, 6); // JavaScript의 월은 0부터 시작
+        const day = timeString.slice(6, 8);
+
+        // 기본 형식: "YYYY-MM-DD"
+        let formattedDate = `${year}년 ${month}월 ${day}일`;
+
+        // 시간 데이터가 있을 경우에만 시간 추가
+        if (includeTime && timeString.length >= 12) {
+            const hour = timeString.slice(8, 10);
+            const minute = timeString.slice(10, 12);
+            formattedDate += ` ${hour}시 ${minute}분`;
+        }
+
+        return formattedDate;
     }
 
     // 모델별 예상 발전량 위젯젯
@@ -215,7 +244,32 @@ $(document).ready(() => {
 
 
     // OPEN API Power API
-    function callPowerAPI() {
+    function callOpen_pabpg() {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "/api/open_pabpg",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    tradeYmd: "20210801",
+                    pageNo: 1,
+                    numOfRows: 30
+                }),
+                success: function (data) {
+                    console.log(data)
+                    if (data.open_pabpg_result) {
+                        resolve(data.open_pabpg_result);
+                    } else {
+                        reject("Error");
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            });
+        });
+
         $("#powerForm").on("submit", function (event) {
             event.preventDefault(); // 기본 폼 제출 방지
 
@@ -224,7 +278,7 @@ $(document).ready(() => {
 
             // POST 요청 보내기
             $.ajax({
-                url: "/api/power",
+                url: "/api/open_pabpg",
                 method: "POST",
                 contentType: "application/json",
                 data: JSON.stringify({
@@ -233,7 +287,7 @@ $(document).ready(() => {
                     numOfRows: 30
                 }),
                 success: function (data) {
-                    // console.log(data);
+                    console.log(data);
                     // 성공 시 응답 데이터를 화면에 표시
                     if (data.response.body.items.item.length > 0) {
                         let resultHtml = "<ul>";
