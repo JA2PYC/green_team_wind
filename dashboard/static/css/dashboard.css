@@ -14,8 +14,12 @@ canvas {
 }
 
 .dashboard {
+    position: relative;
     display: flex;
-    max-width: 1600px;
-    transition: transform 0.5s ease-in-out;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: calc(100vh - 7rem);
     overflow: hidden;
+    margin: auto;
 }

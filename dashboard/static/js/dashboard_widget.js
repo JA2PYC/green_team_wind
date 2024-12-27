@@ -1,28 +1,37 @@
 $(document).ready(function () {
+    // Slide 관련 변수
+    let currentIndex = 0;
+    const $widgetWrapper = $(document).find(".widgetWrapper");
+    const $widgetContainers = $widgetWrapper.find(".widgetContainer");
+    const totalContainers = $widgetContainers.length;
+
+    //  Interval 관련 변수
+    let slideIntervaId;
+    let isWidgetSliding = false;
+
     function initialize() {
-        widgetSlide();
-        widgetSlideInterval();
+        // widgetSlideInterval();
         eventHandler();
     }
 
     function eventHandler() {
         $(document).on('click', function (e) {
+            console.log(e.target)
+            console.log(currentIndex)
             if ($(e.target).hasClass('prev-btn')) {
+                console.log(currentIndex)
                 widgetSlide(currentIndex - 1, -1);
             } else if ($(e.target).hasClass('next-btn')) {
+                console.log(currentIndex)
                 widgetSlide(currentIndex + 1, 1);
 
             }
         });
     }
 
-    let currentIndex = 0;
-    const $dashboardContainer = $(document).find(".dashboard");
-    const $widgetContainers = $dashboardContainer.find(".widgetContainer");
-    const totalContainers = $widgetContainers.length;
     function widgetSlide(targetIndex, slideDirection) {
-        console.log(targetIndex)
         console.log(currentIndex)
+        console.log(targetIndex)
         if (targetIndex < 0) {
             targetIndex = totalContainers - 1;
         } else if (targetIndex >= totalContainers) {
@@ -47,8 +56,6 @@ $(document).ready(function () {
         currentIndex = targetIndex;
     }
 
-    let slideIntervaId;
-    let isWidgetSliding = false;
     function widgetSlideInterval() {
         if (isWidgetSliding) {
             clearInterval(slideIntervaId);
