@@ -6,10 +6,10 @@ const scene = new BABYLON.Scene(engine);
 // 카메라 설정
 const camera = new BABYLON.ArcRotateCamera(
     "camera",
-    Math.PI /30, // Alpha: 수평 각도
-    Math.PI / 2, // Beta: 수직 각도
+    Math.PI /0.65, // Alpha: 수평 각도
+    Math.PI / 2.1, // Beta: 수직 각도
     8,          // Radius: 카메라와 타겟 사이 거리
-    new BABYLON.Vector3(0.1, 2, 0.1), // 타겟 위치
+    new BABYLON.Vector3(0.1, 2.5, 0.1), // 타겟 위치
     scene
 
 );
@@ -55,7 +55,7 @@ BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
 
     // Animation Group 확인
     const animationGroup = scene.animationGroups.find(
-        group => group.name === "idle_with_cross_section"
+        group => group.name === "idle"
     );
 
     if (animationGroup) {
