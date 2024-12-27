@@ -1,8 +1,6 @@
 $(document).ready(() => {
     function initialize() {
         // callWindAPI();
-
-        // console.log(today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString());
         // callkma_sfctm3Data();
         initWidget();
         eventHandler();
@@ -85,6 +83,7 @@ $(document).ready(() => {
             "구름조금": "bi-cloud",
             "구름많음": "bi-clouds",
             "흐리고 비": "bi-cloud-rain",
+            "흐리고 한때 비": "bi-cloud-rain",
             "흐리고 눈": "bi-cloud-rain",
             "흐리고 비/눈": "bi-cloud-sleet",
             "흐리고 눈/비": "bi-cloud-sleet",
