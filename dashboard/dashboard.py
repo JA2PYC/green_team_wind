@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify
+from api.kakao_city import get_kakao_city_data
 from api.kma_reg import fetch_reg_data
 from api.kma_station import fetch_station_data
 from api.kma_sfctm2 import fetch_kma_sfctm2_data
@@ -26,6 +27,20 @@ dashboard = Blueprint("dashboard", __name__)
 @dashboard.route("/")
 def dashboard_route():
     return render_template("dashboard.html")
+
+# Kakao Map API
+@dashboard.route("/api/kakao_city", methods=["POST"])
+def kakao_city_data():
+    try:
+        print('route - kakao_city')
+        # 클라이언트로부터 요청받은 파라미터
+        # params = request.json
+        # city = params.get("city")
+        
+        result = get_kakao_city_data()
+        return jsonify({"kakao_city_result": result}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # 한국전력거래소_발전원별 발전량(계통기준) OPEN API PABG
 @dashboard.route("/api/open_pabg", methods=["POST"])

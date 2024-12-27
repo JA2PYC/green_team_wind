@@ -1,0 +1,128 @@
+/* 카카오 지도 관련 CSS */
+#kakaoMap {
+    width: 100%;
+    height: calc(100% - 3rem);
+}
+
+.area {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 3px;
+    font-size: 12px;
+    top: -5px;
+    left: 15px;
+    padding: 2px;
+}
+
+.info {
+    font-size: 14px;
+    /* border: 1px solid black; */
+    border:none;
+    border-radius: 10px;
+    padding: 8px;
+    background: white;
+    z-index: 10;
+}
+
+.info.info-big {
+    font-size: 20px;
+    border-radius: 20px;
+    padding: 15px;
+}
+
+.info.info-1 {
+    color: #fefefe;
+    background: #ff6a7b; /* 비슷한 계열의 선명한 핑크 */
+}
+
+.info.info-2 {
+    color: #fefefe;
+    background: #ff9f5b; /* 비슷한 계열의 선명한 오렌지 */
+}
+
+.info.info-3 {
+    color: #fefefe;
+    background: #ffcd6d; /* 비슷한 계열의 선명한 노란색 */
+}
+
+.info.info-4 {
+    color: #fefefe;
+    background: #5ac4c4; /* 비슷한 계열의 민트색 */
+}
+
+.info.info-5 {
+    color: #fefefe;
+    background: #4e98db; /* 비슷한 계열의 선명한 파란색 */
+}
+
+.info.info-6 {
+    color: #fefefe;
+    background: #ffad8b; /* 선명한 복숭아 오렌지 */
+}
+
+.info.info-7 {
+    color: #fefefe;
+    background: #ffd54f; /* 선명한 연한 노란색 */
+}
+
+.info.info-8 {
+    color: #fefefe;
+    background: #63b5ad; /* 부드러운 파스텔 그린 */
+}
+
+.info.info-9 {
+    color: #fefefe;
+    background: #60aee3; /* 선명한 청록색 */
+}
+
+.info.info-10 {
+    color: #fefefe;
+    background: #f7b9b9; /* 선명한 연핑크색 */
+}
+
+.info.info-11 {
+    color: #fefefe;
+    background: #b2d8f4; /* 부드러운 파스텔 블루 */
+}
+
+.info.info-12 {
+    color: #fefefe;
+    background: #ffcb80; /* 선명한 오렌지색 */
+}
+
+.info.info-13 {
+    color: #fefefe;
+    background: #4d89c3; /* 선명한 중간 파란색 */
+}
+
+.info.info-14 {
+    color: #fefefe;
+    background: #f8d771; /* 선명한 황금색 */
+}
+
+.info.info-15 {
+    color: #fefefe;
+    background: #89f6cc; /* 밝은 민트색 */
+}
+
+.info.info-16 {
+    color: #fefefe;
+    background: #ff7d82; 
+}
+
+
+
+.info .title {
+    font-weight: bold;
+}
+
+.info p {
+    margin: 0;
+}
+
+/* 인포윈도우 화살표 제거 */
+.kakao-infowindow {
+    display: none;
+    /* 기본 스타일로 표시되는 삼각형 숨기기 */
+}
