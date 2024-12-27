@@ -9,7 +9,7 @@ const camera = new BABYLON.ArcRotateCamera(
     Math.PI /0.65, // Alpha: 수평 각도
     Math.PI / 2.1, // Beta: 수직 각도
     8,          // Radius: 카메라와 타겟 사이 거리
-    new BABYLON.Vector3(0.1, 2.5, 0.1), // 타겟 위치
+    new BABYLON.Vector3(0, 2, 0), // 타겟 위치
     scene
 
 );
@@ -24,7 +24,7 @@ const spotLight = new BABYLON.SpotLight(
 );
 spotLight.intensity = 3.0; // 추가 조명 강도
 camera.attachControl(canvas, true);
-camera.fov = 0.4; // 시야각 증가 (작으면 가깝게 크면 멀리)
+camera.fov = 0.7; // 시야각 증가 (작으면 가깝게 크면 멀리)
 camera.minZ = 1;  // 최소 클리핑 거리 (가까운 물체를 표시)
 camera.maxZ = 100;  // 최대 클리핑 거리 (멀리 있는 물체를 표시)
 
