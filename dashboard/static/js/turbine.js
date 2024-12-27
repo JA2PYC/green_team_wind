@@ -7,8 +7,8 @@ const scene = new BABYLON.Scene(engine);
 const camera = new BABYLON.ArcRotateCamera(
     "camera",
     Math.PI /0.65, // Alpha: 수평 각도
-    Math.PI / 2.0, // Beta: 수직 각도
-    8,          // Radius: 카메라와 타겟 사이 거리
+    Math.PI / 1.8, // Beta: 수직 각도
+    30,          // Radius: 카메라와 타겟 사이 거리
     new BABYLON.Vector3(0, 1.8, 0), // 타겟 위치
     scene
 
@@ -37,8 +37,9 @@ console.log(`Target: ${camera.target}`);
 // 조명 추가
 const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 3, 0), scene);
 light.intensity = 0.8;
-//////////////////////////////////////////////////////////////////////////////////////////
 
+
+/////////////////////////////////////////////
 // 풍력 발전기 주위를 도는 카메라 애니메이션 설정
 const alphaAnimation = new BABYLON.Animation(
     "alphaAnimation",
@@ -81,19 +82,70 @@ scene.beginAnimation(camera, 0, 600, true);
 // 하늘색 설정 (제주도 하늘색과 바다색의 조화)
 scene.clearColor = new BABYLON.Color4(0.5, 0.8, 0.9, 1.0); // 밝은 하늘색
 
-// 바다 평면 생성
-const waterMesh = BABYLON.MeshBuilder.CreateGround("waterMesh", { width: 1000, height: 1000 }, scene);
-const waterMaterial = new BABYLON.StandardMaterial("waterMaterial", scene);
-waterMaterial.diffuseColor = new BABYLON.Color3(0.1608, 0.4627, 0.8118);
-waterMaterial.specularColor = new BABYLON.Color3(0.1608, 0.4627, 0.8118, 1.0); // 1.0은 완전 불투명
-waterMaterial.alpha = 0; // 투명도
-waterMesh.material = waterMaterial;
-waterMesh.position.y = -0.5; // 바다 높이 설정
+// 언덕 지형 생성
+const hill = BABYLON.MeshBuilder.CreateGround("hill", {
+    width: 50,
+    height: 50,
+    subdivisions: 32,
+    updatable: true
+}, scene);
 
-// 물결 애니메이션
-scene.registerBeforeRender(() => {
-    const time = performance.now() * 0.001; // 시간에 따른 변화
-    waterMesh.position.y = Math.sin(time) * 0.5; // 파도 효과
+// 언덕 높낮이 설정 (낮게 조정)
+const hillPositions = hill.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+for (let i = 0; i < hillPositions.length; i += 3) {
+    const x = hillPositions[i];
+    const z = hillPositions[i + 2];
+    hillPositions[i + 1] = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 1.0; // 언덕 모양 낮춤
+}
+hill.updateVerticesData(BABYLON.VertexBuffer.PositionKind, hillPositions);
+
+// 언덕 머티리얼 설정 (텍스처 적용)
+const grassMaterial = new BABYLON.StandardMaterial("grassMaterial", scene);
+grassMaterial.diffuseTexture = new BABYLON.Texture(
+    "/static/models/grassland.jpg", // 상대 경로
+    scene
+);
+grassMaterial.specularColor = new BABYLON.Color3(0, 0, 0); // 반사광 제거
+hill.material = grassMaterial;
+
+// 풍력발전기 다수 배치
+BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
+    console.log("3D 모델 로드 완료");
+
+    // 풍력발전기 복제 및 배치
+    const rootMesh = scene.meshes.find(mesh => mesh.name === "__root__");
+    if (rootMesh) {
+        rootMesh.scaling = new BABYLON.Vector3(4, 4, 4); // 모델 크기 조정
+        rootMesh.position = new BABYLON.Vector3(0, 0, 0); // 중심 위치
+
+        const turbinePositions = []; // 이미 사용된 위치 추적
+
+        // 랜덤 위치 생성 함수 (중복 방지)
+        function generateUniquePosition() {
+            let x, z, y;
+            let isUnique = false;
+
+            while (!isUnique) {
+                x = (Math.random() - 0.5) * 40; // 랜덤한 X 위치
+                z = (Math.random() - 0.5) * 40; // 랜덤한 Z 위치
+                y = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 1.0; // 언덕 높이에 맞춤
+
+              // 기존 좌표와 최소 거리 5 이상 유지 및 앞뒤 위치 확인
+              isUnique = turbinePositions.every(pos => {
+                const distance = Math.sqrt((pos.x - x) ** 2 + (pos.z - z) ** 2);
+                const direction = Math.abs(Math.atan2(pos.z - z, pos.x - x)); // 방향 계산
+                return distance > 5 && (direction < Math.PI / 4 || direction > (3 * Math.PI) / 4);
+            });
+        }
+            turbinePositions.push({ x, z }); // 위치 저장
+            return new BABYLON.Vector3(x, y, z);
+        }
+        // 9개의 고유 위치에 복사본 생성
+        for (let i = 0; i < 8; i++) {
+            const clone = rootMesh.clone(`turbine_${i}`);
+            clone.position = generateUniquePosition(); // 고유한 위치 할당
+        }
+    }
 });
 
 // 풍력 터빈 배경 조명 효과
@@ -105,6 +157,75 @@ const directionalLight = new BABYLON.DirectionalLight(
 directionalLight.intensity = 20.0;
 
 
+//////////////////////////////////////////////////////////////////////////
+// 스카이돔 생성
+const skydome = BABYLON.MeshBuilder.CreateSphere("skyDome", {
+    diameter: 300.0, // 스카이돔 크기
+    segments: 32      // 세그먼트 수 (더 부드러운 구 모양)
+}, scene);
+
+// 스카이돔 머티리얼 설정
+const skydomeMaterial = new BABYLON.StandardMaterial("skyDomeMaterial", scene);
+skydomeMaterial.backFaceCulling = false; // 내부에서 보이도록 설정
+skydomeMaterial.diffuseTexture = new BABYLON.Texture(
+    "/static/models/sky.jpg", // 스카이돔 텍스처
+    scene
+);
+skydomeMaterial.diffuseTexture.hasAlpha = true; // 투명도 활성화 (필요시)
+skydomeMaterial.specularColor = new BABYLON.Color3(0, 0, 0); // 반사광 제거
+skydomeMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.7, 0.9); // 밝기 조정 (하늘색과 통일)
+skydome.material = skydomeMaterial;
+
+// 스카이돔 위치 조정
+skydome.position = new BABYLON.Vector3(0, 0, 0);
+
+// 장면의 기본 하늘색 설정 (스카이돔과 동일한 색상)
+scene.clearColor = new BABYLON.Color4(0.5, 0.7, 0.9, 1.0); // 스카이돔과 동일한 하늘색
+
+// 구름 움직임 애니메이션
+scene.registerBeforeRender(() => {
+    if (skydomeMaterial.diffuseTexture) {
+        skydomeMaterial.diffuseTexture.uOffset += 0.0001; // 수평 이동
+        skydomeMaterial.diffuseTexture.vOffset += 0.00005; // 수직 이동
+    }
+});
+/////////////////////////////////////////////////////////////////////////
+// 비 효과 입자 시스템 생성
+const rainParticleSystem = new BABYLON.ParticleSystem("rain", 2000, scene);
+
+// 비 입자 텍스처 설정
+rainParticleSystem.particleTexture = new BABYLON.Texture(
+    "https://playground.babylonjs.com/textures/flare.png", // 비 입자 텍스처 (작은 원형 이미지)
+    scene
+);
+// 비 시작 위치 설정
+rainParticleSystem.emitter = new BABYLON.Vector3(0, 50, 0); // 비가 내리는 시작 위치
+rainParticleSystem.minEmitBox = new BABYLON.Vector3(-25, 0, -25); // 입자 방출 최소 범위
+rainParticleSystem.maxEmitBox = new BABYLON.Vector3(25, 0, 25); // 입자 방출 최대 범위
+// 입자 크기 설정 (비 물방울 크기)
+rainParticleSystem.minSize = 0.1;
+rainParticleSystem.maxSize = 0.2;
+// 입자 생존 시간 설정
+rainParticleSystem.minLifeTime = 0.5;
+rainParticleSystem.maxLifeTime = 1.0;
+
+// 입자 속도 설정 (비가 떨어지는 속도)
+rainParticleSystem.minEmitPower = 10; // 최소 속도
+rainParticleSystem.maxEmitPower = 15; // 최대 속도
+rainParticleSystem.updateSpeed = 0.01; // 업데이트 주기
+
+// 중력 설정 (입자가 아래로 떨어지게)
+rainParticleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0); // 중력 적용
+
+// 투명도 설정
+rainParticleSystem.color1 = new BABYLON.Color4(0.8, 0.8, 1.0, 0.5); // 밝은 파란색, 반투명
+rainParticleSystem.color2 = new BABYLON.Color4(0.6, 0.6, 1.0, 0.3); // 어두운 파란색, 반투명
+rainParticleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0); // 소멸 시 투명
+
+// 입자 시스템 시작
+rainParticleSystem.start();
+
+//////////////////////////////////////////////////////////////////////////
 // GLTF 모델 로드
 BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
     console.log("3D 모델 로드 완료");
