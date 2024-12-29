@@ -463,12 +463,16 @@
     cursor: pointer;
 }
 
+
 .widget.windPowerChart {
-    grid-column: span 2;
+    grid-column: span 3;
 }
 
-.widget.predictPower .windPowerCanvas {
-    height: 350px;
+.widget.windPowerChart .chartContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100% - 3rem);
 }
 
 /* 3D 풍력 발전기 위젯 */
