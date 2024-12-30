@@ -41,7 +41,6 @@ $(document).ready(() => {
 
     }
 
-
     // 지도 위젯
     function widgetMap(kma_sfctm2Data) {
         let selectedStnName =
@@ -171,7 +170,8 @@ $(document).ready(() => {
     function widgetWeather(fct_afs_data) {
         const widget = $(".widget.weatherForecast");
         let validWeather = null;
-        // console.log(fct_afs_data);
+
+        console.log(fct_afs_data);
 
         // Find the first valid weather data
         for (let weather of fct_afs_data) {
