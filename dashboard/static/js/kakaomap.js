@@ -82,10 +82,12 @@ $(document).ready(function () {
             });
 
             kakao.maps.event.addListener(polygon, 'mouseover', function () {
+                console.log('Mouse over:', area.name);
                 polygon.setOptions({ fillColor: '#09f' });
             });
 
             kakao.maps.event.addListener(polygon, 'mouseout', function () {
+                console.log('Mouse out:', area.name);
                 polygon.setOptions({ fillColor: '#a6c8ff' });
             });
         });
