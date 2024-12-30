@@ -5,39 +5,74 @@ import * as KAKAO_MAP from './api/kakaomap.js';
 $(document).ready(() => {
     function initialize() {
         initAPIData();
-        eventHandler();
+        // eventHandler();
     }
 
     // Initialize Weather API
     function initAPIData() {
         // console.log('initAPIData');
         let today = new Date();
+
+        let year = today.getFullYear().toString();
+        let month = (today.getMonth() + 1).toString().padStart(2, '0'); // 2자리로 변환
+        let date = today.getDate().toString().padStart(2, '0'); // 2자리로 변환
+        let hour1 = (today.getHours() - 9).toString().padStart(2, '0'); // 2자리로 변환
+        let hour2 = today.getHours().toString().padStart(2, '0'); // 2자리로 변환
+
+        let tm1 = year + month + date + hour1 + '00';
+        let tm2 = year + month + date + hour2 + '00';
+
         let kmaFctafsdlData = null
         let kmaSfctm2Data = null;
+        let kmaSfctm3Data = null;
         let openPabgData = null;
 
         Promise.all([
             KMA_API.callfct_afs_dlData("11G00201"),
             KMA_API.callkma_sfctm2Data(),
+            KMA_API.callkma_sfctm3Data(tm1, tm2),
             callOpen_pabg(today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString())
-        ]).then(([responseFctafsdl, responseSfctm2, responseOpenPabg]) => {
+        ]).then(([responseFctafsdl, responseSfctm2, responseSfctm3, responseOpenPabg]) => {
             kmaFctafsdlData = responseFctafsdl;
             kmaSfctm2Data = responseSfctm2
+            kmaSfctm3Data = responseSfctm3;
             openPabgData = responseOpenPabg;
 
             // Initialize Widget
-            initWidget(kmaFctafsdlData, kmaSfctm2Data, openPabgData);
+            initWidget(kmaFctafsdlData, kmaSfctm2Data, kmaSfctm3Data, openPabgData);
         }).catch(function (error) {
             console.log('Error : initAPIData', error);
         });
     }
 
     // 위젯 초기화
-    function initWidget(kmaFctafsdlData, kmaSfctm2Data, openPabgData) {
-        widgetMap(kmaSfctm2Data);
-        widgetWeather(kmaFctafsdlData);
-        widgetPredictPower(kmaSfctm2Data);
-        widgetWindPowerChart(kmaSfctm2Data);
+    function initWidget(kmaFctafsdlData, kmaSfctm2Data, kmaSfctm3Data, openPabgData) {
+        let selectedStnName =
+            ['춘천', '서울', '인천', '수원', '청주',
+                '대전', '안동', '대구', '전주', '울산',
+                '창원', '광주', '부산', '목포', '홍성',
+                '제주']
+        let selectedStnIds =
+            ['90', '96', '101', '108', '112',
+                '119', '131', '133', '136', '143',
+                '146', '152', '155', '156', '159',
+                '165', '184', '212'];
+        let filteredKmaSfctm3Data = KMA_API.filterkma_sfctm3ByStnId(kmaSfctm3Data, selectedStnIds);
+        console.log('kma_sfctm3Data:', filteredKmaSfctm3Data);
+        // console.log('kma_sfctm3Data:', response);
+        //  let processedWeatherSQ = processWeatherTimeSeriesData(kmaSfctm3Data);
+        //  console.log('processedWeatherSQ:', processedWeatherSQ.data);
+        //  console.log('processedWeatherSQ:', processedWeatherSQ.stationIds);
+        // callCSTLModelTimeSeries(processedWeatherSQ).then(function (response) {
+        //     console.log('CSTL Model Response:', response);
+        // }).catch(function (error) {
+        //     console.error("Error:", error); 
+        // });
+
+        // widgetMap(kmaSfctm2Data);
+        // widgetWeather(kmaFctafsdlData);
+        // widgetPredictPower(kmaSfctm2Data);
+        // widgetWindPowerChart(kmaSfctm2Data);
         // widgetPowerStation(openPabgData);
 
     }
@@ -60,32 +95,34 @@ $(document).ready(() => {
     }
 
     // 날씨 위젯
-    function widgetWeather(fct_afs_data) {
+    function widgetWeather(fct_afs_data = []) {
         const widget = $(".widget.weatherForecast");
         let validWeather = null;
 
-        console.log(fct_afs_data);
+        // console.log(fct_afs_data);
+        fct_afs_data.forEach((weather, index) => {
+            if (index === 0) {
+                // Set Indicator
+                widget.find(".widgetIndicator.fcLocation").text(weather.stn_name);
+                widget.find(".weatherFcTime").text(formatDateTimeToKorean(weather.tm_fc, true));
 
-        // Find the first valid weather data
-        for (let weather of fct_afs_data) {
-            if (weather.wf && weather.ta != "-99") {
-                validWeather = weather;
-                break;
+                // Today's Weather
+                const iconClass = getWeatherIcon(weather.wf);
+                widget.find(".weather-icon").html(`<i class="${iconClass}"></i>`);
+                widget.find(".weather-temp").text(weather.ta + "°C");
+                widget.find(".weather-desc").text(weather.wf + ' ' + weather.st + '% ' + weather.w1);
+            } else {
+                // Weekly Weather
+                const forecastElement = $(`
+                    <div class="forecast">
+                        <i class="forecast-icon ${getWeatherIcon(weather.wf)}"></i>
+                        <div class="forecast-temp">${weather.ta}°C</div>
+                        <div class="forecast-desc">${weather.wf}</div>
+                    </div>`
+                );
+                widget.find(".weatherWeek").append(forecastElement);
             }
-        }
-
-        if (validWeather) {
-            const iconClass = getWeatherIcon(validWeather.wf);
-            let foreacastTime = formatDateTimeToKorean(validWeather.tm_ef, true);
-            widget.find(".widgetIndicator.fcLocation").text(validWeather.stn_name);
-            widget.find(".weather-icon").html(`<i class="${iconClass}"></i>`);
-            widget.find(".weather-temp").text(validWeather.ta + "°C");
-            widget.find(".weather-desc").text(validWeather.wf + ' ' + validWeather.st + '% ' + validWeather.w1);
-            widget.find(".weather-detail").text(foreacastTime);
-        } else {
-            widget.find(".weather-icon").html(`<i class="bi-exclamation-circle"></i>`);
-            widget.find(".weather-text").text("데이터가 유효하지 않습니다.");
-        }
+        })
     }
 
     // 날씨 아이콘 매핑
@@ -297,6 +334,34 @@ $(document).ready(() => {
 
     function processWeatherTimeSeriesData(weatherData) {
         // Process Data for CSTL Model
+        const groupedData = {};
+        // console.log(weatherData)
+        // 데이터를 반복하면서 그룹화
+        weatherData.forEach(item => {
+            const stationId = item.station_id;
+            if (!groupedData[stationId]) {
+                groupedData[stationId] = [];
+            }
+            groupedData[stationId].push([item.temperature, item.wind_speed, item.air_pressure, item.density]);
+        });
+
+        // 길이가 10 이상인 데이터만 필터링
+        const filteredData = [];
+        const stationIds = [];  // station_id만 별도로 저장
+
+        $.each(groupedData, function (stationId, data) {
+            // 길이가 10 미만이면 제외
+            if (data.length >= 10) {
+                filteredData.push(data);
+                stationIds.push(stationId);
+            }
+        });
+
+        // # 길이가 10 이상인 데이터만 반환
+        return {
+            stationIds: stationIds,
+            data: filteredData
+        };
     }
 
     // XGB Model Predict
@@ -344,9 +409,31 @@ $(document).ready(() => {
 
     // CSTL Model Predict
     function callCSTLModel(inputs) {
+        console.log(inputs)
         return new Promise(function (resolve, reject) {
             $.ajax({
                 url: "model/cstl_ai_model",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    inputs: inputs
+                }),
+                success: function (data) {
+                    resolve(data);
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    reject(error);
+                }
+            })
+        });
+    }
+
+    function callCSTLModelTimeSeries(inputs) {
+        // console.log(inputs)
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: "model/cstl_ai_model_sq",
                 method: "POST",
                 contentType: "application/json",
                 data: JSON.stringify({

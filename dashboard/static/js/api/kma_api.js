@@ -7,6 +7,10 @@ export function filterkma_sfctm2ByStnId(weatherData = [], stationIds = []) {
     return weatherData.filter((data) => stationIds.includes(data.station_id));
 }
 
+export function filterkma_sfctm3ByStnId(weatherData = [], stationIds= []) {
+    return weatherData.filter((data) => stationIds.includes(data.station_id));
+}
+
 // 기상청 예보구역 정보 BY JSON
 export function callkma_regData(reg = []) {
     return new Promise(function (resolve, reject) {

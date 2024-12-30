@@ -191,6 +191,7 @@
 
 .widget .widgetArticle{
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
@@ -207,14 +208,14 @@
 }
 
 /* widget 요소에 2x2 배치가 적용되도록 더 구체적으로 지정 */
-.widget.wind-map {
+.widget.windMapKakao {
     grid-column: span 2;
     grid-row: span 2;
     position: relative;
     /* iframe을 정확하게 배치하기 위한 부모 컨테이너의 상대적 위치 지정 */
 }
 
-.widget .wind-map iframe {
+.widget.windMapKakao iframe {
     width: 100%;
     /* iframe이 부모의 너비에 맞게 100% 차지 */
     height: 100%;
@@ -224,9 +225,20 @@
 }
 
 /* 날씨 위젯 */
-.widget.weatherForecast .weatehrInfo {
+.widget.weatherForecast .weatherContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    height: 100%;
+}
+
+.widget.weatherForecast .weatherToday {
+    width: 100%;
     font-size: 14px;
     text-align: center;
+    /* margin-bottom: 1rem; */
 }
 
 .widget.weatherForecast .weather-data {
@@ -251,9 +263,10 @@
     margin-bottom: -1rem;
 }
 
-.widget.weatherForecast .weather-detail {
+/* .widget.weatherForecast .weather-detail {
     margin-top: 10px;
-}
+} */
+
 
 .widget.weatherForecast i {
     color: #ffcc00;
@@ -380,7 +393,28 @@
     }
 }
 
+.widget.weatherForecast .weatherWeek {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
 
+.widget.weatherForecast .weatherWeek {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size : 12px;
+    text-align: center;
+}
+
+.widget.weatherForecast .weatherWeek i {
+    font-size: 2rem;
+}
+
+.widget.weatherForecast .weatherFcTime {
+    font-size: 12px;
+}
 /* 모델별 발전량 위젯 */
 .widget.predictPower {
     font-size: 14px;
@@ -470,9 +504,21 @@
     cursor: pointer;
 }
 
+.widget.windMapVentusky {
+    grid-column: span 2;
+    grid-row: span 2;
+    position: relative;
+}
 
+.widget.windMapVentusky .ventuskyMapContainer {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* 풍속 발전량 차트 */
 .widget.windPowerChart {
-    grid-column: span 3;
+    grid-column: span 2;
 }
 
 .widget.windPowerChart .chartContainer {
@@ -500,6 +546,17 @@
     border: none;
     border-radius: 5px;
     /* 테두리 없음 */
+}
+
+.widget.copyright {
+    font-size: 12px;
+    color: #0f0f0f;
+    /* text-align: center; */
+    margin-top: 1rem;
+}
+
+.widget.copyright .copyrightInfo {
+    /* text-align: left; */
 }
 
 .widget button {
@@ -545,6 +602,7 @@
     display: flex;
     justify-content: space-between;
     transform: translateY(-50%);
+    pointer-events: none;
 }
 
 .widgetControl button {
@@ -557,8 +615,10 @@
     cursor: pointer;
     margin: 1rem;
     transition: background-color 0.3s ease;
+    pointer-events: auto;
 }
 
 .widgetControl button:hover {
     background-color: rgba(0, 0, 0, 0.2);
+    pointer-events: auto;
 }
