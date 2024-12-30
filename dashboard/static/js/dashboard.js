@@ -35,9 +35,9 @@ $(document).ready(() => {
     function initWidget(kmaFctafsdlData, kmaSfctm2Data, openPabgData) {
         widgetMap(kmaSfctm2Data);
         widgetWeather(kmaFctafsdlData);
-        widgetPowerStation(openPabgData);
         widgetPredictPower(kmaSfctm2Data);
         widgetWindPowerChart(kmaSfctm2Data);
+        // widgetPowerStation(openPabgData);
 
     }
 
