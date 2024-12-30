@@ -1,0 +1,2 @@
+this is a lowpoly model of casual man for use in animations with programs like fragmotion and
+3d rad.Could be applied textures instead of materials.Enjoy!

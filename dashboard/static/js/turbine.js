@@ -130,7 +130,7 @@ BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
                 z = (Math.random() - 0.5) * 40; // 랜덤한 Z 위치
                 y = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 1.0; // 언덕 높이에 맞춤
 
-              // 기존 좌표와 최소 거리 5 이상 유지 및 앞뒤 위치 확인
+              // 기존 좌표와 최소 거리 5m 초과 유지 및 앞뒤 위치 확인
               isUnique = turbinePositions.every(pos => {
                 const distance = Math.sqrt((pos.x - x) ** 2 + (pos.z - z) ** 2);
                 const direction = Math.abs(Math.atan2(pos.z - z, pos.x - x)); // 방향 계산
@@ -189,43 +189,6 @@ scene.registerBeforeRender(() => {
         skydomeMaterial.diffuseTexture.vOffset += 0.00005; // 수직 이동
     }
 });
-/////////////////////////////////////////////////////////////////////////
-// 비 효과 입자 시스템 생성
-const rainParticleSystem = new BABYLON.ParticleSystem("rain", 2000, scene);
-
-// 비 입자 텍스처 설정
-rainParticleSystem.particleTexture = new BABYLON.Texture(
-    "https://playground.babylonjs.com/textures/flare.png", // 비 입자 텍스처 (작은 원형 이미지)
-    scene
-);
-// 비 시작 위치 설정
-rainParticleSystem.emitter = new BABYLON.Vector3(0, 50, 0); // 비가 내리는 시작 위치
-rainParticleSystem.minEmitBox = new BABYLON.Vector3(-25, 0, -25); // 입자 방출 최소 범위
-rainParticleSystem.maxEmitBox = new BABYLON.Vector3(25, 0, 25); // 입자 방출 최대 범위
-// 입자 크기 설정 (비 물방울 크기)
-rainParticleSystem.minSize = 0.1;
-rainParticleSystem.maxSize = 0.2;
-// 입자 생존 시간 설정
-rainParticleSystem.minLifeTime = 0.5;
-rainParticleSystem.maxLifeTime = 1.0;
-
-// 입자 속도 설정 (비가 떨어지는 속도)
-rainParticleSystem.minEmitPower = 10; // 최소 속도
-rainParticleSystem.maxEmitPower = 15; // 최대 속도
-rainParticleSystem.updateSpeed = 0.01; // 업데이트 주기
-
-// 중력 설정 (입자가 아래로 떨어지게)
-rainParticleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0); // 중력 적용
-
-// 투명도 설정
-rainParticleSystem.color1 = new BABYLON.Color4(0.8, 0.8, 1.0, 0.5); // 밝은 파란색, 반투명
-rainParticleSystem.color2 = new BABYLON.Color4(0.6, 0.6, 1.0, 0.3); // 어두운 파란색, 반투명
-rainParticleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0); // 소멸 시 투명
-
-// 입자 시스템 시작
-rainParticleSystem.start();
-
-//////////////////////////////////////////////////////////////////////////
 // GLTF 모델 로드
 BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
     console.log("3D 모델 로드 완료");
