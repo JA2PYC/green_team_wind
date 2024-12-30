@@ -8,7 +8,7 @@ const camera = new BABYLON.ArcRotateCamera(
     "camera",
     Math.PI /0.65, // Alpha: 수평 각도
     Math.PI / 1.8, // Beta: 수직 각도
-    50,          // Radius: 카메라와 타겟 사이 거리
+    30,          // Radius: 카메라와 타겟 사이 거리
     new BABYLON.Vector3(0, 1.8, 0), // 타겟 위치
     scene
 
@@ -39,46 +39,8 @@ const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 3, 0)
 light.intensity = 0.8;
 
 
-/////////////////////////////////////////////////////////
-// 풍력 발전기 주위를 도는 카메라 애니메이션 설정(드론샷 느낌)
-// const alphaAnimation = new BABYLON.Animation( //알파애니메이션은 수평 회전 각도 조정
-//     "alphaAnimation",
-//     "alpha",
-//     24, // FPS
-//     BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-//     BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
-// );
-
-// const betaAnimation = new BABYLON.Animation( //베타애니메이션은 수직 각도 조정
-//     "betaAnimation",
-//     "beta",
-//     24, // FPS
-//     BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-//     BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT // 고정된 수직 각도
-// );
-
-// // 애니메이션 키프레임 설정
-// const alphaKeys = [
-//     { frame: 0, value: Math.PI / 0.65 }, // 초기 각도
-//     { frame: 1200, value: Math.PI * 2 + Math.PI / 0.65 } // 360도 회전
-// ];
-
-// const betaKeys = [
-//     { frame: 0, value: Math.PI / 3.0 }, // 초기 수직 각도
-//     { frame: 1200, value: Math.PI / 3.0 }, // 조금 아래로 이동
-//     // { frame: 1800, value: Math.PI / 3.0 }, // 원래 위치로 복귀
-// ];
-// alphaAnimation.setKeys(alphaKeys);
-// betaAnimation.setKeys(betaKeys);
-
-// // 카메라에 애니메이션 적용
-// camera.animations.push(alphaAnimation);
-// camera.animations.push(betaAnimation);
-
-// // 애니메이션 시작 (프레임 수 증가로 더 천천히 회전)
-// scene.beginAnimation(camera, 0, 1200, true);
-
-// S자 커브를 위한 알파 애니메이션
+/////////////////////////////////////////////
+// 풍력 발전기 주위를 도는 카메라 애니메이션 설정
 const alphaAnimation = new BABYLON.Animation(
     "alphaAnimation",
     "alpha",
@@ -87,7 +49,6 @@ const alphaAnimation = new BABYLON.Animation(
     BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
 );
 
-// S자 커브를 위한 베타 애니메이션
 const betaAnimation = new BABYLON.Animation(
     "betaAnimation",
     "beta",
@@ -96,55 +57,26 @@ const betaAnimation = new BABYLON.Animation(
     BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
 );
 
-// 거리 변화(근접/멀어짐)를 위한 반경 애니메이션
-const radiusAnimation = new BABYLON.Animation(
-    "radiusAnimation",
-    "radius",
-    24, // FPS
-    BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-    BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
-);
-
-// 알파 애니메이션 키프레임 (좌우로 이동하며 S자 형태)
+// 애니메이션 키프레임 설정
 const alphaKeys = [
-    { frame: 0, value: -2 }, // 시작 각도
-    { frame: 400, value: -Math.PI / 2 }, // S자 커브의 첫번째 방향
-    { frame: 700, value: -Math.PI }, // 반대 방향으로 커브
-    { frame: 1600, value: (3 * Math.PI) / 2 }, // 다시 첫 방향
-    { frame: 2000, value: 2 * Math.PI }, // 초기 위치로 돌아옴
+    { frame: 0, value: Math.PI / 0.65 }, // 초기 각도
+    { frame: 600, value: Math.PI * 1.8 }, // 360도 한 바퀴 회전
 ];
 
-// 베타 애니메이션 키프레임 (상하로 약간 움직이며 흔들림 효과)
 const betaKeys = [
-    { frame: 0, value: Math.PI / 3 }, // 기본 각도
-    { frame: 400, value: Math.PI / 2.8 }, // 약간 위로
-    { frame: 700, value: Math.PI / 3.2 }, // 약간 아래로
-    { frame: 1600, value: Math.PI / 2.8 }, // 다시 위로
-    { frame: 2000, value: Math.PI / 3 }, // 초기 각도로 복귀
+    { frame: 0, value: Math.PI / 3.0 }, // 초기 수직 각도
+    { frame: 300, value: Math.PI / 3.0 }, // 조금 아래로 이동
+    { frame: 600, value: Math.PI / 2.0 }, // 원래 위치로 복귀
 ];
-
-// 반경 애니메이션 키프레임 (근접/멀어짐 효과)
-const radiusKeys = [
-    { frame: 0, value: 50 }, // 멀리 있음
-    { frame: 400, value: 20 }, // 타겟에 가까워짐
-    { frame: 700, value: 30 }, // 다시 약간 멀어짐
-    { frame: 1600, value: 35 }, // 더 멀어짐
-    { frame: 2000, value: 50 }, // 초기 거리로 복귀
-];
-
-// 키프레임 설정
 alphaAnimation.setKeys(alphaKeys);
 betaAnimation.setKeys(betaKeys);
-radiusAnimation.setKeys(radiusKeys);
 
-// 카메라에 애니메이션 추가
+// 카메라에 애니메이션 적용
 camera.animations.push(alphaAnimation);
 camera.animations.push(betaAnimation);
-camera.animations.push(radiusAnimation);
 
 // 애니메이션 시작
-scene.beginAnimation(camera, 0, 1200, true);
-
+scene.beginAnimation(camera, 0, 600, true);
 
 // 하늘색 설정 (제주도 하늘색과 바다색의 조화)
 scene.clearColor = new BABYLON.Color4(0.5, 0.8, 0.9, 1.0); // 밝은 하늘색
@@ -174,23 +106,8 @@ grassMaterial.diffuseTexture = new BABYLON.Texture(
     scene
 );
 grassMaterial.specularColor = new BABYLON.Color3(0, 0, 0); // 반사광 제거
-hill.material = grassMaterial; 
+hill.material = grassMaterial;
 
-// 발전기 위치 배열 (학익진 배열)
-const turbineFixedPositions = [
-    new BABYLON.Vector3(0, 0, 0), // 중심
-    new BABYLON.Vector3(-7, 2, -5), // 좌측 날개 첫번째 줄
-    new BABYLON.Vector3(-14, 2, -10), // 좌측 날개 두번째 줄
-    new BABYLON.Vector3(-21, 2, -15), // 좌측 날개 끝
-    
-    new BABYLON.Vector3(7, 2, -5), // 우측 날개 첫번째 줄
-    new BABYLON.Vector3(14, 2, -10), // 우측 날개 두번째 줄
-    new BABYLON.Vector3(21, 2, -15), // 우측 날개 끝
-    
-    new BABYLON.Vector3(-3, 0, 10), // 좌측 뒤쪽
-    new BABYLON.Vector3(3, 0, 10) // 우측 뒤쪽
-];
-   
 // 풍력발전기 다수 배치
 BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
     console.log("3D 모델 로드 완료");
@@ -201,43 +118,33 @@ BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
         rootMesh.scaling = new BABYLON.Vector3(4, 4, 4); // 모델 크기 조정
         rootMesh.position = new BABYLON.Vector3(0, 0, 0); // 중심 위치
 
-        // 고정된 위치에 풍력 발전기 배치
-        turbineFixedPositions.forEach((position, index) => {
-            const clone = rootMesh.clone(`turbine_${index}`);
-            clone.position = position;
-          
-           // 3D 간판 스타일 태그 표시 추가
-           const tagMesh = BABYLON.MeshBuilder.CreatePlane(`tag_${index}`, { width: 2, height: 1 }, scene); // 2:1 비율
-           tagMesh.position = new BABYLON.Vector3(position.x, position.y + 4, position.z);
+        const turbinePositions = []; // 이미 사용된 위치 추적
 
-           const tagMaterial = new BABYLON.StandardMaterial(`tagMaterial_${index}`, scene);
-           tagMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1); // 흰색
-           tagMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1); // 빛나는 효과
-           tagMaterial.backFaceCulling = false; // 양면 렌더링
+        // 랜덤 위치 생성 함수 (중복 방지)
+        function generateUniquePosition() {
+            let x, z, y;
+            let isUnique = false;
 
-           const dynamicTexture = new BABYLON.DynamicTexture(`dynamicTexture_${index}`, { width: 512, height: 256 }, scene);
-           dynamicTexture.hasAlpha = true; // 배경 투명 설정
-           dynamicTexture.drawText(
-               `A-${index + 1}`,
-               null,
-               128,
-               "bold 96px Arial",
-               "white",
-               "transparent" // 배경을 제거 (투명하게 설정)
-           );
+            while (!isUnique) {
+                x = (Math.random() - 0.5) * 40; // 랜덤한 X 위치
+                z = (Math.random() - 0.5) * 40; // 랜덤한 Z 위치
+                y = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 1.0; // 언덕 높이에 맞춤
 
-           tagMaterial.diffuseTexture = dynamicTexture;
-           tagMesh.material = tagMaterial;
-
-
-           // 태그가 항상 카메라를 향하도록 설정
-           scene.registerBeforeRender(() => {
-               tagMesh.lookAt(camera.position);
-               tagMesh.rotation.y += Math.PI; // Y축 180도 회전 보정
-           });
-        });
-    } else {
-        console.eror("Root mesh를 찾을 수 없습니다.");
+              // 기존 좌표와 최소 거리 5 이상 유지 및 앞뒤 위치 확인
+              isUnique = turbinePositions.every(pos => {
+                const distance = Math.sqrt((pos.x - x) ** 2 + (pos.z - z) ** 2);
+                const direction = Math.abs(Math.atan2(pos.z - z, pos.x - x)); // 방향 계산
+                return distance > 5 && (direction < Math.PI / 4 || direction > (3 * Math.PI) / 4);
+            });
+        }
+            turbinePositions.push({ x, z }); // 위치 저장
+            return new BABYLON.Vector3(x, y, z);
+        }
+        // 8개의 고유 위치에 복사본 생성
+        for (let i = 0; i < 8; i++) {
+            const clone = rootMesh.clone(`turbine_${i}`);
+            clone.position = generateUniquePosition(); // 고유한 위치 할당
+        }
     }
 });
 
@@ -325,7 +232,7 @@ function updateTurbineInfo(speed, power, status) {
 setInterval(() => {
     const randomSpeed = Math.floor(Math.random() * 200) + 50; // 랜덤 속도
     const randomPower = (Math.random() * 2 + 0.5).toFixed(2); // 랜덤 출력
-    const status = randomSpeed > 200 ? "고속" : "정속"; // 상태
+    const status = randomSpeed > 100 ? "작동중" : "멈품"; // 상태
     updateTurbineInfo(randomSpeed, randomPower, status);
 }, 10000);
 
@@ -352,13 +259,13 @@ BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
 
         // Animation Group 시작 및 초기 속도 설정
         animationGroup.start(true);
-        animationGroup.speedRatio = 0.2; // 기본 속도
+        animationGroup.speedRatio = 0.9; // 기본 속도
 
         console.log("Initial Speed Ratio:", animationGroup.speedRatio);
 
         // 테스트용: 5초 후 속도 조절
         setTimeout(() => {
-            animationGroup.speedRatio = 1.8; // 속도 변경
+            animationGroup.speedRatio = 3; // 속도 변경
             console.log("Animation Speed Changed to:", animationGroup.speedRatio);
         }, 5000);
     } else {

@@ -6,7 +6,8 @@
   {% include 'headScript.html' %}
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
-  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
 </head>
 
 <body>
@@ -14,10 +15,11 @@
   <main>
     <div class="dashboard">
       <div class="widgetWrapper">
-        <section class="widgetContainer">
+        <section class="widgetContainer active">
           <div class="widget wind-map">
             <h2>풍향 지도</h2>
-            <div
+            <div id="kakaoMap"></div>
+            <!-- <div class="ventuskymap"
               style="display:block!important;position:relative!important;max-width:133.333vh!important;margin:auto!important;padding:0!important;border:0!important">
               <div
                 style="display:block!important;position:relative!important;width:100%!important;height:0!important;box-sizing:content-box!important;margin:0!important;border:0!important;padding:0 0 75%!important;left:0!important;top:0!important;right:0!important;bottom:0!important">
@@ -25,7 +27,7 @@
                   style="display:block!important;position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;right:auto!important;bottom:auto!important"
                   loading="lazy"></iframe>
               </div>
-            </div>
+            </div> -->
           </div>
           <div class="widget weatherForecast">
             <h2>날씨 예보<span class="widgetIndicator fcLocation"></span>
@@ -57,16 +59,26 @@
                   class="cstl_value">-</span></span>
             </div>
           </div>
-
         </section>
-        <section class="widgetContainer">
+        <section class="widgetContainer slideRight">
           <div class="widget windPowerChart">
             <h2>풍속 발전량 차트</h2>
-            <canvas id="windPowerCanvas" class="windPowerCanvas"></canvas>
+            <article class="widgetArticle">
+              <div class="chartContainer">
+                <canvas id="windPowerCanvas" class="windPowerCanvas"></canvas>
+              </div>
+            </article>
           </div>
           <div class="widget powerStation">
             <h2>발전원별 발전량</h2>
-            <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+            <article class="widgetArticle">
+              <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+            </article>
+          </div>
+        </section>
+        <section class="widgetContainer rightOut slideHide">
+          <div class="widget testBox">
+            <h2>Test</h2>
           </div>
         </section>
       </div>
@@ -78,6 +90,7 @@
 
   </main>
   <script src="{{ url_for('static', filename='js/turbine.js') }}"></script>
+  
   {% include 'footer.html' %}
 </body>
 
