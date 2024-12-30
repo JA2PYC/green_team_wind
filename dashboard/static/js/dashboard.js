@@ -1,76 +1,91 @@
+import * as KMA_API from './api/kma_api.js';
+import { callOpen_pabg } from './api/openData_api.js';
+import * as KAKAO_MAP from './api/kakaomap.js';
+
 $(document).ready(() => {
     function initialize() {
-        // callWindAPI();
-        // callkma_sfctm3Data();
-        initWidget();
+        initAPIData();
         eventHandler();
     }
 
-    function initWidget() {
+    // Initialize Weather API
+    function initAPIData() {
+        // console.log('initAPIData');
         let today = new Date();
-        widgetWeather("11G00201");
-        widgetPowerStation(today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString());
-        widgetPredictPower(184);
-        widgetWindPowerChart();
+        let kmaFctafsdlData = null
+        let kmaSfctm2Data = null;
+        let openPabgData = null;
+
+        Promise.all([
+            KMA_API.callfct_afs_dlData("11G00201"),
+            KMA_API.callkma_sfctm2Data(),
+            callOpen_pabg(today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString())
+        ]).then(([responseFctafsdl, responseSfctm2, responseOpenPabg]) => {
+            kmaFctafsdlData = responseFctafsdl;
+            kmaSfctm2Data = responseSfctm2
+            openPabgData = responseOpenPabg;
+
+            // Initialize Widget
+            initWidget(kmaFctafsdlData, kmaSfctm2Data, openPabgData);
+        }).catch(function (error) {
+            console.log('Error : initAPIData', error);
+        });
     }
 
-    function eventHandler() {
-        // 문서 전체에 클릭 이벤트 감지
-        $(document).on("click", function (e) {
-            // 클릭된 요소가 .forecast-energy 아래의 .model_rf인지 확인
-            if ($(e.target).closest(".forecast-energy .model_rf").length) {
-                let inputs = [
-                    [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
-                ];
+    // 위젯 초기화
+    function initWidget(kmaFctafsdlData, kmaSfctm2Data, openPabgData) {
+        widgetMap(kmaSfctm2Data);
+        widgetWeather(kmaFctafsdlData);
+        widgetPredictPower(kmaSfctm2Data);
+        widgetWindPowerChart(kmaSfctm2Data);
+        // widgetPowerStation(openPabgData);
 
-                // callRFModel 함수 호출
-                callRFModel(inputs).then(function (response) {
-                    // console.log("Returned data:", response);
+    }
 
-                    // 예상 발전량을 forecast-now 요소에 업데이트
-                    if (response && response.rf_result && response.rf_result.length > 0) {
-                        $("#forecast-now").text(response.rf_result.join(", ") + " MW");
-                    } else {
-                        console.error("Invalid data format:", response);
-                        $("#forecast-now").text("Error");
-                    }
-                }).catch(function (error) {
-                    console.error("Error calling RF model:", error);
-                    $("#forecast-now").text("Error");
-                });
-            }
-        });
+    // 지도 위젯
+    function widgetMap(kma_sfctm2Data) {
+        let selectedStnName =
+            ['춘천', '서울', '인천', '수원', '청주',
+                '대전', '안동', '대구', '전주', '울산',
+                '창원', '광주', '부산', '목포', '홍성',
+                '제주']
+        let selectedWeather = KMA_API.filterkma_sfctm2ByStnName(kma_sfctm2Data, selectedStnName);
+        let processedWeatehr = processWeatherData(selectedWeather);
+        Promise.all([
+            KAKAO_MAP.getCityData(),
+            callXGBModel(processedWeatehr)
+        ]).then(function ([areas, modelData]) {
+            KAKAO_MAP.createMap(areas, modelData);
+        }).catch(error => console.error("Failed to initialize Map:", error));
     }
 
     // 날씨 위젯
-    function widgetWeather(reg_id) {
-        callfct_afs_dlData(reg_id).then(function (fct_afs_data) {
-            const widget = $(".widget.weatherForecast");
-            let validWeather = null;
-            // console.log(fct_afs_data);
+    function widgetWeather(fct_afs_data) {
+        const widget = $(".widget.weatherForecast");
+        let validWeather = null;
 
-            // Find the first valid weather data
-            for (let weather of fct_afs_data) {
-                if (weather.wf && weather.ta != "-99") {
-                    validWeather = weather;
-                    break;
-                }
+        console.log(fct_afs_data);
+
+        // Find the first valid weather data
+        for (let weather of fct_afs_data) {
+            if (weather.wf && weather.ta != "-99") {
+                validWeather = weather;
+                break;
             }
+        }
 
-            if (validWeather) {
-                const iconClass = getWeatherIcon(validWeather.wf);
-                let foreacastTime = formatDateTimeToKorean(validWeather.tm_ef, true);
-                widget.find(".widgetIndicator.fcLocation").text(validWeather.stn_name);
-                widget.find(".weather-icon").html(`<i class="${iconClass}"></i>`);
-                widget.find(".weather-temp").text(validWeather.ta + "°C");
-                widget.find(".weather-desc").text(validWeather.wf + ' ' + validWeather.st + '% ' + validWeather.w1);
-                widget.find(".weather-detail").text(foreacastTime);
-            } else {
-                widget.find(".weather-icon").html(`<i class="bi-exclamation-circle"></i>`);
-                widget.find(".weather-text").text("데이터가 유효하지 않습니다.");
-            }
-        });
-
+        if (validWeather) {
+            const iconClass = getWeatherIcon(validWeather.wf);
+            let foreacastTime = formatDateTimeToKorean(validWeather.tm_ef, true);
+            widget.find(".widgetIndicator.fcLocation").text(validWeather.stn_name);
+            widget.find(".weather-icon").html(`<i class="${iconClass}"></i>`);
+            widget.find(".weather-temp").text(validWeather.ta + "°C");
+            widget.find(".weather-desc").text(validWeather.wf + ' ' + validWeather.st + '% ' + validWeather.w1);
+            widget.find(".weather-detail").text(foreacastTime);
+        } else {
+            widget.find(".weather-icon").html(`<i class="bi-exclamation-circle"></i>`);
+            widget.find(".weather-text").text("데이터가 유효하지 않습니다.");
+        }
     }
 
     // 날씨 아이콘 매핑
@@ -119,127 +134,123 @@ $(document).ready(() => {
     }
 
     // 실시간 발전원 위젯
-    function widgetPowerStation(today) {
-        callOpen_pabg(today).then(function (open_pabg_data) {
-            const items = open_pabg_data.response.body.items.item;
+    function widgetPowerStation(open_pabg_data) {
+        // console.log(open_pabg_data);
+        const items = open_pabg_data.response.body.items.item;
 
-            if (items.length > 0) {
-                // 가장 최근 데이터를 추출
-                const latestData = items[items.length - 1];
-                console.log(items[items.length - 1]);
-                // 발전량 데이터를 정리
-                const chartData = {
-                    // "수력": parseFloat(latestData.fuelPwr1 || 0),
-                    // "유류": parseFloat(latestData.fuelPwr2 || 0),
-                    "유연탄": parseFloat(latestData.fuelPwr3 || 0),
-                    "원자력": parseFloat(latestData.fuelPwr4 || 0),
-                    // "양수": parseFloat(latestData.fuelPwr5 || 0),
-                    "가스": parseFloat(latestData.fuelPwr6 || 0),
-                    // "국내탄": parseFloat(latestData.fuelPwr7 || 0),
-                    "신재생(풍력)": parseFloat(latestData.fuelPwr8 || 0),
-                    "태양광": parseFloat(latestData.fuelPwr9 || 0)
-                };
+        if (items.length > 0) {
+            // 가장 최근 데이터를 추출
+            const latestData = items[items.length - 1];
+            // 발전량 데이터를 정리
+            const chartData = {
+                // "수력": parseFloat(latestData.fuelPwr1 || 0),
+                // "유류": parseFloat(latestData.fuelPwr2 || 0),
+                "유연탄": parseFloat(latestData.fuelPwr3 || 0),
+                "원자력": parseFloat(latestData.fuelPwr4 || 0),
+                // "양수": parseFloat(latestData.fuelPwr5 || 0),
+                "가스": parseFloat(latestData.fuelPwr6 || 0),
+                // "국내탄": parseFloat(latestData.fuelPwr7 || 0),
+                "신재생(풍력)": parseFloat(latestData.fuelPwr8 || 0),
+                "태양광": parseFloat(latestData.fuelPwr9 || 0)
+            };
 
-                // 도넛 차트를 렌더링
-                let $powerStationChart = $('#powerStationCanvas');
+            // 도넛 차트를 렌더링
+            let $powerStationChart = $('#powerStationCanvas');
 
-                createDonutChart($powerStationChart, chartData, 'doughnut');
-            }
-        }).catch(function (error) {
-            console.error("Error(WidgetPowerStation):", error);
-        });
+            createDonutChart($powerStationChart, chartData, 'doughnut');
+        }
     }
 
     // 모델별 예상 발전량 위젯
-    function widgetPredictPower(station_id = 184) {
-        callkma_sfctm2Data(tm = 0, station_id).then(function (kma_sfctm2Data) {
-            let processedWeatehr = processWeatherData(kma_sfctm2Data);
+    function widgetPredictPower(kma_sfctm2Data) {
+        // console.log(kma_sfctm2Data)
+        let selectedStaionIds = ['184'];
+        let filteredWeatherData = KMA_API.filterkma_sfctm2ByStnId(kma_sfctm2Data, selectedStaionIds);
+        // console.log(filteredWeatherData)
+        let processedWeatehr = processWeatherData(filteredWeatherData);
 
-            let gaugeInputs = [];
-            let gaugeIntervalId = null;
-            let gaugeChartContainer = 'gaugeChart';
-            let gaugeChart = createGaugeChart(gaugeChartContainer);
-            let gaugeXYChartContainer = 'gaugeXYChart';
-            let gaugeXYChart = createGaugeXYChart(gaugeXYChartContainer);
+        let gaugeInputs = [];
+        let gaugeIntervalId = null;
+        let gaugeChartContainer = 'gaugeChart';
+        let gaugeChart = createGaugeChart(gaugeChartContainer);
+        let gaugeXYChartContainer = 'gaugeXYChart';
+        let gaugeXYChart = createGaugeXYChart(gaugeXYChartContainer);
 
-            Promise.all([
-                callXGBModel(processedWeatehr),
-                callRFModel(processedWeatehr),
-                callCSTLModel(processedWeatehr)
-            ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
-                if (xgb_response.xgboost_ai_result) {
-                    gaugeInputs.push(Math.round(xgb_response.xgboost_ai_result[0]));
-                    $(".widget.predictPower .xgboost_value").text(xgb_response.xgboost_ai_result[0] + ' MW');
-                }
-                if (rf_model_response.rf_result) {
-                    gaugeInputs.push(Math.round(rf_model_response.rf_result[0]));
-                    $(".widget.predictPower .rf_value").text(rf_model_response.rf_result[0] + ' MW');
-                }
-                if (cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
-                    $(".widget.predictPower .cstl_value").text(cstl_model_response.cstl_ai_result[0] + ' MW');
-                }
+        Promise.all([
+            callXGBModel(processedWeatehr),
+            callRFModel(processedWeatehr),
+            callCSTLModel(processedWeatehr)
+        ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
+            if (xgb_response.xgboost_ai_result) {
+                gaugeInputs.push(Math.round(xgb_response.xgboost_ai_result[0]));
+                $(".widget.predictPower .xgboost_value").text(xgb_response.xgboost_ai_result[0] + ' MW');
+            }
+            if (rf_model_response.rf_result) {
+                gaugeInputs.push(Math.round(rf_model_response.rf_result[0]));
+                $(".widget.predictPower .rf_value").text(rf_model_response.rf_result[0] + ' MW');
+            }
+            if (cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
+                $(".widget.predictPower .cstl_value").text(cstl_model_response.cstl_ai_result[0] + ' MW');
+            }
 
-                updateGaugeChart(gaugeChart, gaugeInputs[0]);
-                updateGaugeXYChart(gaugeXYChart, gaugeInputs[0]);
-                showModelAtIndex("modelList", 0);
+            updateGaugeChart(gaugeChart, gaugeInputs[0]);
+            updateGaugeXYChart(gaugeXYChart, gaugeInputs[0]);
+            showModelAtIndex("modelList", 0);
 
-                let index = 1; // Start with the second value in the array
-                if (gaugeIntervalId) {
-                    clearInterval(gaugeIntervalId);
-                }
-                gaugeIntervalId = setInterval(() => {
-                    const value = gaugeInputs[index];
+            let index = 1; // Start with the second value in the array
+            if (gaugeIntervalId) {
+                clearInterval(gaugeIntervalId);
+            }
+            gaugeIntervalId = setInterval(() => {
+                const value = gaugeInputs[index];
 
-                    // Move to the next value in the array
-                    updateGaugeChart(gaugeChart, value);
-                    updateGaugeXYChart(gaugeXYChart, value);
-                    showModelAtIndex("modelList", index);
-                    index = (index + 1) % gaugeInputs.length;
-                }, 3000);
+                // Move to the next value in the array
+                updateGaugeChart(gaugeChart, value);
+                updateGaugeXYChart(gaugeXYChart, value);
+                showModelAtIndex("modelList", index);
+                index = (index + 1) % gaugeInputs.length;
+            }, 3000);
 
-            }).catch(function (error) {
-                console.log("Error:", error)
-            });
+        }).catch(function (error) {
+            console.log("Error:", error)
         });
 
     }
 
-    // 풍속 발전량 차트 위젯젯
-    function widgetWindPowerChart() {
-        callkma_sfctm2Data().then(function (kma_sfctm2Data) {
-            let processedWeatehr = processWeatherData(kma_sfctm2Data);
-            let rfData;
-            let xgbData;
-            let cstlData;
+    // 풍속 발전량 차트 위젯
+    function widgetWindPowerChart(kma_sfctm2Data) {
+        let processedWeatehr = processWeatherData(kma_sfctm2Data);
+        let rfData;
+        let xgbData;
+        let cstlData;
 
-            // 모델 응답 결과를 기다린 후 진행
-            Promise.all([
-                callXGBModel(processedWeatehr), // XGB 모델 호출
-                callRFModel(processedWeatehr),   // RF 모델 호출
-                callCSTLModel(processedWeatehr)
-            ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
-                // XGB 모델 응답 처리
-                if (xgb_response && xgb_response.xgboost_ai_result && xgb_response.xgboost_ai_result.length > 0) {
-                    xgbData = xgb_response.xgboost_ai_result;
-                }
+        // 모델 응답 결과를 기다린 후 진행
+        Promise.all([
+            callXGBModel(processedWeatehr), // XGB 모델 호출
+            callRFModel(processedWeatehr),   // RF 모델 호출
+            callCSTLModel(processedWeatehr)
+        ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
+            // XGB 모델 응답 처리
+            if (xgb_response && xgb_response.xgboost_ai_result && xgb_response.xgboost_ai_result.length > 0) {
+                xgbData = xgb_response.xgboost_ai_result;
+            }
 
-                // RF 모델 응답 처리
-                if (rf_model_response && rf_model_response.rf_result && rf_model_response.rf_result.length > 0) {
-                    rfData = rf_model_response.rf_result;
-                }
+            // RF 모델 응답 처리
+            if (rf_model_response && rf_model_response.rf_result && rf_model_response.rf_result.length > 0) {
+                rfData = rf_model_response.rf_result;
+            }
 
-                // CSTL 모델 응답 처리
-                if (cstl_model_response && cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
-                    cstlData = cstl_model_response.cstl_ai_result;
-                }
+            // CSTL 모델 응답 처리
+            if (cstl_model_response && cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
+                cstlData = cstl_model_response.cstl_ai_result;
+            }
 
-                // 차트 데이터 처리
-                let windPowerChartData = processWindPowerChart(kma_sfctm2Data, xgbData, rfData, cstlData);
-                let $windPowerChart = $('#windPowerCanvas');
-                createChartGraph($windPowerChart, windPowerChartData, 'line');
-            }).catch(function (error) {
-                console.error('Error in fetching model data:', error);
-            });
+            // 차트 데이터 처리
+            let windPowerChartData = processWindPowerChart(kma_sfctm2Data, xgbData, rfData, cstlData);
+            let $windPowerChart = $('#windPowerCanvas');
+            createChartGraph($windPowerChart, windPowerChartData, 'line');
+        }).catch(function (error) {
+            console.error('Error in fetching model data:', error);
         });
     }
 
@@ -275,232 +286,6 @@ $(document).ready(() => {
             .addClass("item_visible");
     }
 
-    // 한국전력거래소_발전원별 발전량(계통기준) OPEN API PABG
-    function callOpen_pabg(baseDate, pageNo = 1, numOfRows = 300, dataType = "json") {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "/api/open_pabg",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    baseDate: baseDate,
-                    pageNo: pageNo,
-                    numOfRows: numOfRows,
-                    dataType: dataType
-                }),
-                success: function (data) {
-                    if (data.open_pabg_result) {
-                        resolve(data.open_pabg_result);
-                    } else {
-                        reject("Error");
-                    }
-                },
-                error: function (error) {
-                    console.error("Error:", error);
-                    reject(error);
-                }
-            });
-        });
-    }
-
-    // OPEN API Power API
-    function callOpen_pabpg() {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "/api/open_pabpg",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    tradeYmd: "20210801",
-                    pageNo: 1,
-                    numOfRows: 30
-                }),
-                success: function (data) {
-                    console.log(data)
-                    if (data.open_pabpg_result) {
-                        resolve(data.open_pabpg_result);
-                    } else {
-                        reject("Error");
-                    }
-                },
-                error: function (error) {
-                    console.error("Error:", error);
-                    reject(error);
-                }
-            });
-        });
-
-        $("#powerForm").on("submit", function (event) {
-            event.preventDefault(); // 기본 폼 제출 방지
-
-            // 폼 데이터 가져오기
-            const tradeYmd = $("#tradeYmd").val();
-
-            // POST 요청 보내기
-            $.ajax({
-                url: "/api/open_pabpg",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    tradeYmd: tradeYmd,
-                    pageNo: 1,
-                    numOfRows: 30
-                }),
-                success: function (data) {
-                    console.log(data);
-                    // 성공 시 응답 데이터를 화면에 표시
-                    if (data.response.body.items.item.length > 0) {
-                        let resultHtml = "<ul>";
-                        data.response.body.items.item.forEach(item => {
-                            resultHtml += `<li>Location: ${item.locationName}, Generation: ${item.amount}</li>`;
-                        });
-                        resultHtml += "</ul>";
-                        $("#result").html(resultHtml);
-                    } else {
-                        $("#result").html("<p>No data available for the given date.</p>");
-                    }
-                },
-                error: function (error) {
-                    // 에러 시 메시지 표시
-                    $("#result").html("<p>Error occurred: " + error.responseJSON.error + "</p>");
-                }
-            });
-        });
-    }
-
-    function callkma_regData(reg = []) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "/api/kma_reg",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    reg: reg
-                }),
-                success: function (data) {
-                    if (data.kma_reg_result) {
-                        resolve(data.kma_reg_result);
-                    } else {
-                        reject("Error")
-                    }
-                },
-                error: function (error) {
-                    console.error("Error:", error);
-                    reject(error);
-                }
-            });
-        });
-    }
-
-    // 기상 예보
-    function callfct_afs_dlData(reg = 0, tmfc1 = 0, tmfc2 = 0) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "/api/fct_afs_dl",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    reg: reg,
-                    tmfc1: tmfc1,
-                    tmfc2: tmfc2,
-                    // pageNo: pageNo,
-                    // numOfRows: numOfRows
-                }),
-                success: function (data) {
-                    if (data.fct_afs_dl_result) {
-                        resolve(data.fct_afs_dl_result);
-                    } else {
-                        reject("Error")
-                    }
-                },
-                error: function (error) {
-                    console.error("Error:", error);
-                    reject(error);
-                }
-            });
-        });
-    }
-
-    // 기상청 스테이션 정보보
-    function callkma_stationData(stn = []) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "/api/kma_station",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    stn: stn
-                }),
-                success: function (data) {
-                    if (data.kma_station_result) {
-                        resolve(data.kma_station_result);
-                    } else {
-                        reject("Error")
-                    }
-                },
-                error: function (data) {
-                    console.error("Error:", error);
-                    reject(error);
-                }
-            })
-        });
-    }
-
-    // 기상청 kma_sfctm2 API
-    function callkma_sfctm2Data(tm = 0, stn = 0) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "/api/kma_sfctm2",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    tm: tm,
-                    stn: stn,
-                }),
-                success: function (data) {
-                    if (data.kma_sfctm2_result) {
-                        // console.log(data.kma_sfctm2_result)
-                        resolve(data.kma_sfctm2_result);
-                    } else {
-                        reject("error")
-                    }
-                },
-                error: function (error) {
-                    console.error("Error:", error);
-                    reject(error);
-                }
-            });
-        });
-    }
-
-    // 기상청 kma_sfctm3 API
-    function callkma_sfctm3Data(tm1 = 0, tm2 = 0, stn = 0) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "/api/kma_sfctm3",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    tm1: tm1,
-                    tm2: tm2,
-                    stn: stn,
-                }),
-                success: function (data) {
-                    if (data.kma_sfctm3_result) {
-                        // console.log(data.kma_sfctm3_result)
-                        resolve(data.kma_sfctm3_result);
-                    } else {
-                        reject("error")
-                    }
-                },
-                error: function (error) {
-                    console.error("Error:", error);
-                    reject(error);
-                }
-            });
-        });
-    }
-
     // 기상 데이터 모델 입력 형태로로 전처리
     function processWeatherData(weatherData) {
         const inputs = [];
@@ -511,7 +296,7 @@ $(document).ready(() => {
     }
 
     function processWeatherTimeSeriesData(weatherData) {
-
+        // Process Data for CSTL Model
     }
 
     // XGB Model Predict
@@ -633,7 +418,7 @@ $(document).ready(() => {
         })
 
         // console.log(stations)
-        callkma_stationData(stations).then(function (stationData) {
+        KMA_API.callkma_stationData(stations).then(function (stationData) {
             stationData.forEach(item => {
                 labels.push(item.station_name);
             })
@@ -964,6 +749,34 @@ $(document).ready(() => {
         }
         // 로드 시 애니메이션
         chart.appear(500, 50);
+    }
+
+    function eventHandler() {
+        // 문서 전체에 클릭 이벤트 감지
+        $(document).on("click", function (e) {
+            // 클릭된 요소가 .forecast-energy 아래의 .model_rf인지 확인
+            if ($(e.target).closest(".forecast-energy .model_rf").length) {
+                let inputs = [
+                    [18, 4, 1010, 1010 * 100 / (287.05 * (18 + 273.15))]
+                ];
+
+                // callRFModel 함수 호출
+                callRFModel(inputs).then(function (response) {
+                    // console.log("Returned data:", response);
+
+                    // 예상 발전량을 forecast-now 요소에 업데이트
+                    if (response && response.rf_result && response.rf_result.length > 0) {
+                        $("#forecast-now").text(response.rf_result.join(", ") + " MW");
+                    } else {
+                        console.error("Invalid data format:", response);
+                        $("#forecast-now").text("Error");
+                    }
+                }).catch(function (error) {
+                    console.error("Error calling RF model:", error);
+                    $("#forecast-now").text("Error");
+                });
+            }
+        });
     }
 
     initialize();
