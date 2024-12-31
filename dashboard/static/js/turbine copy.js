@@ -95,8 +95,8 @@ scene.clearColor = new BABYLON.Color4(0.5, 0.8, 0.9, 1.0); // 하늘색
 
 // 언덕 생성 및 텍스처 적용
 const hill = BABYLON.MeshBuilder.CreateGround("hill", {
-    width: 100,
-    height: 100,
+    width: 50,
+    height: 50,
     subdivisions: 32
 }, scene);
 
@@ -235,17 +235,16 @@ infoPanel.addControl(turbineInfo);
 
 // 풍력 발전기의 초기 상태 정보
 const turbines = [
-    { id: "A-1", position: turbineFixedPositions[0], speed: 120, power: 1.5, status: "작동중" },
-    { id: "A-2", position: turbineFixedPositions[1], speed: 100, power: 1.2, status: "작동중" },
-    { id: "A-3", position: turbineFixedPositions[2], speed: 150, power: 2.0, status: "고속" },
-    { id: "A-4", position: turbineFixedPositions[3], speed: 180, power: 2.5, status: "고속" },
-    { id: "A-5", position: turbineFixedPositions[4], speed: 90, power: 1.0, status: "작동중" },
-    { id: "A-6", position: turbineFixedPositions[5], speed: 200, power: 3.0, status: "고속" },
-    { id: "A-7", position: turbineFixedPositions[6], speed: 110, power: 1.3, status: "작동중" },
-    { id: "A-8", position: turbineFixedPositions[7], speed: 140, power: 1.8, status: "작동중" },
-    { id: "A-9", position: turbineFixedPositions[8], speed: 160, power: 2.2, status: "고속" }
+    { id: "A-1", speed: 120, power: 1.5, status: "작동중" },
+    { id: "A-2", speed: 100, power: 1.2, status: "작동중" },
+    { id: "A-3", speed: 150, power: 2.0, status: "고속" },
+    { id: "A-4", speed: 180, power: 2.5, status: "고속" },
+    { id: "A-5", speed: 90, power: 1.0, status: "작동중" },
+    { id: "A-6", speed: 200, power: 3.0, status: "고속" },
+    { id: "A-7", speed: 110, power: 1.3, status: "작동중" },
+    { id: "A-8", speed: 140, power: 1.8, status: "작동중" },
+    { id: "A-9", speed: 160, power: 2.2, status: "고속" }
 ];
-
 
 // 현재 표시 중인 발전기 인덱스
 let currentIndex = 0;
@@ -275,126 +274,3 @@ window.addEventListener("resize", () => {
 engine.runRenderLoop(() => {
     scene.render();
 });
-
-// 드론샷 애니메이션 상태 플래그
-let isNormalMode = true;
-let currentSpecialTurbine = null;
-
-// HTML 요소 선택
-const modeSelector = document.getElementById("mode-selector");
-const specialModeContainer = document.getElementById("special-mode-container");
-const turbineSelector = document.getElementById("turbine-selector");
-
-// 모드 변경 이벤트 리스너
-modeSelector.addEventListener("change", () => {
-    const selectedMode = modeSelector.value;
-
-    if (selectedMode === "special") {
-        specialModeContainer.style.display = "block";
-        isNormalMode = false;
-        stopDroneAnimation(); // 드론샷 애니메이션 멈춤
-    } else {
-        specialModeContainer.style.display = "none";
-        isNormalMode = true;
-        currentSpecialTurbine = null;
-        startDroneAnimation(); // 드론샷 애니메이션 재개
-    }
-});
-// 초기 Special Mode 숨김
-specialModeContainer.style.display = "none";
-
-
-// 드론샷 애니메이션 시작
-function startDroneAnimation() {
-    if (isNormalMode) {
-        scene.beginAnimation(camera, 0, 1200, true); // 드론샷 애니메이션 루프
-    }
-}
-
-// 드론샷 애니메이션 멈춤
-function stopDroneAnimation() {
-    scene.stopAnimation(camera); // 드론샷 애니메이션 정지
-}
-
-// Special Mode에서 터빈 선택 이벤트 리스너
-turbineSelector.addEventListener("change", () => {
-    const selectedTurbineId = turbineSelector.value; //선택된 ID가져오기
-    const selectedTurbine = turbines.find(t => t.id === selectedTurbineId);
-
-    if (selectedTurbine) {
-        currentSpecialTurbine = selectedTurbine;
-        moveToTurbine(selectedTurbine); // 선택한 터빈으로 카메라 이동
-    }
-});
-
-// 터빈으로 카메라 이동
-function moveToTurbine(turbine) {
-    // 터빈 중심 계산 (터빈 블레이드가 있는 높이로 조정)
-    const turbineCenterHeight = turbine.position.y + 6; // 중심 높이 (적절히 조정)
-    const targetPosition = new BABYLON.Vector3(
-        turbine.position.x,
-        turbineCenterHeight, // 터빈 중심 높이
-        turbine.position.z
-    );
-
-
-    // 카메라 이동 애니메이션: 타겟 설정
-    BABYLON.Animation.CreateAndStartAnimation(
-        "CameraMoveTarget",
-        camera,
-        "target",
-        60, // FPS
-        180, // 3초
-        camera.target,
-        targetPosition,
-        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    // 카메라 Radius 조정: 타겟과의 거리 설정
-    BABYLON.Animation.CreateAndStartAnimation(
-        "CameraMoveRadius",
-        camera,
-        "radius",
-        60, // FPS
-        180, // 3초
-        camera.radius,
-        5, // 가까운 거리 (Radius 값을 조정)
-        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    // 카메라 각도 조정: Alpha와 Beta를 변경해 발전기의 정면을 바라보게 함
-    BABYLON.Animation.CreateAndStartAnimation(
-        "CameraMoveAlpha",
-        camera,
-        "alpha",
-        60, // FPS
-        180, // 3초
-        camera.alpha,
-        Math.PI * 1.5, // (정면에서 바라보도록 조정)
-        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    BABYLON.Animation.CreateAndStartAnimation(
-        "CameraMoveBeta",
-        camera,
-        "beta",
-        60, // FPS
-        180, // 3초
-        camera.beta,
-        Math.PI / 2.1, // 아래에서 위로
-        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-}
-
-
-// 렌더링 루프: Special Mode에서 카메라 고정
-engine.runRenderLoop(() => {
-    if (!isNormalMode && currentSpecialTurbine) {
-        camera.target = currentSpecialTurbine.position; // 선택된 터빈을 계속 바라봄
-    }
-    scene.render();
-});
-
-// 초기 드론샷 애니메이션 시작
-startDroneAnimation();
-

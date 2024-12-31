@@ -6,7 +6,9 @@
   {% include 'headScript.html' %}
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
-  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
 </head>
 
 <body>
@@ -14,7 +16,7 @@
   <main>
     <div class="dashboard">
       <div class="widgetWrapper">
-        <div class="widgetContainer active">
+        <section class="widgetContainer active">
           <div class="widget wind-map">
             <h2>풍향 지도</h2>
             <div id="kakaoMap"></div>
@@ -44,6 +46,29 @@
           </div>
           <div class="widget turbine-3d">
             <h2>3D 풍력 발전기</h2>
+            <div>
+              <select id="mode-selector">
+                  <option value="normal">Normal Mode</option>
+                  <option value="special">Special Mode</option>
+              </select>
+          </div>
+          
+          <div id="special-mode-container" style="display: none;">
+              <label for="turbine-selector">Select Turbine:</label>
+              <select id="turbine-selector">
+                  <option value="A-1">A-1</option>
+                  <option value="A-2">A-2</option>
+                  <option value="A-3">A-3</option>
+                  <option value="A-4">A-4</option>
+                  <option value="A-5">A-5</option>
+                  <option value="A-6">A-6</option>
+                  <option value="A-7">A-7</option>
+                  <option value="A-8">A-8</option>
+                  <option value="A-9">A-9</option>
+              </select>
+          </div>
+          
+          <canvas id="renderCanvas" touch-action="none"></canvas>
             <canvas id="renderCanvas"></canvas>
           </div>
           <div class="widget predictPower">
@@ -58,17 +83,28 @@
                   class="cstl_value">-</span></span>
             </div>
           </div>
-        </div>
-        <div class="widgetContainer">
+        </section>
+        <section class="widgetContainer slideRight">
           <div class="widget windPowerChart">
             <h2>풍속 발전량 차트</h2>
-            <canvas id="windPowerCanvas" class="windPowerCanvas"></canvas>
+            <article class="widgetArticle">
+              <div class="chartContainer">
+                <canvas id="windPowerCanvas" class="windPowerCanvas"></canvas>
+              </div>
+            </article>
           </div>
           <div class="widget powerStation">
             <h2>발전원별 발전량</h2>
-            <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+            <article class="widgetArticle">
+              <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+            </article>
           </div>
-        </div>
+        </section>
+        <section class="widgetContainer rightOut slideHide">
+          <div class="widget testBox">
+            <h2>Test</h2>
+          </div>
+        </section>
       </div>
       <div class="widgetControl">
         <button id="prev-btn"><i class="prev-btn bi bi-chevron-left"></i></button>

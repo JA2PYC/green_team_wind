@@ -32,7 +32,7 @@ def dashboard_route():
 @dashboard.route("/api/kakao_city", methods=["POST"])
 def kakao_city_data():
     try:
-        print('route - kakao_city')
+        # print('route - kakao_city')
         # 클라이언트로부터 요청받은 파라미터
         # params = request.json
         # city = params.get("city")

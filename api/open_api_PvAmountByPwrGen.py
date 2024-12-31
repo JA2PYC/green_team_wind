@@ -24,12 +24,12 @@ def fetch_power_data(trade_ymd, page_no=1, num_of_rows=30):
         # 응답 데이터 처리
         if params["dataType"] == "json":  # "type" 대신 "dataType" 사용
             data = response.json()
-            print("JSON 응답 데이터:")
-            print(data)
+            # print("JSON 응답 데이터:")
+            # print(data)
         else:
             # XML 형식인 경우 파싱
             root = ET.fromstring(response.text)
-            print("XML 응답 데이터:")
+            # print("XML 응답 데이터:")
             for child in root.iter():
                 print(child.tag, child.text)
 
