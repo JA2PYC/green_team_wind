@@ -4,11 +4,11 @@ export function filterkma_sfctm2ByStnName(weatherData = [], stationNames = []) {
 }
 
 export function filterkma_sfctm2ByStnId(weatherData = [], stationIds = []) {
-    return weatherData.filter((data) => stationIds.includes(data.station_id));
+    return weatherData.filter((data) => stationIds.includes(String(data.station_id)));
 }
 
-export function filterkma_sfctm3ByStnId(weatherData = [], stationIds= []) {
-    return weatherData.filter((data) => stationIds.includes(data.station_id));
+export function filterkma_sfctm3ByStnId(weatherData = [], stationIds = []) {
+    return weatherData.filter((data) => stationIds.includes(String(data.station_id)));
 }
 
 // 기상청 예보구역 정보 BY JSON

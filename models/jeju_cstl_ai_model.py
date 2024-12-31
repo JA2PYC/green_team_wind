@@ -47,22 +47,23 @@ except Exception as e:
 
 def cstl_ai_model_predict_sequences(multi_inputs, sequence_length=10):
     try:
-
-        print('cstl_ai_model_predict_sequences')
+        # print('cstl_ai_model_predict_sequences')
 
         # 결과를 저장할 리스트
         all_predictions = []
-
+        # print('multi_inputs',multi_inputs)
         # 다중 배열 데이터를 개별적으로 처리
         for inputs in multi_inputs:
+            # print(inputs)
+            # print('len : ',len(inputs))
             if len(inputs) != 10:
                 continue
             # 입력 데이터를 NumPy 배열로 변환
             input_data = np.array(inputs).astype(float)
-            print(input_data)
+            # print(input_data)
             # 스케일링
             X_scaled = scaler_X.transform(input_data)
-            print(X_scaled)
+            # print(X_scaled)
             # 시퀀스 길이 정의
             sequence_length = 10
             num_samples = len(X_scaled) - sequence_length + 1
@@ -85,7 +86,7 @@ def cstl_ai_model_predict_sequences(multi_inputs, sequence_length=10):
 
             # 결과 추가
             all_predictions.append(rounded_preds)
-        print(all_predictions)
+        # print(all_predictions)
         return all_predictions
         # # 입력 데이터 유효성 확인 (리스트 형태로 변환)
         # if not isinstance(inputs, (list, np.ndarray)):

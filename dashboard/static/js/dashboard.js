@@ -47,45 +47,33 @@ $(document).ready(() => {
 
     // 위젯 초기화
     function initWidget(kmaFctafsdlData, kmaSfctm2Data, kmaSfctm3Data, openPabgData) {
-        let selectedStnName =
-            ['춘천', '서울', '인천', '수원', '청주',
-                '대전', '안동', '대구', '전주', '울산',
-                '창원', '광주', '부산', '목포', '홍성',
-                '제주']
+        // let selectedStnNames =
+        //     ['춘천', '서울', '인천', '수원', '청주',
+        //         '대전', '안동', '대구', '전주', '울산',
+        //         '창원', '광주', '부산', '목포', '홍성',
+        //         '제주']
         let selectedStnIds =
-            ['90', '96', '101', '108', '112',
-                '119', '131', '133', '136', '143',
-                '146', '152', '155', '156', '159',
-                '165', '184', '212'];
+            ['101', '108', '112', '119', '131',
+                '133', '136', '143', '146', '152',
+                '155', '156', '159', '165', '177',
+                '184'];
+        let filteredKmaSfctm2Data = KMA_API.filterkma_sfctm2ByStnId(kmaSfctm2Data, selectedStnIds);
         let filteredKmaSfctm3Data = KMA_API.filterkma_sfctm3ByStnId(kmaSfctm3Data, selectedStnIds);
-        console.log('kma_sfctm3Data:', filteredKmaSfctm3Data);
-        // console.log('kma_sfctm3Data:', response);
-        //  let processedWeatherSQ = processWeatherTimeSeriesData(kmaSfctm3Data);
-        //  console.log('processedWeatherSQ:', processedWeatherSQ.data);
-        //  console.log('processedWeatherSQ:', processedWeatherSQ.stationIds);
-        // callCSTLModelTimeSeries(processedWeatherSQ).then(function (response) {
-        //     console.log('CSTL Model Response:', response);
-        // }).catch(function (error) {
-        //     console.error("Error:", error); 
-        // });
 
-        // widgetMap(kmaSfctm2Data);
-        // widgetWeather(kmaFctafsdlData);
-        // widgetPredictPower(kmaSfctm2Data);
-        // widgetWindPowerChart(kmaSfctm2Data);
+
+        // widgetMap(filteredKmaSfctm2Data);
+        widgetWeather(kmaFctafsdlData);
+        widgetPredictPower(kmaSfctm2Data, kmaSfctm3Data, ['184']);
+        widgetWindPowerChart(filteredKmaSfctm2Data, filteredKmaSfctm3Data);
+        widgetWindPowerTimeSeriesChart(filteredKmaSfctm2Data, filteredKmaSfctm3Data);
         // widgetPowerStation(openPabgData);
 
     }
 
     // 지도 위젯
-    function widgetMap(kma_sfctm2Data) {
-        let selectedStnName =
-            ['춘천', '서울', '인천', '수원', '청주',
-                '대전', '안동', '대구', '전주', '울산',
-                '창원', '광주', '부산', '목포', '홍성',
-                '제주']
-        let selectedWeather = KMA_API.filterkma_sfctm2ByStnName(kma_sfctm2Data, selectedStnName);
-        let processedWeatehr = processWeatherData(selectedWeather);
+    function widgetMap(filteredKmaSfctm2Data) {
+        let processedWeatehr = processWeatherData(filteredKmaSfctm2Data);
+        console.log(processedWeatehr);
         Promise.all([
             KAKAO_MAP.getCityData(),
             callXGBModel(processedWeatehr)
@@ -97,10 +85,10 @@ $(document).ready(() => {
     // 날씨 위젯
     function widgetWeather(fct_afs_data = []) {
         const widget = $(".widget.weatherForecast");
-        let validWeather = null;
 
         // console.log(fct_afs_data);
         fct_afs_data.forEach((weather, index) => {
+            weather.ta == '-99' ? weather.ta = '0' : weather.ta;
             if (index === 0) {
                 // Set Indicator
                 widget.find(".widgetIndicator.fcLocation").text(weather.stn_name);
@@ -135,6 +123,7 @@ $(document).ready(() => {
             "구름조금": "bi-cloud",
             "구름많음": "bi-clouds",
             "흐리고 비": "bi-cloud-rain",
+            "흐리고 가끔 비": "bi-cloud-rain",
             "흐리고 한때 비": "bi-cloud-rain",
             "흐리고 눈": "bi-cloud-rain",
             "흐리고 비/눈": "bi-cloud-sleet",
@@ -199,12 +188,11 @@ $(document).ready(() => {
     }
 
     // 모델별 예상 발전량 위젯
-    function widgetPredictPower(kma_sfctm2Data) {
-        // console.log(kma_sfctm2Data)
-        let selectedStaionIds = ['184'];
-        let filteredWeatherData = KMA_API.filterkma_sfctm2ByStnId(kma_sfctm2Data, selectedStaionIds);
-        // console.log(filteredWeatherData)
-        let processedWeatehr = processWeatherData(filteredWeatherData);
+    function widgetPredictPower(kma_sfctm2Data, kma_sfctm3Data, selectedStaionIds = ['184']) {
+        let filteredKmaSfctm2Data = KMA_API.filterkma_sfctm2ByStnId(kma_sfctm2Data, selectedStaionIds);
+        let filteredKmaSfctm3Data = KMA_API.filterkma_sfctm3ByStnId(kma_sfctm3Data, selectedStaionIds);
+        let processedSfctm2 = processWeatherData(filteredKmaSfctm2Data);
+        let processedSfctm3 = processWeatherTimeSeriesData(filteredKmaSfctm3Data);
 
         let gaugeInputs = [];
         let gaugeIntervalId = null;
@@ -212,11 +200,10 @@ $(document).ready(() => {
         let gaugeChart = createGaugeChart(gaugeChartContainer);
         let gaugeXYChartContainer = 'gaugeXYChart';
         let gaugeXYChart = createGaugeXYChart(gaugeXYChartContainer);
-
         Promise.all([
-            callXGBModel(processedWeatehr),
-            callRFModel(processedWeatehr),
-            callCSTLModel(processedWeatehr)
+            callXGBModel(processedSfctm2),
+            callRFModel(processedSfctm2),
+            callCSTLModelTimeSeries(processedSfctm3.data)
         ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
             if (xgb_response.xgboost_ai_result) {
                 gaugeInputs.push(Math.round(xgb_response.xgboost_ai_result[0]));
@@ -227,6 +214,7 @@ $(document).ready(() => {
                 $(".widget.predictPower .rf_value").text(rf_model_response.rf_result[0] + ' MW');
             }
             if (cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
+                gaugeInputs.push(Math.round(cstl_model_response.cstl_ai_result[0]));
                 $(".widget.predictPower .cstl_value").text(cstl_model_response.cstl_ai_result[0] + ' MW');
             }
 
@@ -255,28 +243,27 @@ $(document).ready(() => {
     }
 
     // 풍속 발전량 차트 위젯
-    function widgetWindPowerChart(kma_sfctm2Data) {
-        let processedWeatehr = processWeatherData(kma_sfctm2Data);
+    function widgetWindPowerChart(kma_sfctm2Data, kma_sfctm3Data) {
+        let processedSfctm2 = processWeatherData(kma_sfctm2Data);
+        let processedSfctm3 = processWeatherTimeSeriesData(kma_sfctm3Data);
         let rfData;
         let xgbData;
         let cstlData;
 
         // 모델 응답 결과를 기다린 후 진행
         Promise.all([
-            callXGBModel(processedWeatehr), // XGB 모델 호출
-            callRFModel(processedWeatehr),   // RF 모델 호출
-            callCSTLModel(processedWeatehr)
+            callXGBModel(processedSfctm2), // XGB 모델 호출
+            callRFModel(processedSfctm2),   // RF 모델 호출
+            callCSTLModelTimeSeries(processedSfctm3.data)
         ]).then(function ([xgb_response, rf_model_response, cstl_model_response]) {
             // XGB 모델 응답 처리
             if (xgb_response && xgb_response.xgboost_ai_result && xgb_response.xgboost_ai_result.length > 0) {
                 xgbData = xgb_response.xgboost_ai_result;
             }
-
             // RF 모델 응답 처리
             if (rf_model_response && rf_model_response.rf_result && rf_model_response.rf_result.length > 0) {
                 rfData = rf_model_response.rf_result;
             }
-
             // CSTL 모델 응답 처리
             if (cstl_model_response && cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
                 cstlData = cstl_model_response.cstl_ai_result;
@@ -285,12 +272,34 @@ $(document).ready(() => {
             // 차트 데이터 처리
             let windPowerChartData = processWindPowerChart(kma_sfctm2Data, xgbData, rfData, cstlData);
             let $windPowerChart = $('#windPowerCanvas');
-            createChartGraph($windPowerChart, windPowerChartData, 'line');
+            createChartGraph($windPowerChart, windPowerChartData, 'bar');
         }).catch(function (error) {
             console.error('Error in fetching model data:', error);
         });
     }
 
+    function widgetWindPowerTimeSeriesChart(kma_sfctm2Data, kma_sfctm3Data) {
+        let processedSfctm2 = processWeatherData(kma_sfctm2Data);
+        let processedSfctm3 = processWeatherTimeSeriesData(kma_sfctm3Data);
+        let cstlData;
+
+        // CSTL 모델 응답 처리
+        callCSTLModelTimeSeries(processedSfctm3.data).then(function (cstl_model_response) {
+            if (cstl_model_response && cstl_model_response.cstl_ai_result && cstl_model_response.cstl_ai_result.length > 0) {
+                cstlData = cstl_model_response.cstl_ai_result;
+            }
+            console.log('cstl_model_response : ',cstl_model_response)
+            console.log('cstlData : ',cstlData)
+            // 차트 데이터 처리
+            let windPowerTimeSeriesChartData = processWindPowerTimeSeriesChart(kma_sfctm2Data, cstlData);
+            console.log('windPowerTSChartData : ',windPowerTimeSeriesChartData)
+            let $windPowerTimeSeriesChart = $('#windPowerTimeSeriesCanvas');
+            createChartGraph($windPowerTimeSeriesChart, windPowerTimeSeriesChartData, 'line');
+        }).catch(function (error) {
+            console.error('Error in fetching model data:', error);
+        });
+
+    }
 
     // Show Model List
     function showModelAtIndex(containerClass, index) {
@@ -409,7 +418,7 @@ $(document).ready(() => {
 
     // CSTL Model Predict
     function callCSTLModel(inputs) {
-        console.log(inputs)
+        // console.log(inputs)
         return new Promise(function (resolve, reject) {
             $.ajax({
                 url: "model/cstl_ai_model",
@@ -500,9 +509,9 @@ $(document).ready(() => {
         rfData.forEach(item => {
             rf_model.push(parseFloat(item));
         });
-        cstlData.forEach(item => {
-            cstl_model.push(parseFloat(item));
-        })
+        // cstlData.forEach(item => {
+        //     cstl_model.push(parseFloat(item));
+        // })
 
         // console.log(stations)
         KMA_API.callkma_stationData(stations).then(function (stationData) {
@@ -537,6 +546,68 @@ $(document).ready(() => {
                     borderColor: 'rgb(84, 100, 243)',
                     borderWidth: 1,
                     yAxisID: 'y2' // 첫 번째 y축
+                },
+                // {
+                //     label: 'CSTL Model (MW)', // 기압 그래프
+                //     data: cstl_model,
+                //     backgroundColor: 'rgba(210, 31, 255, 0.2)',
+                //     borderColor: 'rgb(210, 31, 255)',
+                //     borderWidth: 1,
+                //     yAxisID: 'y2' // 첫 번째 y축
+                // },
+            ],
+            yAxisConfig: { // y축 설정 추가
+                y1: {
+                    title: '풍속 (m/s)',
+                    beginAtZero: true,
+                    type: 'linear',
+                    position: 'left'
+                },
+                y2: {
+                    title: '발전량 (MW)',
+                    beginAtZero: true,
+                    type: 'linear',
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false // 오른쪽 y축의 격자선 제거
+                    }
+                }
+            }
+        }
+    }
+
+    function processWindPowerTimeSeriesChart(weatherData, cstlData) {
+        // 데이터를 처리하여 그래프에 필요한 데이터 배열을 만듭니다.
+        const labels = []; // datetime 배열
+        const stations = []; // datetime 배열
+        const windSpeeds = []; // 풍속 배열
+        const cstl_model = []; // 기압 배열
+        // 데이터 반복 처리
+        weatherData.forEach(item => {
+            stations.push(item.station_id); // datetime을 x축 레이블로 사용
+            windSpeeds.push(parseFloat(item.wind_speed)); // 풍속을 배열에 추가
+        });
+        cstlData.forEach(item => {
+            cstl_model.push(parseFloat(item));
+        })
+
+        // console.log(stations)
+        KMA_API.callkma_stationData(stations).then(function (stationData) {
+            stationData.forEach(item => {
+                labels.push(item.station_name);
+            })
+        });
+
+        return {
+            labels: labels,
+            datasets: [
+                {
+                    label: '풍속 (m/s)', // 풍속 그래프
+                    data: windSpeeds,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgb(78, 230, 184)',
+                    borderWidth: 1,
+                    yAxisID: 'y1' // 첫 번째 y축
                 },
                 {
                     label: 'CSTL Model (MW)', // 기압 그래프

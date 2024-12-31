@@ -244,7 +244,7 @@ def cstl_ai_sq_data():
     try:
         data = request.get_json()
         inputs = data.get("inputs")
-
+        # print(inputs)
         if not isinstance(inputs, list) or len(inputs) == 0:
             print (inputs[0])
             return jsonify({"error": "Invalid input format."}), 400
@@ -252,7 +252,7 @@ def cstl_ai_sq_data():
         # 첫 번째 데이터만 검증
         first_data = inputs[0]
         if not (isinstance(first_data, list) and len(first_data[0]) == 4):
-            print(first_data)
+            # print(first_data)
             return jsonify({"error": "Invalid format for the first data row."}), 400
 
         predictions = cstl_ai_model.cstl_ai_model_predict_sequences(inputs)
