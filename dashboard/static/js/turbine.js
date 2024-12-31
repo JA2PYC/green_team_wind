@@ -17,7 +17,7 @@ const spotLight = new BABYLON.SpotLight(
     "spotLight",
     new BABYLON.Vector3(0, 50, 50),  // 높게 설정하여 하부를 비추도록 설정
     new BABYLON.Vector3(0, -1, -1), // 모델 중심을 향하도록 설정
-    Math.PI / 3,
+    Math.PI / 3, // 스포트라이트의 조사각(스포트라이트가 조명을 비추는 원뿔형태의 각도)
     2,
     scene
 );
@@ -27,7 +27,7 @@ camera.fov = 0.8; // 시야각 증가 (작으면 가깝게 크면 멀리)
 camera.minZ = 1;  // 최소 클리핑 거리 (가까운 물체를 표시)
 camera.maxZ = 500;  // 최대 클리핑 거리 (멀리 있는 물체를 표시)
 
-// 카메라 초기 값 출력
+// 카메라 초기 값 디버깅 콘솔창 확인용
 console.log("카메라 초기 설정 값:");
 console.log(`Alpha: ${camera.alpha}`);
 console.log(`Beta: ${camera.beta}`);
@@ -52,7 +52,7 @@ const alphaAnimation = new BABYLON.Animation(
 const betaAnimation = new BABYLON.Animation(
     "betaAnimation",
     "beta",
-    24, // FPS
+    24, // FPS (초당 프레임수 일반적인 영화프레임 24프레임/1초)
     BABYLON.Animation.ANIMATIONTYPE_FLOAT,
     BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
 );
@@ -96,6 +96,7 @@ for (let i = 0; i < hillPositions.length; i += 3) {
     const x = hillPositions[i];
     const z = hillPositions[i + 2];
     hillPositions[i + 1] = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 1.0; // 언덕 모양 낮춤
+    //
 }
 hill.updateVerticesData(BABYLON.VertexBuffer.PositionKind, hillPositions);
 
@@ -122,25 +123,34 @@ BABYLON.SceneLoader.Append("/static/models/", "scene.gltf", scene, () => {
 
         // 랜덤 위치 생성 함수 (중복 방지)
         function generateUniquePosition() {
-            let x, z, y;
-            let isUnique = false;
+            let x, z, y; // 랜덤 좌표(x,z)와 높이(y)를 저장할 변수 선언
+            let isUnique = false; //위치가 고유한지 여부를 판별하는 플래그
 
-            while (!isUnique) {
-                x = (Math.random() - 0.5) * 40; // 랜덤한 X 위치
-                z = (Math.random() - 0.5) * 40; // 랜덤한 Z 위치
-                y = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 1.0; // 언덕 높이에 맞춤
+            while (!isUnique) { //고유하지 않으면 계속 반복
+                // 1. 랜덤 위치 생성
+                x = (Math.random() - 0.5) * 40; // 랜덤한 X 위치: -20~20범위 
+                // 바닥평면이 50이니깐 반경 -25~25로 할 수 있으나 바닥 끝점을 피하기 위해 -20~20으로 제한함)
+                z = (Math.random() - 0.5) * 40; // 랜덤한 Z 위치: -20~20범위
+                // 언덕 높이에 맞춤
+                // sin(x값)은 x축 방향으로 주기적 파형 생성(좌~우)
+                // cos(z값)은 z축 방향으로 주기적 파형 생성(앞~뒤) 
+                // 결국 2차원 파형을 생성 
+                y = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 1.0; 
 
               // 기존 좌표와 최소 거리 5 이상 유지 및 앞뒤 위치 확인
-              isUnique = turbinePositions.every(pos => {
-                const distance = Math.sqrt((pos.x - x) ** 2 + (pos.z - z) ** 2);
+              isUnique = turbinePositions.every(pos => { //every()메서드: 배열의 모든 요소가 조건 만족 여부 확인
+                // 유클리드 거리 계산 
+                // (x,y,z는 3차원에서 수평 수직 깊이(앞뒤)지만, 2차원 평면에서는 (x,z) z값이 수직성분으로 동작)
+                const distance = Math.sqrt((pos.x - x) ** 2 + (pos.z - z) ** 2); 
                 const direction = Math.abs(Math.atan2(pos.z - z, pos.x - x)); // 방향 계산
                 return distance > 5 && (direction < Math.PI / 4 || direction > (3 * Math.PI) / 4);
+                                        //180/4=45도, 540/4=135도 범위로 제한
             });
         }
             turbinePositions.push({ x, z }); // 위치 저장
             return new BABYLON.Vector3(x, y, z);
         }
-        // 9개의 고유 위치에 복사본 생성
+        // 8개의 고유 위치에 복사본 생성
         for (let i = 0; i < 8; i++) {
             const clone = rootMesh.clone(`turbine_${i}`);
             clone.position = generateUniquePosition(); // 고유한 위치 할당
@@ -191,7 +201,7 @@ scene.registerBeforeRender(() => {
 });
 /////////////////////////////////////////////////////////////////////////
 // 비 효과 입자 시스템 생성
-const rainParticleSystem = new BABYLON.ParticleSystem("rain", 2000, scene);
+const rainParticleSystem = new BABYLON.ParticleSystem("rain", 5000, scene);
 
 // 비 입자 텍스처 설정
 rainParticleSystem.particleTexture = new BABYLON.Texture(
@@ -203,11 +213,11 @@ rainParticleSystem.emitter = new BABYLON.Vector3(0, 50, 0); // 비가 내리는 
 rainParticleSystem.minEmitBox = new BABYLON.Vector3(-25, 0, -25); // 입자 방출 최소 범위
 rainParticleSystem.maxEmitBox = new BABYLON.Vector3(25, 0, 25); // 입자 방출 최대 범위
 // 입자 크기 설정 (비 물방울 크기)
-rainParticleSystem.minSize = 0.1;
-rainParticleSystem.maxSize = 0.2;
+rainParticleSystem.minSize = 1;
+rainParticleSystem.maxSize = 2;
 // 입자 생존 시간 설정
-rainParticleSystem.minLifeTime = 0.5;
-rainParticleSystem.maxLifeTime = 1.0;
+rainParticleSystem.minLifeTime = 1;
+rainParticleSystem.maxLifeTime = 2;
 
 // 입자 속도 설정 (비가 떨어지는 속도)
 rainParticleSystem.minEmitPower = 10; // 최소 속도
