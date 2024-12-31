@@ -17,72 +17,92 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <!-- <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=e1ec5378979a9f3ffe97d798bdcd05e1&libraries=services,route"></script> -->
   <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=e1ec5378979a9f3ffe97d798bdcd05e1"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+  <script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </head>
 
 <body>
   {% include 'header.html' %}
   <main>
     <div class="dashboard">
-      <div class="widget wind-map">
-        <h2>풍향 지도</h2>
-        <div id="map"></div>
-		<script src="{{ url_for('static', filename='js/ny_kakaomap.js') }}"></script>
-        <!-- <div
-          style="display:block!important;position:relative!important;max-width:133.333vh!important;margin:auto!important;padding:0!important;border:0!important">
-          <div
-            style="display:block!important;position:relative!important;width:100%!important;height:0!important;box-sizing:content-box!important;margin:0!important;border:0!important;padding:0 0 75%!important;left:0!important;top:0!important;right:0!important;bottom:0!important">
-            <iframe src="https://embed.ventusky.com/?p=35.80;129.69;6&l=wind-10m"
-              style="display:block!important;position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;right:auto!important;bottom:auto!important"
-              loading="lazy"></iframe>
+      <div class="widgetWrapper">
+        <section class="widgetContainer active">
+          <div class="widget wind-map">
+            <h2>풍향 지도</h2>
+            <div id="kakaoMap"></div>
+            <!-- <div class="ventuskymap"
+              style="display:block!important;position:relative!important;max-width:133.333vh!important;margin:auto!important;padding:0!important;border:0!important">
+              <div
+                style="display:block!important;position:relative!important;width:100%!important;height:0!important;box-sizing:content-box!important;margin:0!important;border:0!important;padding:0 0 75%!important;left:0!important;top:0!important;right:0!important;bottom:0!important">
+                <iframe src="https://embed.ventusky.com/?p=35.80;129.69;6&l=wind-10m"
+                  style="display:block!important;position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;right:auto!important;bottom:auto!important"
+                  loading="lazy"></iframe>
+              </div>
+            </div> -->
           </div>
-        </div> -->
+          <div class="widget weatherForecast">
+            <h2>날씨 예보<span class="widgetIndicator fcLocation"></span>
+            </h2>
+            <div class="weatehrInfo">
+              <div class="weather-data">
+                <div class="weather-icon"></div>
+                <div class="weather-text">
+                  <div class="weather-temp"></div>
+                  <div class="weather-desc"></div>
+                </div>
+              </div>
+              <div class="weather-detail"></div>
+            </div>
+          </div>
+          <div class="widget turbine-3d">
+            <h2>3D 풍력 발전기</h2>
+            <canvas id="renderCanvas"></canvas>
+          </div>
+          <div class="widget predictPower">
+            <h2>모델별 예상 발전량</h2>
+            <div class="gaugeChart"></div>
+            <div class="gaugeXYChart"></div>
+            <div class="modelList">
+              <span class="model_item"><span class="model_xgboost">XBGoost Model</span><span
+                  class="xgboost_value">-</span></span>
+              <span class="model_item"><span class="model_rf">RF Model</span><span class="rf_value">-</span></span>
+              <span class="model_item"><span class="model_cstl">CSTL Model</span><span
+                  class="cstl_value">-</span></span>
+            </div>
+          </div>
+        </section>
+        <section class="widgetContainer slideRight">
+          <div class="widget windPowerChart">
+            <h2>풍속 발전량 차트</h2>
+            <article class="widgetArticle">
+              <div class="chartContainer">
+                <canvas id="windPowerCanvas" class="windPowerCanvas"></canvas>
+              </div>
+            </article>
+          </div>
+          <div class="widget powerStation">
+            <h2>발전원별 발전량</h2>
+            <article class="widgetArticle">
+              <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+            </article>
+          </div>
+        </section>
+        <section class="widgetContainer rightOut slideHide">
+          <div class="widget testBox">
+            <h2>Test</h2>
+          </div>
+        </section>
       </div>
-      <div class="widget weather">
-        <h2>현재 날씨</h2>
-        <p>
-          기온 : <span id="temperature">-</span> °C
-        </p>
-        <p>
-          풍속 : <span id="wind-speed">-</span> m/s
-        </p>
-        <p>
-          습도 : <span id="humidity">-</span> %
-        </p>
+      <div class="widgetControl">
+        <button id="prev-btn"><i class="prev-btn bi bi-chevron-left"></i></button>
+        <button id="next-btn"><i class="next-btn bi bi-chevron-right"></i></button>
       </div>
-      <div class="widget current-energy">
-        <h2>현재 발전량</h2>
-        <p>
-
-        </p>
-      </div>
-      
-      <div class="widget forecast-energy">
-        <h2>예상 발전량</h2>
-        <p>
-          현재 예상 발전량: <span id="forecast-now">-</span>
-        </p>
-        <p>
-          내일 예상 발전량: <span id="forecast-tomorrow">-</span>
-        </p>
-        <div class="select_model">
-          <button type="button" class="model_rf">RF Model</button>
-        </div>
-      </div>
-      <div class="widget charts">
-        <h2>성능 차트</h2>
-        <div id="chartdiv"></div>
-        <div id="chartdiv2"></div>
-        <!-- <canvas id="chartdiv2"></canvas> -->
-
-      </div>
-      <div class="widget windPowerChart">
-        <h2>풍속 발전량 차트</h2>
-        <canvas id="windPowerChart"></canvas>
-
-      </div>
-    
     </div>
+
   </main>
+  <!-- <script src="{{ url_for('static', filename='js/turbine.js') }}"></script> -->
   {% include 'footer.html' %}
 </body>
+
 </html>
