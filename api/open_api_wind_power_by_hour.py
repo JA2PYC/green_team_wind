@@ -33,12 +33,12 @@ def fetch_wind_data():
         # 응답 데이터 처리
         if params["type"] == "json":
             data = response.json()
-            print("JSON 응답 데이터:")
+            # print("JSON 응답 데이터:")
             print(data)
         else:
             # XML 형식인 경우 파싱
             root = ET.fromstring(response.text)
-            print("XML 응답 데이터:")
+            # print("XML 응답 데이터:")
             for child in root.iter():
                 print(child.tag, child.text)
 
