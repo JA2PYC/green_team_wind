@@ -61,12 +61,12 @@ $(document).ready(() => {
         let filteredKmaSfctm3Data = KMA_API.filterkma_sfctm3ByStnId(kmaSfctm3Data, selectedStnIds);
 
 
-        // widgetMap(filteredKmaSfctm2Data);
+        widgetMap(filteredKmaSfctm2Data);
         widgetWeather(kmaFctafsdlData);
         widgetPredictPower(kmaSfctm2Data, kmaSfctm3Data, ['184']);
         widgetWindPowerChart(filteredKmaSfctm2Data, filteredKmaSfctm3Data);
         widgetWindPowerTimeSeriesChart(filteredKmaSfctm2Data, filteredKmaSfctm3Data);
-        // widgetPowerStation(openPabgData);
+        widgetPowerStation(openPabgData);
 
     }
 
