@@ -284,50 +284,50 @@ scene.registerBeforeRender(() => {
 });
 
 //////////////////////////////////////////////////////////////////////////
-// GUI 추가
-const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+// // GUI 추가
+// const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-// 패널 생성
-const infoPanel = new BABYLON.GUI.Rectangle();
-infoPanel.width = "300px"; // 패널 크기
-infoPanel.height = "120px"; // 패널 높이
-infoPanel.cornerRadius = 5; // 둥근 모서리
-infoPanel.color = "white"; // 테두리 색상
-infoPanel.background = "rgba(0, 0, 0, 0.3)"; // 배경색 및 투명도(red,green,blue,alpha(투명도))
-infoPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP; // 상단 정렬
-infoPanel.top = "10px"; // 상단에서 20px 띄움
-advancedTexture.addControl(infoPanel); // 화면에 추가
+// // 패널 생성
+// const infoPanel = new BABYLON.GUI.Rectangle();
+// infoPanel.width = "300px"; // 패널 크기
+// infoPanel.height = "120px"; // 패널 높이
+// infoPanel.cornerRadius = 5; // 둥근 모서리
+// infoPanel.color = "white"; // 테두리 색상
+// infoPanel.background = "rgba(0, 0, 0, 0.3)"; // 배경색 및 투명도(red,green,blue,alpha(투명도))
+// infoPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP; // 상단 정렬
+// infoPanel.top = "10px"; // 상단에서 20px 띄움
+// advancedTexture.addControl(infoPanel); // 화면에 추가
 
-// 텍스트 추가
-const title = new BABYLON.GUI.TextBlock();
-title.text = "실시간 풍력발전량 정보"; // 제목
-title.color = "white"; // 글자 색상
-title.fontSize = 16; // 글자 크기
-title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER; // 가운데 정렬
-title.top = "-35px"; // 위쪽 여백
-infoPanel.addControl(title); // 패널에 추가
+// // 텍스트 추가
+// const title = new BABYLON.GUI.TextBlock();
+// title.text = "실시간 풍력발전량 정보"; // 제목
+// title.color = "white"; // 글자 색상
+// title.fontSize = 16; // 글자 크기
+// title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER; // 가운데 정렬
+// title.top = "-35px"; // 위쪽 여백
+// infoPanel.addControl(title); // 패널에 추가
 
-// 풍력발전기 세부 정보
-const turbineInfo = new BABYLON.GUI.TextBlock();
-turbineInfo.text = `터빈회전속도: 120 RPM\n 발전량: 1.5 MW\n 운행상태: 작동중`; // 표시할 정보
-turbineInfo.color = "white"; // 글자 색상
-turbineInfo.fontSize = 12; // 글자 크기
-turbineInfo.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER; // 가운데 정렬
-turbineInfo.paddingTop = "25px"; // 위쪽 여백
-infoPanel.addControl(turbineInfo); // 패널에 추가
+// // 풍력발전기 세부 정보
+// const turbineInfo = new BABYLON.GUI.TextBlock();
+// turbineInfo.text = `터빈회전속도: 120 RPM\n 발전량: 1.5 MW\n 운행상태: 작동중`; // 표시할 정보
+// turbineInfo.color = "white"; // 글자 색상
+// turbineInfo.fontSize = 12; // 글자 크기
+// turbineInfo.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER; // 가운데 정렬
+// turbineInfo.paddingTop = "25px"; // 위쪽 여백
+// infoPanel.addControl(turbineInfo); // 패널에 추가
 
-// 정보 업데이트 함수 (속도와 출력 동적 업데이트)
-function updateTurbineInfo(speed, power, status) {
-    turbineInfo.text = `터빈회전속도: ${speed} RPM\n 발전량: ${power} MW\n 작동상태: ${status}`;
-}
+// // 정보 업데이트 함수 (속도와 출력 동적 업데이트)
+// function updateTurbineInfo(speed, power, status) {
+//     turbineInfo.text = `터빈회전속도: ${speed} RPM\n 발전량: ${power} MW\n 작동상태: ${status}`;
+// }
 
-// 예제: 10초마다 정보 업데이트
-setInterval(() => {
-    const randomSpeed = Math.floor(Math.random() * 200) + 50; // 랜덤 속도
-    const randomPower = (Math.random() * 2 + 0.5).toFixed(2); // 랜덤 출력
-    const status = randomSpeed > 200 ? "고속" : "정속"; // 상태
-    updateTurbineInfo(randomSpeed, randomPower, status);
-}, 10000);
+// // 예제: 10초마다 정보 업데이트
+// setInterval(() => {
+//     const randomSpeed = Math.floor(Math.random() * 200) + 50; // 랜덤 속도
+//     const randomPower = (Math.random() * 2 + 0.5).toFixed(2); // 랜덤 출력
+//     const status = randomSpeed > 200 ? "고속" : "정속"; // 상태
+//     updateTurbineInfo(randomSpeed, randomPower, status);
+// }, 10000);
 
 //////////////////////////////////////////////////////////////////////////
 // GLTF 모델 로드
