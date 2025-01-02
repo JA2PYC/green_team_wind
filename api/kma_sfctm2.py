@@ -13,7 +13,7 @@ def fetch_kma_sfctm2_data(tm, stn):
         # 'help': 1,
         'authKey': API_KEY,
     }
-
+    
     try:
         response = requests.get(API_URL, params=params)
 
@@ -64,7 +64,7 @@ def parse_weather_data(data):
             stn_name = "미확인"
         
         # 각 데이터를 JSON에 적합한 형태로 변환
-        if len(parts) >= 10:  # 최소 18개의 값이 있어야 정상적인 데이터라고 가정
+        if len(parts) >= 12:  # 최소 18개의 값이 있어야 정상적인 데이터라고 가정
             weather_info = {
                 "datetime": parts[0],
                 "station_id": parts[1],

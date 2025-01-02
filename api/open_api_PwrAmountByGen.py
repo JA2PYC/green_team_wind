@@ -20,7 +20,7 @@ def fetch_open_pabg_data(baseDate, pageNo=1, numOfRows=300, dataType="json"):
 
         if params["dataType"] == "json":
             data = response.json()
-            print("JSON 응답 데이터:")
+            # print("JSON 응답 데이터:")
             return data
         else:
             # XML 데이터를 JSON 형태로 변환
@@ -32,7 +32,7 @@ def fetch_open_pabg_data(baseDate, pageNo=1, numOfRows=300, dataType="json"):
                 record = {child.tag: child.text for child in item}
                 xml_data.append(record)
 
-            print("XML 응답 데이터:", xml_data)
+            # print("XML 응답 데이터:", xml_data)
             return {
                 "header": {
                     "resultCode": root.findtext(".//resultCode"),

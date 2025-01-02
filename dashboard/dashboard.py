@@ -7,10 +7,13 @@ from api.kma_sfctm3 import fetch_kma_sfctm3_data
 from api.fct_afs_dl import fetch_fct_afs_dl_data
 from api.open_api_PwrAmountByGen import fetch_open_pabg_data
 from api.open_api_PvAmountByPwrGen import fetch_power_data
+
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
 from models.jeju_xgboost_ai_model import xgboost_ai_model_predict
-from models.jeju_cstl_ai_model import cstl_ai_model_predict
+import models.jeju_cstl_ai_model as cstl_ai_model
+
+# from models.jeju_cstl_ai_model import cstl_ai_model_predict
 
 # 라우트 설정
 dashboard = Blueprint("dashboard", __name__)
@@ -28,6 +31,7 @@ dashboard = Blueprint("dashboard", __name__)
 def dashboard_route():
     return render_template("dashboard.html")
 
+
 # Kakao Map API
 @dashboard.route("/api/kakao_city", methods=["POST"])
 def kakao_city_data():
@@ -36,11 +40,12 @@ def kakao_city_data():
         # 클라이언트로부터 요청받은 파라미터
         # params = request.json
         # city = params.get("city")
-        
+
         result = get_kakao_city_data()
         return jsonify({"kakao_city_result": result}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # 한국전력거래소_발전원별 발전량(계통기준) OPEN API PABG
 @dashboard.route("/api/open_pabg", methods=["POST"])
@@ -60,6 +65,7 @@ def open_pabg_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 # 공공 데이터 PvAmountByPowerGen API
 @dashboard.route("/api/open_pabpg", methods=["POST"])
 def power_data():
@@ -77,6 +83,7 @@ def power_data():
         return jsonify({"open_pabpg_result": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # kma_reg 지역 정보
 @dashboard.route("/api/kma_reg", methods=["POST"])
@@ -225,7 +232,30 @@ def cstl_ai_data():
         ):
             return jsonify({"error": "Invalid input format."}), 400
 
-        predictions = cstl_ai_model_predict(inputs)
+        predictions = cstl_ai_model.cstl_ai_model_predict(inputs)
+
+        return jsonify({"cstl_ai_result": predictions})
+    except Exception as e:
+        return jsonify({"error": e}), 500
+
+
+@dashboard.route("/model/cstl_ai_model_sq", methods=["POST"])
+def cstl_ai_sq_data():
+    try:
+        data = request.get_json()
+        inputs = data.get("inputs")
+        # print(inputs)
+        if not isinstance(inputs, list) or len(inputs) == 0:
+            print (inputs[0])
+            return jsonify({"error": "Invalid input format."}), 400
+
+        # 첫 번째 데이터만 검증
+        first_data = inputs[0]
+        if not (isinstance(first_data, list) and len(first_data[0]) == 4):
+            # print(first_data)
+            return jsonify({"error": "Invalid format for the first data row."}), 400
+
+        predictions = cstl_ai_model.cstl_ai_model_predict_sequences(inputs)
 
         return jsonify({"cstl_ai_result": predictions})
     except Exception as e:

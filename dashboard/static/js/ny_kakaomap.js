@@ -84,7 +84,7 @@ var initialData = [
 
 // 여러 개의 초기 인포윈도우 생성
 initialData.forEach(function(data) {
-      var initialContent = '<div class="info" style="">' +
+      var initialContent = '<div class="info" style="border:1px solid black; border-radius:30px; padding:10px; background:white; z-index:10;">' +
                            '   <div class="title">' + data.title + '</div>' +
                            '   <div class="size">' + data.size + '</div>' +
                            '</div>';

@@ -1,5 +1,6 @@
 import os
 import requests
+from api.kma_station import fetch_station_data
 
 API_KEY = os.getenv("KMA_SFCTM2_KEY")
 API_URL = "http://apihub.kma.go.kr/api/typ01/url/kma_sfctm3.php" 
@@ -58,11 +59,19 @@ def parse_weather_data(data):
         # 각 라인에서 데이터를 추출
         parts = line.split()
         
+        # 지점명 가져오기
+        stn_name = fetch_station_data(parts[1].split(','))  
+        try:
+            stn_name = stn_name[0]['station_name']
+        except:
+            stn_name = "미확인"
+            
         # 각 데이터를 JSON에 적합한 형태로 변환
-        if len(parts) >= 18:  # 최소 18개의 값이 있어야 정상적인 데이터라고 가정
+        if len(parts) >= 12:  # 최소 18개의 값이 있어야 정상적인 데이터라고 가정
             weather_info = {
                 "datetime": parts[0],
                 "station_id": parts[1],
+                "station_name": stn_name,
                 "wind_direction": parts[2],
                 "wind_speed": parts[3],
                 "air_pressure": parts[7],
