@@ -7,7 +7,6 @@ from api.kma_sfctm3 import fetch_kma_sfctm3_data
 from api.fct_afs_dl import fetch_fct_afs_dl_data
 from api.open_api_PwrAmountByGen import fetch_open_pabg_data
 from api.open_api_PvAmountByPwrGen import fetch_power_data
-
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
 from models.jeju_xgboost_ai_model import xgboost_ai_model_predict

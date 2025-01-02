@@ -6,7 +6,7 @@
   {% include 'headScript.html' %}
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
-  <script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
 </head>
 
 <body>
@@ -41,6 +41,22 @@
           </div>
           <div class="widget turbine-3d">
             <h2>3D 풍력 발전기</h2>
+            <select id="modeSelect">
+              <option value="normal">일반 모드</option>
+              <option value="special">점검 모드</option>
+            </select>
+            <select id="turbineSelect" style="display: none;">
+              <option value="model">모델선택</option>
+              <option value="A-1">A-1</option>
+              <option value="A-2">A-2</option>
+              <option value="A-3">A-3</option>
+              <option value="A-4">A-4</option>
+              <option value="A-5">A-5</option>
+              <option value="A-6">A-6</option>
+              <option value="A-7">A-7</option>
+              <option value="A-8">A-8</option>
+              <option value="A-9">A-9</option>
+            </select>
             <canvas id="renderCanvas"></canvas>
           </div>
           <div class="widget predictPower">
@@ -94,7 +110,39 @@
           <div class="widget powerStation">
             <h2>발전원별 발전량</h2>
             <article class="widgetArticle">
-              <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+              <div class="powerStationContainer">
+                <canvas id="powerStationCanvas" class="doughnutChart"></canvas>
+                <div class="powerStationData">
+                  <div class="powerStationItem stationCoal">
+                    <div class="powerStationName"><div class="nameBox boxCoal"></div>유연탄</div>
+                    <div class="powerStationValue">-</div>
+                  </div>
+                  <div class="powerStationItem stationNuclear">
+                    <div class="powerStationName"><div class="nameBox boxNuclear"></div>원자력</div>
+                    <div class="powerStationValue">-</div>
+                  </div>
+                  <div class="powerStationItem stationGas">
+                    <div class="powerStationName"><div class="nameBox boxGas"></div>가스</div>
+                    <div class="powerStationValue">-</div>
+                  </div>
+                  <div class="powerStationItem stationWind">
+                    <div class="powerStationName"><div class="nameBox boxWind"></div>신재생(풍력)</div>
+                    <div class="powerStationValue">-</div>
+                  </div>
+                  <div class="powerStationItem stationSolar">
+                    <div class="powerStationName"><div class="nameBox boxSolar"></div>태양광</div>
+                    <div class="powerStationValue">-</div>
+                  </div>
+                  <div class="powerStationItem stationEtc">
+                    <div class="powerStationName"><div class="nameBox boxEtc"></div>기타</div>
+                    <div class="powerStationValue">-</div>
+                  </div>
+                  <div class="powerStationItem stationTotal">
+                    <div class="powerStationName">합계</div>
+                    <div class="powerStationValue">-</div>
+                  </div>
+                </div>
+              </div>
             </article>
           </div>
           <div class="widget copyright">
@@ -119,7 +167,7 @@
     </div>
 
   </main>
-  <!-- <script src="{{ url_for('static', filename='js/turbine.js') }}"></script> -->
+  <script src="{{ url_for('static', filename='js/turbine.js') }}"></script>
   {% include 'footer.html' %}
 </body>
 

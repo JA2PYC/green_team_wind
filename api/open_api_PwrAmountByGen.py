@@ -6,6 +6,7 @@ API_KEY = os.getenv("PVAMOUNTBYPOWERGEN_KEY")
 API_URL = "http://apis.data.go.kr/B552115/PwrAmountByGen/getPwrAmountByGen"
 
 def fetch_open_pabg_data(baseDate, pageNo=1, numOfRows=300, dataType="json"):
+    print("PABG / API 호출 함수 실행")
     params = {
         "baseDate": baseDate,
         "pageNo": pageNo,
@@ -17,7 +18,7 @@ def fetch_open_pabg_data(baseDate, pageNo=1, numOfRows=300, dataType="json"):
     try:
         response = requests.get(API_URL, params=params)
         response.raise_for_status()
-
+        # print(response.text)
         if params["dataType"] == "json":
             data = response.json()
             # print("JSON 응답 데이터:")
@@ -47,4 +48,5 @@ def fetch_open_pabg_data(baseDate, pageNo=1, numOfRows=300, dataType="json"):
                 },
             }
     except Exception as e:
+        print("Error (PABG) : ",e)
         return {"error": str(e)}

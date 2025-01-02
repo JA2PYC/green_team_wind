@@ -8,6 +8,7 @@ API_URL = "http://apis.data.go.kr/B552115/PvAmountByPwrGen/getPvAmountByPwrGen"
 
 def fetch_power_data(trade_ymd, page_no=1, num_of_rows=30):
     """공공데이터 API 호출 함수"""
+    print("PABPG / API 호출 함수 실행")
     params = {
         "tradeYmd": trade_ymd,
         "pageNo": page_no,

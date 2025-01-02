@@ -1,5 +1,32 @@
+// 동적 스크립트 로드 함수
+export function loadKakaoMapScript(apiKey) {
+    return new Promise((resolve, reject) => {
+        if (typeof kakao !== 'undefined' && kakao.maps) {
+            // Kakao 지도 객체가 이미 로드된 경우
+            resolve();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}`;
+        script.async = true;
+        script.onload = () => {
+            if (typeof kakao !== 'undefined' && kakao.maps) {
+                resolve();
+            } else {
+                reject(new Error('Kakao Map object not found after script load.'));
+            }
+        };
+        script.onerror = () => {
+            reject(new Error('Failed to load Kakao Map script.'));
+        };
+        document.head.appendChild(script);
+    });
+
+}
+
 export function createMap(areas, modelData) {
-    // console.log('Initializing map...');
+    console.log('Initializing map...');
     let mapContainer = document.getElementById('kakaoMap');
     let mapOption = {
         center: new kakao.maps.LatLng(35.478764, 127.205678),
