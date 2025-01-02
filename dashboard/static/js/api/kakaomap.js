@@ -3,6 +3,7 @@ export function loadKakaoMapScript(apiKey) {
     return new Promise((resolve, reject) => {
         if (typeof kakao !== 'undefined' && kakao.maps) {
             // Kakao 지도 객체가 이미 로드된 경우
+            console.log('Kakao Map object already loaded.');
             resolve();
             return;
         }
@@ -12,6 +13,7 @@ export function loadKakaoMapScript(apiKey) {
         script.async = true;
         script.onload = () => {
             if (typeof kakao !== 'undefined' && kakao.maps) {
+                console.log('Kakao Map object loaded.');
                 resolve();
             } else {
                 reject(new Error('Kakao Map object not found after script load.'));
