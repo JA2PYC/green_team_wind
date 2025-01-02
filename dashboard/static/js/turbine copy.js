@@ -151,7 +151,7 @@ scene.clearColor = new BABYLON.Color4(0.5, 0.8, 0.9, 1.0); // 밝은 하늘색
 
 // 언덕 지형 생성
 const hill = BABYLON.MeshBuilder.CreateGround("hill", {
-    width: 200,
+    width: 50,
     height: 50,
     subdivisions: 32,
     updatable: true
@@ -167,7 +167,7 @@ const updatedPositions = hillPositions.map((pos, index) => {
 });
 hill.updateVerticesData(BABYLON.VertexBuffer.PositionKind, updatedPositions);
 
-// 바닥 언덕 머티리얼 설정 (텍스처 적용)
+// 언덕 머티리얼 설정 (텍스처 적용)
 const grassMaterial = new BABYLON.StandardMaterial("grassMaterial", scene);
 grassMaterial.diffuseTexture = new BABYLON.Texture(
     "/static/models/grassland.jpg", // 상대 경로
@@ -253,7 +253,7 @@ directionalLight.intensity = 20.0;
 //////////////////////////////////////////////////////////////////////////
 // 스카이돔 생성
 const skydome = BABYLON.MeshBuilder.CreateSphere("skyDome", {
-    diameter: 600.0, // 스카이돔 크기
+    diameter: 300.0, // 스카이돔 크기
     segments: 32      // 세그먼트 수 (더 부드러운 구 모양)
 }, scene);
 
@@ -265,8 +265,6 @@ skydomeMaterial.diffuseTexture = new BABYLON.Texture(
     scene
 );
 skydomeMaterial.diffuseTexture.hasAlpha = true; // 투명도 활성화 (필요시)
-skydomeMaterial.diffuseTexture.uScale = 0.5; // 가로 타일링 조정
-skydomeMaterial.diffuseTexture.vScale = 0.5; // 세로 타일링 조정
 skydomeMaterial.specularColor = new BABYLON.Color3(0, 0, 0); // 반사광 제거
 skydomeMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.7, 0.9); // 밝기 조정 (하늘색과 통일)
 skydome.material = skydomeMaterial;
@@ -284,54 +282,6 @@ scene.registerBeforeRender(() => {
         skydomeMaterial.diffuseTexture.vOffset += 0.00005; // 수직 이동
     }
 });
-
-
-// 드론샷 카메라 설정 (일반 모드 및 특수 모드 A-1~A-9)
-const modeSelect = document.getElementById("modeSelect");
-const turbineSelect = document.getElementById("turbineSelect");
-
-modeSelect.addEventListener("change", () => {
-    if (modeSelect.value === "special") {
-        turbineSelect.style.display = "inline";
-    } else {
-        turbineSelect.style.display = "none";
-        resetCameraToNormal(); // 일반 모드 카메라 리셋
-    }
-});
-
-turbineSelect.addEventListener("change", () => {
-    if (modeSelect.value === "special") {
-        const selectedTurbine = turbineSelect.value;
-        focusOnTurbine(selectedTurbine);
-    }
-});
-
-// 일반 모드 카메라 초기화 함수
-function resetCameraToNormal() {
-    scene.beginAnimation(camera, 0, 1200, true); // 일반 모드 애니메이션 유지
-}
-
-// 특정 터빈으로 카메라 이동
-function focusOnTurbine(turbineId) {
-    // 선택된 풍력발전기 좌표 가져오기
-    const turbineIndex = parseInt(turbineId.split("-")[1]) - 1;
-    const targetPosition = turbineFixedPositions[turbineIndex];
-
-    // 드론샷 애니메이션 설정
-    scene.stopAnimation(camera); // 기존 카메라 애니메이션 중지
-    BABYLON.Animation.CreateAndStartAnimation(
-        "cameraMove", camera, "position",
-        24, 48, // 2초간 진행
-        camera.position, new BABYLON.Vector3(targetPosition.x, targetPosition.y + 5, targetPosition.z - 15), // 타겟 근처 위치
-        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-    BABYLON.Animation.CreateAndStartAnimation(
-        "cameraLook", camera, "target",
-        24, 48, // 2초간 진행
-        camera.target, targetPosition, // 타겟을 바라보도록 설정
-        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-}
 
 //////////////////////////////////////////////////////////////////////////
 // // GUI 추가
