@@ -16,101 +16,156 @@
 }
 
 .info {
+    position: relative;
     font-size: 14px;
-    /* border: 1px solid black; */
-    border:none;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+    background-color: #fefefe;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    /* border: none; */
     border-radius: 10px;
     padding: 8px;
-    background: white;
-    z-index: 10;
+    z-index: 1;
+}
+
+.info::before {
+    content: '';
+    /* 테두리 역할의 가상 요소 */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    /* 텍스트 뒤에 위치 */
+    border-radius: 10px;
+    /* 테두리의 둥근 모서리 */
+    padding: 5px;
+    /* 테두리 두께 */
+    background: linear-gradient(45deg, #4CAF50, #2196F3);
+    /* 그라데이션 */
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    /* 내부 영역 비우기 */
+    mask-composite: exclude;
+    /* 크로스 브라우저 */
 }
 
 .info.info-big {
-    font-size: 20px;
-    border-radius: 20px;
+    font-size: 18px;
+    color: #0f0f0f;
+    /* border: 5px solid transparent; */
+    /* border-image: linear-gradient(45deg, #4CAF50, #2196F3) 1; */
     padding: 15px;
+    border-radius: 20px;
 }
 
+.info.info-big::before {
+    content: '';
+    /* 테두리 역할의 가상 요소 */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    /* 텍스트 뒤에 위치 */
+    border-radius: 20px;
+    /* 테두리의 둥근 모서리 */
+    padding: 5px;
+    /* 테두리 두께 */
+    background: linear-gradient(45deg, #4CAF50, #2196F3);
+    /* 그라데이션 */
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    /* 내부 영역 비우기 */
+    mask-composite: exclude;
+    /* 크로스 브라우저 */
+}
+
+/* 
 .info.info-1 {
     color: #fefefe;
-    background: #ff6a7b; /* 비슷한 계열의 선명한 핑크 */
+    background: #ff6a7b;
 }
 
 .info.info-2 {
     color: #fefefe;
-    background: #ff9f5b; /* 비슷한 계열의 선명한 오렌지 */
+    background: #ff9f5b;
 }
 
 .info.info-3 {
     color: #fefefe;
-    background: #ffcd6d; /* 비슷한 계열의 선명한 노란색 */
+    background: #ffcd6d;
 }
 
 .info.info-4 {
     color: #fefefe;
-    background: #5ac4c4; /* 비슷한 계열의 민트색 */
+    background: #5ac4c4;
 }
 
 .info.info-5 {
     color: #fefefe;
-    background: #4e98db; /* 비슷한 계열의 선명한 파란색 */
+    background: #4e98db;
 }
 
 .info.info-6 {
     color: #fefefe;
-    background: #ffad8b; /* 선명한 복숭아 오렌지 */
+    background: #ffad8b;
 }
 
 .info.info-7 {
     color: #fefefe;
-    background: #ffd54f; /* 선명한 연한 노란색 */
+    background: #ffd54f;
 }
 
 .info.info-8 {
     color: #fefefe;
-    background: #63b5ad; /* 부드러운 파스텔 그린 */
+    background: #63b5ad;
 }
 
 .info.info-9 {
     color: #fefefe;
-    background: #60aee3; /* 선명한 청록색 */
+    background: #60aee3;
 }
 
 .info.info-10 {
     color: #fefefe;
-    background: #f7b9b9; /* 선명한 연핑크색 */
+    background: #f7b9b9;
 }
 
 .info.info-11 {
     color: #fefefe;
-    background: #98cdf3; /* 부드러운 파스텔 블루 */
+    background: #98cdf3;
 }
 
 .info.info-12 {
     color: #fefefe;
-    background: #ffcb80; /* 선명한 오렌지색 */
+    background: #ffcb80;
 }
 
 .info.info-13 {
     color: #fefefe;
-    background: #4d89c3; /* 선명한 중간 파란색 */
+    background: #4d89c3;
 }
 
 .info.info-14 {
     color: #fefefe;
-    background: #f8d771; /* 선명한 황금색 */
+    background: #f8d771;
 }
 
 .info.info-15 {
     color: #fefefe;
-    background: #89f6cc; /* 밝은 민트색 */
+    background: #89f6cc;
 }
 
 .info.info-16 {
     color: #fefefe;
-    background: #ff7d82; 
-}
-
+    background: #ff7d82;
+} */
 
 
 .info .title {

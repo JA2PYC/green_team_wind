@@ -629,6 +629,54 @@
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.widget.techStack {
+    grid-column: span 2;
+}
+
+.widget.techStack .widgetArticle {
+    align-items: normal;
+    overflow: hidden;
+}
+
+.widget.techStack .techStackContainer {
+    position: relative;
+    display: grid;
+    grid-template-rows: repeat(2, 100px);
+    grid-auto-columns: 200px;
+    grid-auto-flow: column;
+    gap: 20px;
+    white-space: nowrap;
+    animation: scrollHorizontal 30s linear infinite;
+}
+
+.widget.techStack .techItem {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateY(var(--random-offset, 0));
+    /* transform: rotate(var(--random-rotation, 0deg));  */
+    transition: transform 0.3s ease;
+}
+
+.widget.techStack .techLogo {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    max-height: 100px;
+    object-fit: contain;
+}
+
+/* 스크롤 애니메이션 */
+@keyframes scrollHorizontal {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(-200%);
+    }
+}
+
 .widget.copyright {}
 
 .widget.copyright .copyrightInfo {

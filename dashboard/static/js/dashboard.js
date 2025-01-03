@@ -35,6 +35,7 @@ $(document).ready(() => {
             KMA_API.callfct_afs_dlData("11G00201"),
             KMA_API.callkma_sfctm2Data(),
             KMA_API.callkma_sfctm3Data(tm1, tm2),
+            // On/Off Open API Data (Limit 100)
             callOpen_pabg(baseDate)
         ]).then(([responseFctafsdl, responseSfctm2, responseSfctm3, responseOpenPabg]) => {
             kmaFctafsdlData = responseFctafsdl;

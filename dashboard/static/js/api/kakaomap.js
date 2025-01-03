@@ -46,14 +46,14 @@ export function createMap(areas, modelData) {
 
     // modelData에서 임의의 값을 추가
     const insertIndex = 16; // 원하는 위치 (예: 5번째 위치)
-    const insertValue = '#e6d00e'; // 삽입할 값
+    const insertValue = '#4CAF50'; // 삽입할 값
     
     let fillcolor = [];
     modelData.forEach(data => {
         if (data > 100) {
-            fillcolor.push('#bd7b00');
+            fillcolor.push('#2196F3');
         }else{
-            fillcolor.push('#e6d00e');
+            fillcolor.push('#4CAF50');
         }
     });
     fillcolor.splice(insertIndex, 0, insertValue); // 16번째 위치에 #e6d00e 추가

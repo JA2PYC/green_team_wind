@@ -245,7 +245,7 @@ def cstl_ai_sq_data():
         inputs = data.get("inputs")
         # print(inputs)
         if not isinstance(inputs, list) or len(inputs) == 0:
-            print (inputs[0])
+            # print (inputs[0])
             return jsonify({"error": "Invalid input format."}), 400
 
         # 첫 번째 데이터만 검증
