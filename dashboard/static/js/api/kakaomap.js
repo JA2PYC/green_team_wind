@@ -1,5 +1,34 @@
+// 동적 스크립트 로드 함수
+export function loadKakaoMapScript(apiKey) {
+    return new Promise((resolve, reject) => {
+        if (typeof kakao !== 'undefined' && kakao.maps) {
+            // Kakao 지도 객체가 이미 로드된 경우
+            console.log('Kakao Map object already loaded.');
+            resolve();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}`;
+        script.async = true;
+        script.onload = () => {
+            if (typeof kakao !== 'undefined' && kakao.maps) {
+                console.log('Kakao Map object loaded.');
+                resolve();
+            } else {
+                reject(new Error('Kakao Map object not found after script load.'));
+            }
+        };
+        script.onerror = () => {
+            reject(new Error('Failed to load Kakao Map script.'));
+        };
+        document.head.appendChild(script);
+    });
+
+}
+
 export function createMap(areas, modelData) {
-    // console.log('Initializing map...');
+    console.log('Initializing map...');
     let mapContainer = document.getElementById('kakaoMap');
     let mapOption = {
         center: new kakao.maps.LatLng(35.478764, 127.205678),
@@ -17,14 +46,14 @@ export function createMap(areas, modelData) {
 
     // modelData에서 임의의 값을 추가
     const insertIndex = 16; // 원하는 위치 (예: 5번째 위치)
-    const insertValue = '#e6d00e'; // 삽입할 값
+    const insertValue = '#4CAF50'; // 삽입할 값
     
     let fillcolor = [];
     modelData.forEach(data => {
         if (data > 100) {
-            fillcolor.push('#bd7b00');
+            fillcolor.push('#2196F3');
         }else{
-            fillcolor.push('#e6d00e');
+            fillcolor.push('#4CAF50');
         }
     });
     fillcolor.splice(insertIndex, 0, insertValue); // 16번째 위치에 #e6d00e 추가

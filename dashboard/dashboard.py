@@ -7,7 +7,6 @@ from api.kma_sfctm3 import fetch_kma_sfctm3_data
 from api.fct_afs_dl import fetch_fct_afs_dl_data
 from api.open_api_PwrAmountByGen import fetch_open_pabg_data
 from api.open_api_PvAmountByPwrGen import fetch_power_data
-
 # from api.open_api_wind_power_by_hour import fetch_wind_data
 from models.random_forest_model import rf_model_predict
 from models.jeju_xgboost_ai_model import xgboost_ai_model_predict
@@ -246,7 +245,7 @@ def cstl_ai_sq_data():
         inputs = data.get("inputs")
         # print(inputs)
         if not isinstance(inputs, list) or len(inputs) == 0:
-            print (inputs[0])
+            # print (inputs[0])
             return jsonify({"error": "Invalid input format."}), 400
 
         # 첫 번째 데이터만 검증
